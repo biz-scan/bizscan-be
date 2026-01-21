@@ -1,11 +1,13 @@
 package com.umc9th.bizscan.global.apiPayload.exception;
 
+
+
 import com.umc9th.bizscan.global.apiPayload.code.BaseErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class GeneralException extends RuntimeException {
-  private final BaseErrorCode code;
+public class GeneralException extends RuntimeException{
+    private final BaseErrorCode code;
 }
