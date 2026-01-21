@@ -9,6 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class SalesService {
-    private final SalesRepository salesRepository;
-    // ...
+  private final SalesRepository salesRepository;
+  // ...
 }
