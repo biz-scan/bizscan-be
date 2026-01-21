@@ -27,6 +27,7 @@ public enum ErrorCode implements BaseErrorCode {
   MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_1", "사용자를 찾을 수 없습니다."),
   MEMBER_ALREADY_REGISTERED(HttpStatus.CONFLICT, "MEMBER409_1", "이미 가입된 사용자입니다."),
   EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "MEMBER409_2", "이미 사용 중인 이메일입니다."),
+  NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "MEMBER409_3", "이미 사용 중인 닉네임입니다."),
   MEMBER_NAME_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MEMBER400_1", "이름의 형식이 맞지 않습니다."),
 
   PAGE_INVALID(HttpStatus.BAD_REQUEST, "PAGE400_1", "유효하지 않은 페이지 범위입니다.");
