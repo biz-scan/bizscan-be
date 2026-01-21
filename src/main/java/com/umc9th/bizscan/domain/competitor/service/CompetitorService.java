@@ -9,5 +9,5 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class CompetitorService {
-    private final CompetitorRepository competitorRepository;
+  private final CompetitorRepository competitorRepository;
 }

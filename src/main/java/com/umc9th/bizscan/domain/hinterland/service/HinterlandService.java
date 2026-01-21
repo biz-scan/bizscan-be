@@ -10,6 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class HinterlandService {
-    private final IncomeRepository incomeRepository;
-    private final HousingRepository housingRepository; // (Repository 따로 만들었다면)
+  private final IncomeRepository incomeRepository;
+  private final HousingRepository housingRepository; // (Repository 따로 만들었다면)
 }
