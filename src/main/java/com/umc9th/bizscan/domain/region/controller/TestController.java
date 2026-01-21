@@ -2,6 +2,7 @@ package com.umc9th.bizscan.domain.region.controller;
 
 import com.umc9th.bizscan.domain.region.dto.HashtagDto;
 import com.umc9th.bizscan.domain.region.service.RegionTrendService;
+import com.umc9th.bizscan.domain.store.service.ReviewCrawlerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
   private final RegionTrendService regionTrendService;
+  private final ReviewCrawlerService reviewCrawlerService;
 
   // http://localhost:8080/api/test/trend?regionId=1&keyword=성수동맛집
   @Operation(
@@ -44,5 +46,25 @@ public class TestController {
           @RequestParam("keyword")
           String keyword) {
     return regionTrendService.recommendHashtags(keyword);
+  }
+
+  @Operation(summary = "자동 리뷰 크롤링 (주소 기반)", description = "주소와 가게명을 입력받아 ID를 찾고 리뷰를 수집합니다.")
+  @GetMapping("/api/test/review/auto")
+  public List<String> testAutoReview(
+      @Parameter(
+              description = "매장 상세 주소 (예: 서울 성동구 성수동1가 656-442)",
+              example = "서울 성동구 성수동1가 656-442")
+          @RequestParam("address")
+          String address,
+      @Parameter(description = "매장 이름", example = "밀도") @RequestParam("name") String name) {
+    // 1. 주소 + 이름으로 ID 찾기
+    String placeId = reviewCrawlerService.findPlaceId(address, name);
+
+    if (placeId.isEmpty()) {
+      return List.of("가게를 찾을 수 없습니다. 주소를 확인해주세요.");
+    }
+
+    // 2. 리뷰 수집
+    return reviewCrawlerService.getReviews(placeId);
   }
 }

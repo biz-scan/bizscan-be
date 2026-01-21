@@ -1,8 +1,3 @@
-SELECT * FROM tb_region_trend;
-
-COMMIT;
-
-
 CREATE TABLE `tb_region_master` (
     `id`            BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
 
@@ -139,4 +134,17 @@ CREATE TABLE `tb_analysis_summary` (
     `housing_type` VARCHAR(50) NULL,
     `trend_keyword` TEXT NULL,
     CONSTRAINT `FK_region_TO_summary` FOREIGN KEY (`region_id`) REFERENCES `tb_region_master`(`id`)
+);
+
+CREATE TABLE `tb_store_review` (
+    `id`        BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+
+    /* 네이버 플레이스 ID (가게 식별용) */
+    `place_id`  VARCHAR(255)    NOT NULL,
+
+    /* 리뷰 내용 (길 수 있으므로 TEXT 타입) */
+    `content`   TEXT            NULL,
+
+    /* 검색 속도를 위해 인덱스 추가 */
+    INDEX `idx_store_review_place` (`place_id`)
 );
