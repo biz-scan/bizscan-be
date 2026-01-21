@@ -11,13 +11,14 @@ import lombok.*;
 @Table(name = "tb_income_stat")
 public class IncomeStat {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String adstrdCd; // 행정동 코드
-    private String adstrdNm;
-    private String stdDate;
+  private String adstrdCd; // 행정동 코드
+  private String adstrdNm;
+  private String stdDate;
 
-    private Long avgMonIncome;
-    private Long incomeSecCd;
+  private Long avgMonIncome;
+  private Long incomeSecCd;
 }
