@@ -1,3 +1,8 @@
+SELECT * FROM tb_region_trend;
+
+COMMIT;
+
+
 CREATE TABLE `tb_region_master` (
     `id`            BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
 
