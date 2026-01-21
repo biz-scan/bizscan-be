@@ -4,7 +4,9 @@ package com.umc9th.bizscan.domain.member.controller;
 import com.umc9th.bizscan.domain.member.dto.RegisterMemberDto;
 import com.umc9th.bizscan.domain.member.service.MemberCommandService;
 import com.umc9th.bizscan.domain.member.service.MemberCommandServiceImpl;
+import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
+import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
 import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +26,16 @@ public class MemberController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Long> register(
-            @RequestBody @Valid RegisterMemberDto registerMemberDto
+    public ResponseEntity<ApiResponse<Long>> register(
+            @RequestBody @Valid RegisterMemberDto dto
     ) {
+        Long memberId = memberCommandService.registerMember(dto);
+
         return ResponseEntity.ok(
-                memberCommandService.registerMember(registerMemberDto)
+                ApiResponse.onSuccess(
+                        SuccessCode.OK,
+                        memberId
+                )
         );
     }
 }
