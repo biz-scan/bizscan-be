@@ -47,6 +47,15 @@ dependencies {
     //naver search ad api(webclient 의존성)
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    //security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+
+    // naver crawling - Selenium
+    implementation 'org.seleniumhq.selenium:selenium-java:4.16.1'
+    // WebDriver Manager - chrom driver
+    implementation 'io.github.bonigarcia:webdrivermanager:5.6.3'
+
 }
 
 tasks.named('test') {
