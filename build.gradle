@@ -36,6 +36,11 @@ dependencies {
     // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.13'
+
+
+    //CSV
+    implementation 'com.opencsv:opencsv:5.7.1'
+
 }
 
 tasks.named('test') {
