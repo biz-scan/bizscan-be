@@ -2,6 +2,7 @@ package com.umc9th.bizscan.domain.member.controller;
 
 
 import com.umc9th.bizscan.domain.member.dto.RegisterMemberDto;
+import com.umc9th.bizscan.domain.member.service.MemberCommandService;
 import com.umc9th.bizscan.domain.member.service.MemberCommandServiceImpl;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/member")
 public class MemberController {
-    private final MemberCommandServiceImpl memberCommandService;
+    private final MemberCommandService memberCommandService;
 
     @GetMapping("/test")
     @ApiErrorCodeExamples({ErrorCode.BAD_REQUEST, ErrorCode.FORBIDDEN, ErrorCode.NOT_FOUND})
