@@ -2,7 +2,6 @@ package com.umc9th.bizscan.domain.member.controller;
 
 
 import com.umc9th.bizscan.domain.member.dto.RegisterMemberDto;
-import com.umc9th.bizscan.domain.member.service.MemberCommandService;
 import com.umc9th.bizscan.domain.member.service.MemberCommandServiceImpl;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
@@ -33,7 +32,7 @@ public class MemberController {
 
         return ResponseEntity.ok(
                 ApiResponse.onSuccess(
-                        SuccessCode.OK,
+                        SuccessCode.MEMBER_REGISTER_SUCCESS,
                         memberId
                 )
         );
