@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "현재 고민")
 public enum PainPoint {
-
   @Schema(description = "고객 유입")
   CUSTOMER_ACQUISITION,
 

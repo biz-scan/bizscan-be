@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "평균 결제 금액")
 public enum PriceRange {
-
   @Schema(description = "1만원 미만")
   UNDER_10000,
 

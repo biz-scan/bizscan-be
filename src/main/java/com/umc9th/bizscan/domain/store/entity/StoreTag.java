@@ -24,9 +24,10 @@ import lombok.experimental.SuperBuilder;
 @Table(
     name = "store_tag",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_store_tag_store_tag", columnNames = {"store_id", "tag_id"})
-    }
-)
+      @UniqueConstraint(
+          name = "uk_store_tag_store_tag",
+          columnNames = {"store_id", "tag_id"})
+    })
 public class StoreTag extends BaseEntity {
 
   @Id

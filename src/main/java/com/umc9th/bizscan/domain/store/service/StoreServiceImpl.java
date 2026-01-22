@@ -47,7 +47,9 @@ public class StoreServiceImpl implements StoreService {
 
   @Override
   public StoreResponse createStore(StoreRequest request) {
-    log.info("Create store request received. memberId={}, address={}", request.getMemberId(),
+    log.info(
+        "Create store request received. memberId={}, address={}",
+        request.getMemberId(),
         request.getAddress());
 
     if (storeRepository.existsByAddress(request.getAddress())) {
@@ -58,17 +60,18 @@ public class StoreServiceImpl implements StoreService {
     Member member =
         memberRepository
             .findById(request.getMemberId())
-            .orElseThrow(() -> {
-              log.warn("Member not found. memberId={}", request.getMemberId());
-              return new GeneralException(StoreErrorCode.MEMBER_NOT_FOUND);
-            });
+            .orElseThrow(
+                () -> {
+                  log.warn("Member not found. memberId={}", request.getMemberId());
+                  return new GeneralException(StoreErrorCode.MEMBER_NOT_FOUND);
+                });
 
     KakaoGeoClient.GeoPoint geo;
     try {
       geo = kakaoGeoClient.getCoordinates(request.getAddress());
     } catch (Exception e) {
-      log.warn("Failed to geocode address. address={}, reason={}", request.getAddress(),
-          e.getMessage());
+      log.warn(
+          "Failed to geocode address. address={}, reason={}", request.getAddress(), e.getMessage());
       throw new GeneralException(StoreErrorCode.ADDRESS_INVALID);
     }
 
@@ -77,12 +80,14 @@ public class StoreServiceImpl implements StoreService {
       throw new GeneralException(StoreErrorCode.ADDRESS_INVALID);
     }
 
-    Store saved =
-        storeRepository.save(
-            storeMapper.toEntity(member, request, geo.lat(), geo.lon()));
+    Store saved = storeRepository.save(storeMapper.toEntity(member, request, geo.lat(), geo.lon()));
 
-    log.info("Store saved. storeId={}, address={}, lat={}, lon={}", saved.getId(),
-        saved.getAddress(), saved.getLat(), saved.getLon());
+    log.info(
+        "Store saved. storeId={}, address={}, lat={}, lon={}",
+        saved.getId(),
+        saved.getAddress(),
+        saved.getLat(),
+        saved.getLon());
 
     // tags null 방어 + null 요소 제거
     List<TagCode> tagCodes =
@@ -110,24 +115,16 @@ public class StoreServiceImpl implements StoreService {
     List<TagCode> orderedDistinct = new ArrayList<>(distinct);
 
     // 필요한 type/name만 뽑아서 한번에 조회
-    List<TagCode.Type> types =
-        orderedDistinct.stream().map(TagCode::getType).distinct().toList();
+    List<TagCode.Type> types = orderedDistinct.stream().map(TagCode::getType).distinct().toList();
 
-    List<TagCode.Name> names =
-        orderedDistinct.stream().map(TagCode::getName).distinct().toList();
+    List<TagCode.Name> names = orderedDistinct.stream().map(TagCode::getName).distinct().toList();
 
     List<Tag> candidates = tagRepository.findAllByTypeInAndNameIn(types, names);
 
     // DB 데이터가 중복되어 있어도 서버가 죽지 않도록 merge 함수 추가
     Map<String, Tag> tagMap =
         candidates.stream()
-            .collect(
-                Collectors.toMap(
-                    t -> key(t.getType(), t.getName()),
-                    t -> t,
-                    (a, b) -> a
-                )
-            );
+            .collect(Collectors.toMap(t -> key(t.getType(), t.getName()), t -> t, (a, b) -> a));
 
     // 요청 순서대로 검증 + 태그 리스트 구성
     List<Tag> tags = new ArrayList<>();
@@ -155,14 +152,13 @@ public class StoreServiceImpl implements StoreService {
     log.info("Stores loaded. count={}", stores.size());
 
     return stores.stream()
-        .map(store -> {
-          List<Tag> tags =
-              storeTagRepository.findAllByStore(store).stream()
-                  .map(StoreTag::getTag)
-                  .toList();
+        .map(
+            store -> {
+              List<Tag> tags =
+                  storeTagRepository.findAllByStore(store).stream().map(StoreTag::getTag).toList();
 
-          return storeMapper.toCreateResponse(store, tags);
-        })
+              return storeMapper.toCreateResponse(store, tags);
+            })
         .toList();
   }
 
@@ -174,15 +170,14 @@ public class StoreServiceImpl implements StoreService {
     Store store =
         storeRepository
             .findById(storeId)
-            .orElseThrow(() -> {
-              log.warn("Store not found. storeId={}", storeId);
-              return new GeneralException(StoreErrorCode.STORE_NOT_FOUND);
-            });
+            .orElseThrow(
+                () -> {
+                  log.warn("Store not found. storeId={}", storeId);
+                  return new GeneralException(StoreErrorCode.STORE_NOT_FOUND);
+                });
 
     List<Tag> tags =
-        storeTagRepository.findAllByStore(store).stream()
-            .map(StoreTag::getTag)
-            .toList();
+        storeTagRepository.findAllByStore(store).stream().map(StoreTag::getTag).toList();
 
     return storeMapper.toCreateResponse(store, tags);
   }
@@ -194,10 +189,11 @@ public class StoreServiceImpl implements StoreService {
     Store store =
         storeRepository
             .findById(storeId)
-            .orElseThrow(() -> {
-              log.warn("Store not found for delete. storeId={}", storeId);
-              return new GeneralException(StoreErrorCode.STORE_NOT_FOUND);
-            });
+            .orElseThrow(
+                () -> {
+                  log.warn("Store not found for delete. storeId={}", storeId);
+                  return new GeneralException(StoreErrorCode.STORE_NOT_FOUND);
+                });
 
     // FK 때문에 store_tag 먼저 삭제
     storeTagRepository.deleteAllByStore_Id(storeId);

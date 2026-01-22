@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "가게 업종(대분류)")
 public enum StoreCategory {
-
   @Schema(description = "카페/베이커리")
   CAFE_BAKERY,
 

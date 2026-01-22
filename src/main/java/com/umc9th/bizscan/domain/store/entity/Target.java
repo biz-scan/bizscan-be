@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "타겟 고객")
 public enum Target {
-
   @Schema(description = "20대")
   TWENTIES,
 

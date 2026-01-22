@@ -52,7 +52,6 @@ public class StoreMapper {
         store.getPrice().name(),
         store.getTarget().name(),
         store.getPainPoint().name(),
-        tagInfos
-    );
+        tagInfos);
   }
 }

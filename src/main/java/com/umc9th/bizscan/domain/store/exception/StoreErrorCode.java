@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum StoreErrorCode implements BaseErrorCode {
-
   MEMBER_NOT_FOUND("STORE404_1", "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
   STORE_NOT_FOUND("STORE404_2", "가게를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 

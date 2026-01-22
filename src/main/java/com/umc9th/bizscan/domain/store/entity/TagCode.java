@@ -74,10 +74,21 @@ public enum TagCode {
 
   public enum Name {
     // mood
-    VIEW, HIP, QUIET, RETRO, LUXURY, LIVELY,
+    VIEW,
+    HIP,
+    QUIET,
+    RETRO,
+    LUXURY,
+    LIVELY,
     // feature
-    GOOD_VALUE, SOLO_FRIENDLY, GROUP_SEAT, PET_FRIENDLY, PHOTO_SPOT,
+    GOOD_VALUE,
+    SOLO_FRIENDLY,
+    GROUP_SEAT,
+    PET_FRIENDLY,
+    PHOTO_SPOT,
     // operation
-    HALL_SERVICE, DELIVERY_AVAILABLE, TAKEOUT_ONLY
+    HALL_SERVICE,
+    DELIVERY_AVAILABLE,
+    TAKEOUT_ONLY
   }
 }

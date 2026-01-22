@@ -24,9 +24,10 @@ import lombok.experimental.SuperBuilder;
 @Table(
     name = "tag",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_tag_type_name", columnNames = {"type", "name"})
-    }
-)
+      @UniqueConstraint(
+          name = "uk_tag_type_name",
+          columnNames = {"type", "name"})
+    })
 public class Tag extends BaseEntity {
 
   @Id
@@ -42,10 +43,7 @@ public class Tag extends BaseEntity {
   private TagCode.Name name;
 
   public static Tag of(TagCode.Type type, TagCode.Name name) {
-    return Tag.builder()
-        .type(type)
-        .name(name)
-        .build();
+    return Tag.builder().type(type).name(name).build();
   }
 
   public void updateName(TagCode.Name name) {
