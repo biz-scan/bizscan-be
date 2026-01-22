@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -123,5 +125,32 @@ public class StoreController {
 
     return ResponseEntity.status(SuccessCode.OK.getStatus())
         .body(ApiResponse.onSuccess(SuccessCode.OK, result));
+  }
+
+  @Operation(summary = "가게 전체 조회", description = "등록된 모든 가게를 조회합니다.")
+  @GetMapping
+  public ResponseEntity<ApiResponse<List<StoreResponse>>> getStores() {
+
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(
+            SuccessCode.OK,
+            storeService.getStores()
+        )
+    );
+  }
+
+  @Operation(summary = "가게 단건 조회", description = "가게 ID로 단일 가게 정보를 조회합니다.")
+  @GetMapping("/{storeId}")
+  public ResponseEntity<ApiResponse<StoreResponse>> getStore(
+      @Parameter(description = "가게 ID", example = "1", required = true)
+      @PathVariable Long storeId
+  ) {
+
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(
+            SuccessCode.OK,
+            storeService.getStore(storeId)
+        )
+    );
   }
 }

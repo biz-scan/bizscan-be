@@ -115,4 +115,35 @@ public class StoreServiceImpl implements StoreService {
   private String key(TagCode.Type type, TagCode.Name name) {
     return type.name() + ":" + name.name();
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<StoreResponse> getStores() {
+    return storeRepository.findAll().stream()
+        .map(store -> {
+          List<Tag> tags =
+              storeTagRepository.findAllByStore(store).stream()
+                  .map(StoreTag::getTag)
+                  .toList();
+
+          return storeMapper.toCreateResponse(store, tags);
+        })
+        .toList();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public StoreResponse getStore(Long storeId) {
+    Store store =
+        storeRepository
+            .findById(storeId)
+            .orElseThrow(() -> new GeneralException(StoreErrorCode.STORE_NOT_FOUND));
+
+    List<Tag> tags =
+        storeTagRepository.findAllByStore(store).stream()
+            .map(StoreTag::getTag)
+            .toList();
+
+    return storeMapper.toCreateResponse(store, tags);
+  }
 }
