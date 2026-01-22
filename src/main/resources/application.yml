@@ -29,3 +29,6 @@ naver:
     api-key: ${NAVER_AD_API_KEY}
     secret-key: ${NAVER_AD_SECRET_KEY}
     customer-id: ${NAVER_AD_CUSTOMER_ID}
+
+kakao:
+  rest-api-key: ${KAKAO_REST_API_KEY}
