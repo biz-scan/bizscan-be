@@ -1,6 +1,7 @@
 package com.umc9th.bizscan.domain.store.controller;
 
 import com.umc9th.bizscan.domain.store.dto.request.StoreRequest;
+import com.umc9th.bizscan.domain.store.dto.response.StoreDeleteResponse;
 import com.umc9th.bizscan.domain.store.dto.response.StoreResponse;
 import com.umc9th.bizscan.domain.store.entity.PainPoint;
 import com.umc9th.bizscan.domain.store.entity.PriceRange;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -152,5 +154,14 @@ public class StoreController {
             storeService.getStore(storeId)
         )
     );
+  }
+
+  @Operation(summary = "가게 삭제", description = "가게를 삭제합니다. (연결된 태그 매핑도 함께 삭제)")
+  @DeleteMapping("/{storeId}")
+  public ResponseEntity<ApiResponse<StoreDeleteResponse>> deleteStore(@PathVariable Long storeId) {
+    StoreDeleteResponse result = storeService.deleteStore(storeId);
+
+    return ResponseEntity.status(SuccessCode.OK.getStatus())
+        .body(ApiResponse.onSuccess(SuccessCode.OK, result));
   }
 }

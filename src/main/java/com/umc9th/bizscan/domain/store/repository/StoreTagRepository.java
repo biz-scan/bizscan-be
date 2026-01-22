@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface StoreTagRepository extends JpaRepository<StoreTag, Long> {
 
   List<StoreTag> findAllByStore(Store store);
+
+  void deleteAllByStore_Id(Long storeId);
 }
