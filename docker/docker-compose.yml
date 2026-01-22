@@ -10,6 +10,10 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASS}
       TZ: Asia/Seoul
+      NAVER_AD_API_KEY: ${NAVER_AD_API_KEY}
+      NAVER_AD_SECRET_KEY: ${NAVER_AD_SECRET_KEY}
+      NAVER_AD_CUSTOMER_ID: ${NAVER_AD_CUSTOMER_ID}
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY}
     depends_on:
       mysql:
         condition: service_healthy
