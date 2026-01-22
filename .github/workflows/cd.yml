@@ -77,15 +77,16 @@ jobs:
           DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
         run: |
           set -e
-
-          cd docker
-
-          echo "$ENV_FILE" > .env
-          echo "PROFILE=${PROFILE}" >> .env
-          echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
-          echo "DOCKER_USERNAME=${DOCKER_USERNAME}" >> .env
-          echo "DOCKER_REPO=${DOCKER_REPO}" >> .env
-
-          docker compose --env-file .env down
-          docker compose --env-file .env pull
-          docker compose --env-file .env up -d --build
+          
+          # env 파일 생성 (docker/.env)
+          mkdir -p docker
+          echo "$ENV_FILE" > docker/.env
+          echo "PROFILE=${PROFILE}" >> docker/.env
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> docker/.env
+          echo "DOCKER_USERNAME=${DOCKER_USERNAME}" >> docker/.env
+          echo "DOCKER_REPO=${DOCKER_REPO}" >> docker/.env
+          
+          # docker/docker-compose.yml 사용
+          docker compose -f docker/docker-compose.yml --env-file docker/.env down
+          docker compose -f docker/docker-compose.yml --env-file docker/.env pull
+          docker compose -f docker/docker-compose.yml --env-file docker/.env up -d --build
