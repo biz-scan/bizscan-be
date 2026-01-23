@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '6.19.0'
 }
 
 group = 'com.umc9th'
@@ -32,12 +33,38 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    //security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.13'
+
+
+    //CSV
+    implementation 'com.opencsv:opencsv:5.7.1'
+
+    //naver search ad api(webclient 의존성)
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    //security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+
+    // naver crawling - Selenium
+    implementation 'org.seleniumhq.selenium:selenium-java:4.16.1'
+    // WebDriver Manager - chrom driver
+    implementation 'io.github.bonigarcia:webdrivermanager:5.6.3'
+
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        // 자바 코드 자동 포맷 (Google Java Style)
+        googleJavaFormat()
+    }
 }

@@ -17,3 +17,15 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  sql:
+    init:
+      mode: always
+
+
+naver:
+  ad:
+    base-url: https://api.searchad.naver.com
+    api-key: ${NAVER_AD_API_KEY}
+    secret-key: ${NAVER_AD_SECRET_KEY}
+    customer-id: ${NAVER_AD_CUSTOMER_ID}
