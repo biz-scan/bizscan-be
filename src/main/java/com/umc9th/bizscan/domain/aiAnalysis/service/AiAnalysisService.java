@@ -3,7 +3,9 @@ package com.umc9th.bizscan.domain.aiAnalysis.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.AiAnalysisCallbackRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.AiAnalysisRequest;
+import com.umc9th.bizscan.domain.aiAnalysis.dto.request.DiagnosisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.AnalysisStatusResponse;
+import com.umc9th.bizscan.domain.aiAnalysis.dto.response.DiagnosisResponse;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.FastApiAiAnalysisResponse;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.ActionPlan;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.AnalysisRequest;
@@ -113,6 +115,15 @@ public class AiAnalysisService {
     return swotRepository
         .findTopByStoreIdOrderByCreatedAtDesc(storeId)
         .orElseThrow(() -> new GeneralException(ErrorCode.SWOT_NOT_FOUND));
+  }
+
+  /** 정밀 진단 */
+  public DiagnosisResponse generateDiagnosis(DiagnosisRequest request) {
+    String url = "http://localhost:8000/ai-diagnosis";
+
+    DiagnosisResponse response = restTemplate.postForObject(url, request, DiagnosisResponse.class);
+
+    return response;
   }
 
   /** FastAPI 호출 */
