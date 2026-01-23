@@ -99,4 +99,4 @@ jobs:
           echo "NAVER_AD_CUSTOMER_ID=${NAVER_AD_CUSTOMER_ID}" >> docker/.env
 
           docker compose -f docker/docker-compose.yml --env-file docker/.env down
-          docker compose -f docker/docker-compose.yml --envㄴ
+          docker compose -f docker/docker-compose.yml --env
