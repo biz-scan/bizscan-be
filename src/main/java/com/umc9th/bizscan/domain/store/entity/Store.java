@@ -1,0 +1,96 @@
+package com.umc9th.bizscan.domain.store.entity;
+
+import com.umc9th.bizscan.domain.member.entity.Member;
+import com.umc9th.bizscan.global.common.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@SuperBuilder
+@Table(name = "store")
+public class Store extends BaseEntity {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_id", nullable = false)
+  private Member member;
+
+  @Column(nullable = false, length = 100)
+  private String name;
+
+  @Column(nullable = false, length = 255)
+  private String address;
+
+  @Column(precision = 10, scale = 7)
+  private BigDecimal lat;
+
+  @Column(precision = 10, scale = 7)
+  private BigDecimal lon;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 30)
+  private StoreCategory category;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "category_detail", nullable = false, length = 50)
+  private StoreCategoryDetail categoryDetail;
+
+  @Column(length = 255)
+  private String signature;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 30)
+  private PriceRange price;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 30)
+  private Target target;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "pain_point", nullable = false, length = 30)
+  private PainPoint painPoint;
+
+  public void update(
+      String name,
+      String address,
+      BigDecimal lat,
+      BigDecimal lon,
+      StoreCategory category,
+      StoreCategoryDetail categoryDetail,
+      String signature,
+      PriceRange price,
+      Target target,
+      PainPoint painPoint) {
+
+    this.name = name;
+    this.address = address;
+    this.lat = lat;
+    this.lon = lon;
+    this.category = category;
+    this.categoryDetail = categoryDetail;
+    this.signature = signature;
+    this.price = price;
+    this.target = target;
+    this.painPoint = painPoint;
+  }
+}
