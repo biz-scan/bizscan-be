@@ -2,10 +2,9 @@ package com.umc9th.bizscan.domain.aiAnalysis.entity;
 
 import com.umc9th.bizscan.global.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
+import lombok.*;
 
 @Entity
 @Getter
@@ -15,46 +14,46 @@ import java.util.List;
 @Table(name = "swot")
 public class Swot extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    // 매장 ID
-    @Column(name = "store_id", nullable = false)
-    private Long storeId;
+  // 매장 ID
+  @Column(name = "store_id", nullable = false)
+  private Long storeId;
 
-    // 뱃지
-    private String badge;
+  // 뱃지
+  private String badge;
 
-    // Strength
-    @Column(columnDefinition = "TEXT")
-    private String sTitle;
+  // Strength
+  @Column(columnDefinition = "TEXT")
+  private String sTitle;
 
-    @Column(columnDefinition = "TEXT")
-    private String sDetail;
+  @Column(columnDefinition = "TEXT")
+  private String sDetail;
 
-    // Weakness
-    @Column(columnDefinition = "TEXT")
-    private String wTitle;
+  // Weakness
+  @Column(columnDefinition = "TEXT")
+  private String wTitle;
 
-    @Column(columnDefinition = "TEXT")
-    private String wDetail;
+  @Column(columnDefinition = "TEXT")
+  private String wDetail;
 
-    // Opportunity
-    @Column(columnDefinition = "TEXT")
-    private String oTitle;
+  // Opportunity
+  @Column(columnDefinition = "TEXT")
+  private String oTitle;
 
-    @Column(columnDefinition = "TEXT")
-    private String oDetail;
+  @Column(columnDefinition = "TEXT")
+  private String oDetail;
 
-    // Threat
-    @Column(columnDefinition = "TEXT")
-    private String tTitle;
+  // Threat
+  @Column(columnDefinition = "TEXT")
+  private String tTitle;
 
-    @Column(columnDefinition = "TEXT")
-    private String tDetail;
+  @Column(columnDefinition = "TEXT")
+  private String tDetail;
 
-    // ActionPlan 연결
-    @OneToMany(mappedBy = "swot", cascade = CascadeType.ALL)
-    private List<ActionPlan> actionPlans = new ArrayList<>();
+  // ActionPlan 연결
+  @OneToMany(mappedBy = "swot", cascade = CascadeType.ALL)
+  private List<ActionPlan> actionPlans = new ArrayList<>();
 }

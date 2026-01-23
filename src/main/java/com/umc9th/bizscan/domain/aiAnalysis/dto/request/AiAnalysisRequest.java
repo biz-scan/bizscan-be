@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AiAnalysisRequest {
 
-    private Long storeId;
+  private Long storeId;
 }

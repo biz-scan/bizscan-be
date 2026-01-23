@@ -12,17 +12,17 @@ import lombok.*;
 @Builder
 public class AnalysisRequest extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private Long storeId;
+  private Long storeId;
 
-    @Enumerated(EnumType.STRING)
-    private AnalysisStatus status;
+  @Enumerated(EnumType.STRING)
+  private AnalysisStatus status;
 
-    public AnalysisRequest toDone() {
-        this.status = AnalysisStatus.DONE;
-        return this;
-    }
+  public AnalysisRequest toDone() {
+    this.status = AnalysisStatus.DONE;
+    return this;
+  }
 }

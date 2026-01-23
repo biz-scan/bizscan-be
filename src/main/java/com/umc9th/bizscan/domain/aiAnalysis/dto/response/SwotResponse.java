@@ -8,28 +8,28 @@ import lombok.Getter;
 @Builder
 public class SwotResponse {
 
-    private String sTitle;
-    private String sDetail;
+  private String sTitle;
+  private String sDetail;
 
-    private String wTitle;
-    private String wDetail;
+  private String wTitle;
+  private String wDetail;
 
-    private String oTitle;
-    private String oDetail;
+  private String oTitle;
+  private String oDetail;
 
-    private String tTitle;
-    private String tDetail;
+  private String tTitle;
+  private String tDetail;
 
-    public static SwotResponse from(Swot swot) {
-        return SwotResponse.builder()
-            .sTitle(swot.getSTitle())
-            .sDetail(swot.getSDetail())
-            .wTitle(swot.getWTitle())
-            .wDetail(swot.getWDetail())
-            .oTitle(swot.getOTitle())
-            .oDetail(swot.getODetail())
-            .tTitle(swot.getTTitle())
-            .tDetail(swot.getTDetail())
-            .build();
-    }
+  public static SwotResponse from(Swot swot) {
+    return SwotResponse.builder()
+        .sTitle(swot.getSTitle())
+        .sDetail(swot.getSDetail())
+        .wTitle(swot.getWTitle())
+        .wDetail(swot.getWDetail())
+        .oTitle(swot.getOTitle())
+        .oDetail(swot.getODetail())
+        .tTitle(swot.getTTitle())
+        .tDetail(swot.getTDetail())
+        .build();
+  }
 }
