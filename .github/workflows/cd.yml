@@ -75,18 +75,29 @@ jobs:
           ENV_FILE: ${{ secrets.ENV_FILE }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          NAVER_AD_API_KEY: ${{ secrets.NAVER_AD_API_KEY }}
+          NAVER_AD_SECRET_KEY: ${{ secrets.NAVER_AD_SECRET_KEY }}
+          NAVER_AD_CUSTOMER_ID: ${{ secrets.NAVER_AD_CUSTOMER_ID }}
         run: |
           set -e
-          
-          # env 파일 생성 (docker/.env)
+
           mkdir -p docker
-          echo "$ENV_FILE" > docker/.env
+
+          # 멀티라인 ENV_FILE 안전 저장
+          printf "%s" "$ENV_FILE" > docker/.env
+          echo "" >> docker/.env
+
           echo "PROFILE=${PROFILE}" >> docker/.env
           echo "IMAGE_TAG=${IMAGE_TAG}" >> docker/.env
           echo "DOCKER_USERNAME=${DOCKER_USERNAME}" >> docker/.env
           echo "DOCKER_REPO=${DOCKER_REPO}" >> docker/.env
-          
-          # docker/docker-compose.yml 사용
+
+          echo "KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}" >> docker/.env
+          echo "NAVER_AD_API_KEY=${NAVER_AD_API_KEY}" >> docker/.env
+          echo "NAVER_AD_SECRET_KEY=${NAVER_AD_SECRET_KEY}" >> docker/.env
+          echo "NAVER_AD_CUSTOMER_ID=${NAVER_AD_CUSTOMER_ID}" >> docker/.env
+
           docker compose -f docker/docker-compose.yml --env-file docker/.env down
           docker compose -f docker/docker-compose.yml --env-file docker/.env pull
           docker compose -f docker/docker-compose.yml --env-file docker/.env up -d --build
