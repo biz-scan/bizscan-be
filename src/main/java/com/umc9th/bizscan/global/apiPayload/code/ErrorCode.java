@@ -30,6 +30,9 @@ public enum ErrorCode implements BaseErrorCode {
   NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "MEMBER409_3", "이미 사용 중인 닉네임입니다."),
   MEMBER_NAME_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MEMBER400_1", "이름의 형식이 맞지 않습니다."),
 
+  // AiAnalysis
+  SWOT_NOT_FOUND(HttpStatus.NOT_FOUND, "SWOT404", "해당 매장의 SWOT 분석 결과가 존재하지 않습니다."),
+
   PAGE_INVALID(HttpStatus.BAD_REQUEST, "PAGE400_1", "유효하지 않은 페이지 범위입니다.");
 
   private final HttpStatus status;
