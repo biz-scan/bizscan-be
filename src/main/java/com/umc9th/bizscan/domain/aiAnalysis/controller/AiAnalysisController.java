@@ -16,8 +16,8 @@ public class AiAnalysisController {
 
   // 분석 요청 (프론트에서 최초 1회 호출)
   @PostMapping
-  public ApiResponse<String> analyze(@RequestParam Long StoreId) {
-    String requestId = aiAnalysisService.analyzeStore(StoreId);
+  public ApiResponse<String> analyze(@RequestParam Long storeId) {
+    String requestId = aiAnalysisService.analyzeStore(storeId);
     return ApiResponse.onSuccess(SuccessCode.OK, requestId);
   }
 

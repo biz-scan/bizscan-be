@@ -29,28 +29,31 @@ public class AiAnalysisService {
 
   private final SwotRepository swotRepository;
   private final ActionPlanRepository actionPlanRepository;
-  private final ObjectMapper objectMapper;
   private final AnalysisRequestRepository analysisRequestRepository;
+  private final ObjectMapper objectMapper;
 
   private final RestTemplate restTemplate = new RestTemplate();
 
-  // AI 분석 실행 (SWOT + ActionPlan)
+  /** AI 분석 요청 (프론트에서 최초 1회 호출) requestId 반환 → 프론트에서 폴링 */
   @Transactional
   public String analyzeStore(Long storeId) {
 
     // 1. requestId 생성
     String requestId = UUID.randomUUID().toString();
 
-    // 2. AnalysisRequest 생성 및 저장
+    // 2. 분석 요청 상태 저장
     AnalysisRequest request =
-        new AnalysisRequest(requestId, storeId, AnalysisStatus.PROCESSING, "매장 정보를 분석 중입니다.");
+        AnalysisRequest.builder()
+            .requestId(requestId)
+            .storeId(storeId)
+            .status(AnalysisStatus.PROCESSING)
+            .progressMessage("매장 정보를 분석 중입니다.")
+            .build();
 
     analysisRequestRepository.save(request);
 
-    // 지금은 일단 동기 흐름 유지하면서 아래 코드 실행
-
     try {
-      // 3. FastAPI 호출
+      // 3. FastAPI 호출 (현재는 동기)
       FastApiAiAnalysisResponse aiResponse = callFastApi(storeId);
 
       // 4. SWOT 저장
@@ -65,7 +68,6 @@ public class AiAnalysisService {
               aiResponse.getSwot().getODetail(),
               aiResponse.getSwot().getTTitle(),
               aiResponse.getSwot().getTDetail());
-
       swotRepository.save(swot);
 
       // 5. ActionPlan 저장
@@ -85,37 +87,19 @@ public class AiAnalysisService {
         actionPlanRepository.save(plan);
       }
 
-      // 6. 분석 완료 처리
+      // 6. 완료 처리
       request.complete();
 
     } catch (Exception e) {
-      // 7. 실패 처리
       request.fail("분석 중 오류가 발생했습니다.");
       throw new RuntimeException(e);
     }
 
-    // 8. requestId 반환 (프론트가 폴링에 사용)
+    // 7. requestId 반환 (폴링용)
     return requestId;
   }
 
-  // 최신 SWOT 조회
-  public SwotResponse getLatestSwot(Long storeId) {
-    Swot swot =
-        swotRepository
-            .findTopByStoreIdOrderByCreatedAtDesc(storeId)
-            .orElseThrow(() -> new GeneralException(ErrorCode.SWOT_NOT_FOUND));
-
-    return SwotResponse.from(swot);
-  }
-
-  // FastAPI 호출
-  private FastApiAiAnalysisResponse callFastApi(Long storeId) {
-    String url = "http://localhost:8000/ai-analysis";
-
-    return restTemplate.postForObject(
-        url, new AiAnalysisRequest(storeId), FastApiAiAnalysisResponse.class);
-  }
-
+  /** 분석 상태 조회 (폴링 API) */
   public AnalysisStatusResponse getAnalysisStatus(String requestId) {
     AnalysisRequest request =
         analysisRequestRepository
@@ -125,7 +109,25 @@ public class AiAnalysisService {
     return new AnalysisStatusResponse(request.getStatus(), request.getProgressMessage());
   }
 
-  // 콜백 처리 로직
+  /** 최신 SWOT 조회 (대시보드용) */
+  public SwotResponse getLatestSwot(Long storeId) {
+    Swot swot =
+        swotRepository
+            .findTopByStoreIdOrderByCreatedAtDesc(storeId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.SWOT_NOT_FOUND));
+
+    return SwotResponse.from(swot);
+  }
+
+  /** FastAPI 호출 */
+  private FastApiAiAnalysisResponse callFastApi(Long storeId) {
+    String url = "http://localhost:8000/ai-analysis";
+
+    return restTemplate.postForObject(
+        url, new AiAnalysisRequest(storeId), FastApiAiAnalysisResponse.class);
+  }
+
+  /** FastAPI 콜백 처리 (비동기 전환 대비) */
   @Transactional
   public void completeAnalysis(AiAnalysisCallbackRequest callback) {
 
@@ -137,7 +139,6 @@ public class AiAnalysisService {
     try {
       FastApiAiAnalysisResponse result = callback.getResult();
 
-      // 1️. SWOT 저장
       Swot swot =
           new Swot(
               request.getStoreId(),
@@ -149,10 +150,8 @@ public class AiAnalysisService {
               result.getSwot().getODetail(),
               result.getSwot().getTTitle(),
               result.getSwot().getTDetail());
-
       swotRepository.save(swot);
 
-      // 2️. ActionPlan 저장
       for (FastApiAiAnalysisResponse.ActionPlanPart planDto : result.getActionPlans()) {
 
         String tagsJson = objectMapper.writeValueAsString(planDto.getTags());
@@ -169,11 +168,9 @@ public class AiAnalysisService {
         actionPlanRepository.save(plan);
       }
 
-      // 3. 상태 완료 처리
       request.complete();
 
     } catch (Exception e) {
-      // 4️. 실패 처리
       request.fail("분석 중 오류가 발생했습니다.");
       throw new RuntimeException(e);
     }

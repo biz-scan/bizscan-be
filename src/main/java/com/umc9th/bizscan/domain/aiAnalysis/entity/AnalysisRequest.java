@@ -5,18 +5,20 @@ import com.umc9th.bizscan.global.common.BaseEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@SuperBuilder
 public class AnalysisRequest extends BaseEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  // 프론트에서 들고 다닐 id (폴링용)
+  // 프론트에서 들고 다닐 ID (폴링용)
   @Column(nullable = false, unique = true)
   private String requestId;
 
@@ -35,16 +37,7 @@ public class AnalysisRequest extends BaseEntity {
   // 완료 시간
   private LocalDateTime completedAt;
 
-  // 전용 생성자 추가
-  public AnalysisRequest(
-      String requestId, Long storeId, AnalysisStatus status, String progressMessage) {
-    this.requestId = requestId;
-    this.storeId = storeId;
-    this.status = status;
-    this.progressMessage = progressMessage;
-  }
-
-  // ==== 상태 변경 메서드 ====
+  // ===== 상태 전이 메서드 =====
 
   public void start() {
     this.status = AnalysisStatus.PROCESSING;
