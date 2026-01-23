@@ -1,5 +1,6 @@
 package com.umc9th.bizscan.domain.aiAnalysis.controller;
 
+import com.umc9th.bizscan.domain.aiAnalysis.dto.response.AnalysisStatusResponse;
 import com.umc9th.bizscan.domain.aiAnalysis.service.AiAnalysisService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
@@ -11,19 +12,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/ai-analysis")
 public class AiAnalysisController {
 
-    private final AiAnalysisService aiAnalysisService;
+  private final AiAnalysisService aiAnalysisService;
 
-    @PostMapping
-    public ApiResponse<Void> analyze(@RequestParam Long storeId) {
-        aiAnalysisService.analyzeStore(storeId);
-        return ApiResponse.onSuccess(SuccessCode.OK, null);
-    }
+  // 분석 요청 (프론트에서 최초 1회 호출)
+  @PostMapping
+  public ApiResponse<String> analyze(@RequestParam Long StoreId) {
+    String requestId = aiAnalysisService.analyzeStore(StoreId);
+    return ApiResponse.onSuccess(SuccessCode.OK, requestId);
+  }
 
-    @GetMapping("/{storeId}")
-    public ApiResponse<?> getLatestSwot(@PathVariable Long storeId) {
-        return ApiResponse.onSuccess(
-                SuccessCode.OK,
-                aiAnalysisService.getLatestSwot(storeId)
-        );
-    }
+  // 분석 상태 조회 (폴링용)
+  @GetMapping("/{requestId}/status")
+  public ApiResponse<AnalysisStatusResponse> getStatus(@PathVariable String requestId) {
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getAnalysisStatus(requestId));
+  }
 }
