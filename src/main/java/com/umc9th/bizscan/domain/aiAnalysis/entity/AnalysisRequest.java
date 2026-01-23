@@ -4,12 +4,13 @@ import com.umc9th.bizscan.domain.aiAnalysis.enums.AnalysisStatus;
 import com.umc9th.bizscan.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class AnalysisRequest extends BaseEntity {
 
   @Id
