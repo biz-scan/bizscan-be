@@ -1,12 +1,13 @@
 package com.umc9th.bizscan.domain.aiAnalysis.dto.request;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class ActionPlanAnalyzeRequest {
+public class AiAnalysisRequest {
 
     private Long storeId;
 }
