@@ -1,9 +1,7 @@
 package com.umc9th.bizscan.domain.aiAnalysis.controller;
 
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.DiagnosisRequest;
-import com.umc9th.bizscan.domain.aiAnalysis.dto.response.AnalysisStatusResponse;
-import com.umc9th.bizscan.domain.aiAnalysis.dto.response.DashboardSwotResponse;
-import com.umc9th.bizscan.domain.aiAnalysis.dto.response.DiagnosisResponse;
+import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.Swot;
 import com.umc9th.bizscan.domain.aiAnalysis.service.AiAnalysisService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
@@ -39,9 +37,20 @@ public class AiAnalysisController {
     return ApiResponse.onSuccess(SuccessCode.OK, DashboardSwotResponse.from(swot));
   }
 
-  // 정밀 진단
+  // AI 정밀 진단
   @PostMapping("/diagnosis")
   public ApiResponse<DiagnosisResponse> diagnose(@RequestBody DiagnosisRequest request) {
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.generateDiagnosis(request));
+  }
+
+  // 맞춤 실행 전략
+  @GetMapping("/action-plans")
+  public ApiResponse<ActionPlanListResponse> getActionPlans(@RequestParam Long storeId) {
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlans(storeId));
+  }
+
+  @GetMapping("/action-plans/{solutionId}")
+  public ApiResponse<ActionPlanDetailResponse> getActionPlanDetail(@PathVariable Long solutionId) {
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlanDetail(solutionId));
   }
 }

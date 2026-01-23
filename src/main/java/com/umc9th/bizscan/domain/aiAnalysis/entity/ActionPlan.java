@@ -36,4 +36,7 @@ public class ActionPlan {
 
   @OneToMany(mappedBy = "actionPlan", cascade = CascadeType.ALL)
   private List<ActionDetail> actionDetails = new ArrayList<>();
+
+  @Column(columnDefinition = "TEXT")
+  private String steps;
 }
