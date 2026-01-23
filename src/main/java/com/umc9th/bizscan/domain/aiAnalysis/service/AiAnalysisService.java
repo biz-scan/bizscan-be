@@ -5,7 +5,6 @@ import com.umc9th.bizscan.domain.aiAnalysis.dto.request.AiAnalysisCallbackReques
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.AiAnalysisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.AnalysisStatusResponse;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.FastApiAiAnalysisResponse;
-import com.umc9th.bizscan.domain.aiAnalysis.dto.response.SwotResponse;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.ActionPlan;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.AnalysisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.Swot;
@@ -110,13 +109,10 @@ public class AiAnalysisService {
   }
 
   /** 최신 SWOT 조회 (대시보드용) */
-  public SwotResponse getLatestSwot(Long storeId) {
-    Swot swot =
-        swotRepository
-            .findTopByStoreIdOrderByCreatedAtDesc(storeId)
-            .orElseThrow(() -> new GeneralException(ErrorCode.SWOT_NOT_FOUND));
-
-    return SwotResponse.from(swot);
+  public Swot getLatestSwotEntity(Long storeId) {
+    return swotRepository
+        .findTopByStoreIdOrderByCreatedAtDesc(storeId)
+        .orElseThrow(() -> new GeneralException(ErrorCode.SWOT_NOT_FOUND));
   }
 
   /** FastAPI 호출 */

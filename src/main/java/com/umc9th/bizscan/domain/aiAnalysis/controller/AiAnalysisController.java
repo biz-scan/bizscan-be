@@ -1,6 +1,8 @@
 package com.umc9th.bizscan.domain.aiAnalysis.controller;
 
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.AnalysisStatusResponse;
+import com.umc9th.bizscan.domain.aiAnalysis.dto.response.DashboardSwotResponse;
+import com.umc9th.bizscan.domain.aiAnalysis.entity.Swot;
 import com.umc9th.bizscan.domain.aiAnalysis.service.AiAnalysisService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
@@ -25,5 +27,12 @@ public class AiAnalysisController {
   @GetMapping("/{requestId}/status")
   public ApiResponse<AnalysisStatusResponse> getStatus(@PathVariable String requestId) {
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getAnalysisStatus(requestId));
+  }
+
+  @GetMapping("/dashboard/swot")
+  public ApiResponse<DashboardSwotResponse> getDashboardSwot(@RequestParam Long storeId) {
+    Swot swot = aiAnalysisService.getLatestSwotEntity(storeId);
+
+    return ApiResponse.onSuccess(SuccessCode.OK, DashboardSwotResponse.from(swot));
   }
 }
