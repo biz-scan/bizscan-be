@@ -6,6 +6,7 @@ import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
 import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,11 @@ public class MemberController {
     return "Hello, World!";
   }
 
+  @Operation(
+          summary = "회원가입",
+          description = "신규 사용자를 회원으로 등록합니다. " +
+                  "이메일 중복 여부를 검증하고, 비밀번호는 암호화되어 저장됩니다."
+  )
   @PostMapping("/register")
   public ResponseEntity<ApiResponse<Long>> register(@RequestBody @Valid RegisterMemberDto dto) {
     Long memberId = memberCommandService.registerMember(dto);
