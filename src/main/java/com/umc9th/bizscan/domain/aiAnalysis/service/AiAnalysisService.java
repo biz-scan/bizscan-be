@@ -1,10 +1,11 @@
 package com.umc9th.bizscan.domain.aiAnalysis.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.AiAnalysisCallbackRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.AiAnalysisRequest;
-import com.umc9th.bizscan.domain.aiAnalysis.dto.response.AnalysisStatusResponse;
-import com.umc9th.bizscan.domain.aiAnalysis.dto.response.FastApiAiAnalysisResponse;
+import com.umc9th.bizscan.domain.aiAnalysis.dto.request.DiagnosisRequest;
+import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.ActionPlan;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.AnalysisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.Swot;
@@ -15,6 +16,7 @@ import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRequestRepository
 import com.umc9th.bizscan.domain.aiAnalysis.repository.SwotRepository;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -113,6 +115,65 @@ public class AiAnalysisService {
     return swotRepository
         .findTopByStoreIdOrderByCreatedAtDesc(storeId)
         .orElseThrow(() -> new GeneralException(ErrorCode.SWOT_NOT_FOUND));
+  }
+
+  /** 정밀 진단 조회 */
+  public DiagnosisResponse generateDiagnosis(DiagnosisRequest request) {
+    String url = "http://localhost:8000/ai-diagnosis";
+
+    DiagnosisResponse response = restTemplate.postForObject(url, request, DiagnosisResponse.class);
+
+    return response;
+  }
+
+  /** 실행 전략 목록 조회 */
+  public ActionPlanListResponse getActionPlans(Long storeId) {
+
+    List<ActionPlan> plans = actionPlanRepository.findAllBySwot_StoreId(storeId);
+
+    if (plans.isEmpty()) {
+      return new ActionPlanListResponse(List.of());
+    }
+
+    List<ActionPlanListResponse.ActionPlanItem> items =
+        plans.stream()
+            .map(
+                plan -> {
+                  List<String> tags;
+                  try {
+                    tags =
+                        objectMapper.readValue(
+                            plan.getTags(), new TypeReference<List<String>>() {});
+                  } catch (Exception e) {
+                    tags = List.of();
+                  }
+
+                  return new ActionPlanListResponse.ActionPlanItem(
+                      plan.getId(), plan.getTitle(), tags);
+                })
+            .toList();
+
+    return new ActionPlanListResponse(items);
+  }
+
+  /** 실행 전략 상세 조회 */
+  public ActionPlanDetailResponse getActionPlanDetail(Long solutionId) {
+
+    ActionPlan plan =
+        actionPlanRepository
+            .findById(solutionId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.ACTION_PLAN_NOT_FOUND));
+
+    List<String> steps;
+    try {
+      steps = objectMapper.readValue(plan.getSteps(), new TypeReference<List<String>>() {});
+    } catch (Exception e) {
+      steps = List.of();
+    }
+
+    return new ActionPlanDetailResponse(
+        plan.getId(), plan.getTitle(), plan.getReason(), steps, false // 노트 추가 여부 연동 필요
+        );
   }
 
   /** FastAPI 호출 */
