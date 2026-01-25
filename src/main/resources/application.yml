@@ -33,4 +33,4 @@ naver:
 kakao:
   api:
     key: ${KAKAO_API_KEY}
-    url: "https://dapi.kakao.com/v2/local/search/address.json"
+    url: "https://dapi.kakao.com/v2/local/search/address.json
