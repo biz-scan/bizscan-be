@@ -1,4 +1,4 @@
-package com.umc9th.bizscan.domain.member.dto;
+package com.umc9th.bizscan.domain.member.dto.response;
 
 import com.umc9th.bizscan.domain.member.entity.Member;
 import lombok.AllArgsConstructor;

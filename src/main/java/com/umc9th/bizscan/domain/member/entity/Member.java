@@ -69,4 +69,9 @@ public class Member extends BaseEntity implements UserDetails {
     return this.email; // 로그인 ID로 email 사용
   }
 
+  public void updateNickname(String nickname) {
+    this.nickname = nickname;
+  }
+
+
 }

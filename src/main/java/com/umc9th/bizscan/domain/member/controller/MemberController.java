@@ -1,11 +1,11 @@
 package com.umc9th.bizscan.domain.member.controller;
 
-import com.umc9th.bizscan.domain.member.dto.MemberResponseDto;
+import com.umc9th.bizscan.domain.member.dto.request.MemberUpdateRequestDto;
+import com.umc9th.bizscan.domain.member.dto.response.MemberResponseDto;
 import com.umc9th.bizscan.domain.member.dto.RegisterMemberDto;
 import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.domain.member.service.MemberCommandService;
 import com.umc9th.bizscan.domain.member.service.MemberQueryService;
-import com.umc9th.bizscan.domain.store.dto.response.StoreResponse;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
@@ -52,6 +52,48 @@ public class MemberController {
     Member member = memberQueryService.getMemberById(memberId);
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.MEMBER_GET_SUCCESS, MemberResponseDto.from(member)
             )
+    );
+  }
+
+  @GetMapping
+  @Operation(summary = "회원 목록 조회", description = "전체 회원 목록을 조회합니다.")
+  public ResponseEntity<ApiResponse<List<MemberResponseDto>>> getMembers() {
+
+    List<MemberResponseDto> result =
+            memberQueryService.getAllMembers().stream()
+                    .map(MemberResponseDto::from)
+                    .toList();
+
+    return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                    SuccessCode.MEMBER_LIST_SUCCESS,
+                    result
+            )
+    );
+  }
+
+  @PatchMapping("/{memberId}")
+  @Operation(summary = "회원 정보 수정", description = "회원 닉네임을 수정합니다.")
+  public ResponseEntity<ApiResponse<Void>> updateMember(
+          @PathVariable Long memberId,
+          @RequestBody @Valid MemberUpdateRequestDto dto
+  ) {
+    memberCommandService.updateMember(memberId, dto);
+
+    return ResponseEntity.ok(
+            ApiResponse.onSuccess(SuccessCode.MEMBER_UPDATE_SUCCESS, null)
+    );
+  }
+
+  @DeleteMapping("/{memberId}")
+  @Operation(summary = "회원 삭제", description = "회원을 삭제합니다.")
+  public ResponseEntity<ApiResponse<Void>> deleteMember(
+          @PathVariable Long memberId
+  ) {
+    memberCommandService.deleteMember(memberId);
+
+    return ResponseEntity.ok(
+            ApiResponse.onSuccess(SuccessCode.MEMBER_DELETE_SUCCESS, null)
     );
   }
 

@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true) //queryservice에는 readonly
@@ -26,4 +28,9 @@ public class MemberQueryServiceImpl implements MemberQueryService {
         return memberRepository.findByEmail(email)
                 .orElseThrow(()-> new GeneralException(ErrorCode.MEMBER_NOT_FOUND)) ;
     };
+
+    @Override
+    public List<Member> getAllMembers() {
+        return memberRepository.findAll();
+    }
 }
