@@ -1,7 +1,7 @@
 package com.umc9th.bizscan.domain.aiAnalysis.entity;
 
 import com.umc9th.bizscan.domain.aiAnalysis.enums.AnalysisStatus;
-import com.umc9th.bizscan.global.common.BaseEntity;
+import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;

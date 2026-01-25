@@ -1,7 +1,7 @@
 package com.umc9th.bizscan.domain.store.entity;
 
 import com.umc9th.bizscan.domain.member.entity.Member;
-import com.umc9th.bizscan.global.common.BaseEntity;
+import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
