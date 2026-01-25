@@ -1,6 +1,6 @@
 package com.umc9th.bizscan.domain.member.entity;
 
-import com.umc9th.bizscan.global.common.BaseEntity;
+import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
