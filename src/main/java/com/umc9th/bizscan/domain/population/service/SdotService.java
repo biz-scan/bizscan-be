@@ -12,6 +12,4 @@ import org.springframework.transaction.annotation.Transactional;
 public class SdotService {
   private final SdotRepository sdotRepository;
   private final RegionRepository regionRepository; // 부모 찾기용
-
-  // TODO: CSV 읽고 -> 상권코드로 부모 찾고 -> 저장
 }

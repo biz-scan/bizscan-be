@@ -29,3 +29,8 @@ naver:
     api-key: ${NAVER_AD_API_KEY}
     secret-key: ${NAVER_AD_SECRET_KEY}
     customer-id: ${NAVER_AD_CUSTOMER_ID}
+
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}
+    url: "https://dapi.kakao.com/v2/local/search/address.json"
