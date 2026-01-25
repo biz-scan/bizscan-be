@@ -1,6 +1,7 @@
 package com.umc9th.bizscan.domain.region.controller;
 
 import com.umc9th.bizscan.domain.analysis.dto.AnalysisSummaryDto;
+import com.umc9th.bizscan.domain.analysis.service.DataVerificationService;
 import com.umc9th.bizscan.domain.commercial.dto.OpportunityResponseDto;
 import com.umc9th.bizscan.domain.competitor.dto.ThreatResponseDto;
 import com.umc9th.bizscan.domain.hinterland.dto.StrengthResponseDto;
@@ -8,7 +9,6 @@ import com.umc9th.bizscan.domain.region.dto.HashtagDto;
 import com.umc9th.bizscan.domain.region.service.RegionTrendService;
 import com.umc9th.bizscan.domain.store.dto.WeaknessResponseDto;
 import com.umc9th.bizscan.domain.store.service.ReviewCrawlerService;
-import com.umc9th.bizscan.global.service.DataVerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,4 +1,4 @@
-package com.umc9th.bizscan.global.service;
+package com.umc9th.bizscan.domain.analysis.service;
 
 import com.umc9th.bizscan.domain.analysis.dto.AnalysisSummaryDto;
 import com.umc9th.bizscan.domain.analysis.entity.AnalysisSummary;
