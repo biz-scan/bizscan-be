@@ -2,12 +2,7 @@ package com.umc9th.bizscan.domain.region.service;
 
 import com.umc9th.bizscan.domain.region.dto.HashtagDto;
 import com.umc9th.bizscan.domain.region.dto.NaverKeywordResponse;
-import com.umc9th.bizscan.domain.region.dto.NaverKeywordResponse.KeywordResult;
-import com.umc9th.bizscan.domain.region.entity.RegionMaster;
-import com.umc9th.bizscan.domain.region.entity.RegionTrend;
 import com.umc9th.bizscan.domain.region.repository.RegionRepository;
-import com.umc9th.bizscan.domain.region.repository.RegionTrendRepository;
-import java.time.LocalDate;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +23,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class RegionTrendService {
 
   private final RegionRepository regionRepository;
-  private final RegionTrendRepository regionTrendRepository;
 
   @Value("${naver.ad.base-url}")
   private String baseUrl;
@@ -41,78 +35,6 @@ public class RegionTrendService {
 
   @Value("${naver.ad.customer-id}")
   private String customerId;
-
-  // 특정 지역(Region)에 대한 키워드 검색량 수집
-  public void collectSearchTrend(Long regionId, String searchKeyword) {
-
-    // 1. 부모 지역 찾기
-    RegionMaster region =
-        regionRepository
-            .findById(regionId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 지역이 없습니다."));
-
-    // 2. API 호출을 위한 서명 및 헤더 준비
-    String timestamp = String.valueOf(System.currentTimeMillis());
-    String method = "GET";
-    String resource = "/keywordstool";
-    String signature = generateSignature(timestamp, method, resource, secretKey);
-
-    // 3. WebClient로 네이버 API 호출
-    // WebClient 생성 시 메모리 한도 늘리기 (10MB)
-    WebClient webClient =
-        WebClient.builder()
-            .baseUrl(baseUrl)
-            .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
-            .build();
-
-    NaverKeywordResponse response =
-        webClient
-            .get()
-            .uri(
-                uriBuilder ->
-                    uriBuilder
-                        .path(resource)
-                        .queryParam("hintKeywords", searchKeyword) // 예: "성수동 맛집"
-                        .queryParam("showDetail", "1")
-                        .build())
-            .header("X-Timestamp", timestamp)
-            .header("X-API-KEY", apiKey)
-            .header("X-Customer", customerId)
-            .header("X-Signature", signature)
-            .retrieve()
-            .bodyToMono(NaverKeywordResponse.class)
-            .block(); // 동기 처리 (데이터 수집이니까 기다림)
-
-    if (response == null || response.getKeywordList() == null) {
-      log.warn("네이버 API 응답이 비어있습니다.");
-      return;
-    }
-
-    // 4. DB 저장 (상위 5개만 예시로 저장)
-    List<KeywordResult> results = response.getKeywordList();
-    int rank = 1;
-
-    for (KeywordResult result : results) {
-      if (rank > 10) break; // 상위 10개만 저장
-
-      long pcCount = parseCount(result.getMonthlyPcQcCnt());
-      long mobileCount = parseCount(result.getMonthlyMobileQcCnt());
-      long totalCount = pcCount + mobileCount;
-
-      RegionTrend trend =
-          RegionTrend.builder()
-              .regionMaster(region)
-              .stdDate(LocalDate.now())
-              .keyword(result.getRelKeyword())
-              .searchVol(totalCount)
-              .rank((long) rank++)
-              .build();
-
-      regionTrendRepository.save(trend);
-    }
-
-    log.info("키워드 '{}' 관련 트렌드 데이터 {}건 저장 완료", searchKeyword, rank - 1);
-  }
 
   // SNS 해시태그 추천용 (DB 저장 X, 즉시 리턴)
   public List<HashtagDto> recommendHashtags(String keyword) {

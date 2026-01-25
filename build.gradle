@@ -40,9 +40,8 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.13'
 
-
     //CSV
-    implementation 'com.opencsv:opencsv:5.7.1'
+    implementation 'com.opencsv:opencsv:5.9'
 
     //naver search ad api(webclient 의존성)
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -55,6 +54,10 @@ dependencies {
     implementation 'org.seleniumhq.selenium:selenium-java:4.16.1'
     // WebDriver Manager - chrom driver
     implementation 'io.github.bonigarcia:webdrivermanager:5.6.3'
+
+
+    //lat, lon
+    implementation 'org.locationtech.proj4j:proj4j:1.3.0'
 
 }
 
