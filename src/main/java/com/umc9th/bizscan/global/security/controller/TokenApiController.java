@@ -42,28 +42,12 @@ public class TokenApiController {
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.TOKEN_REISSUE_SUCCESS, token));
   }
 
-  @Operation(
-      summary = "로그아웃",
-      description =
-          """
-    사용자를 로그아웃 처리합니다.
-
-    - Authorization 헤더에 포함된 Access Token을 통해 요청합니다.
-    - 내부적으로 Redis에 저장된 Refresh Token을 삭제합니다.
-    - 로그아웃 이후에는 기존 Refresh Token으로 토큰 재발급이 불가능합니다.
-    - Access Token은 만료 시점까지 유효하지만, 재발급은 차단됩니다.
-    """)
+  @Operation(summary = "로그아웃", description = "사용자를 로그아웃 처리합니다.")
   @PostMapping("/logout")
   public ApiResponse<Void> logout(@AuthenticationPrincipal User user) {
     tokenService.logout(user.getUsername());
     return ApiResponse.onSuccess(SuccessCode.MEMBER_LOGOUT_SUCCESS, null);
   }
-
-  /*@PostMapping("/logout")
-  public ApiResponse<Void> logout(@AuthenticationPrincipal UserDetails user, @RequestParam String refreshToken) {
-    tokenService.logout(refreshToken);
-    return ApiResponse.onSuccess(MEMBER_LOGOUT_SUCCESS, null);
-  }*/
 
   @Operation(summary = "이메일 중복 검증", description = "이미 존재하면 true, 사용 가능하면 false를 반환합니다.")
   @GetMapping("/duplication/login-id")
