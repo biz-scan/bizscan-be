@@ -21,16 +21,27 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     public Member getMemberById(Long Id){
         return memberRepository.findById(Id)
                 .orElseThrow(()->new GeneralException(ErrorCode.MEMBER_NOT_FOUND)) ;
-    };
+    }
 
     @Override
     public Member getMemberByEmail(String email){
         return memberRepository.findByEmail(email)
                 .orElseThrow(()-> new GeneralException(ErrorCode.MEMBER_NOT_FOUND)) ;
-    };
+    }
 
     @Override
     public List<Member> getAllMembers() {
         return memberRepository.findAll();
     }
+
+    @Override
+    public boolean validateExistNickname(String nickname) {
+        return memberRepository.existsByNickname(nickname);
+    }
+
+    @Override
+    public boolean validateExistEmail(String email) {
+        return memberRepository.existsByEmail(email);
+    }
+
 }

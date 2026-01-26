@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -97,4 +98,24 @@ public class MemberController {
     );
   }
 
+  @Operation(
+          summary = "내 정보 조회",
+          description = "JWT 인증을 통해 로그인한 사용자의 정보를 조회합니다."
+  )
+  @GetMapping("/me")
+  public ResponseEntity<ApiResponse<MemberResponseDto>> getMyInfo(
+          Authentication authentication
+  ) {
+    // JWT subject == email
+    String email = authentication.getName();
+
+    Member member = memberQueryService.getMemberByEmail(email);
+
+    return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                    SuccessCode.MEMBER_GET_SUCCESS,
+                    MemberResponseDto.from(member)
+            )
+    );
+  }
 }

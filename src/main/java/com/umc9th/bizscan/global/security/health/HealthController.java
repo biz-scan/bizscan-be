@@ -1,4 +1,4 @@
-package com.umc9th.bizscan.global.health;
+package com.umc9th.bizscan.global.security.health;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
