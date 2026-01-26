@@ -1,5 +1,6 @@
 package com.umc9th.bizscan.global.security.controller;
 
+import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.domain.member.service.MemberQueryService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
@@ -12,6 +13,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import static com.umc9th.bizscan.global.apiPayload.code.SuccessCode.MEMBER_LOGOUT_SUCCESS;
@@ -55,10 +59,20 @@ public class TokenApiController {
     """
   )
   @PostMapping("/logout")
-  public ApiResponse<Void> logout(@RequestParam String refreshToken) {
+  public ApiResponse<Void> logout(
+          @AuthenticationPrincipal User user
+  ) {
+    tokenService.logout(user.getUsername());
+    return ApiResponse.onSuccess(
+            SuccessCode.MEMBER_LOGOUT_SUCCESS,
+            null
+    );
+  }
+  /*@PostMapping("/logout")
+  public ApiResponse<Void> logout(@AuthenticationPrincipal UserDetails user, @RequestParam String refreshToken) {
     tokenService.logout(refreshToken);
     return ApiResponse.onSuccess(MEMBER_LOGOUT_SUCCESS, null);
-  }
+  }*/
 
   @Operation(summary = "이메일 중복 검증", description = "이미 존재하면 true, 사용 가능하면 false를 반환합니다.")
   @GetMapping("/duplication/login-id")

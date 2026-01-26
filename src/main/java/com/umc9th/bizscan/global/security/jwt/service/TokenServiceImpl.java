@@ -165,11 +165,12 @@ public class TokenServiceImpl implements TokenService {
   }
 
   @Override
-  public boolean logout(String refreshToken) {
-    refreshToken = resolveToken(refreshToken);
-    redisService.deleteValue(refreshToken);
+  public boolean logout(String email) {
+    // email 기준으로 Redis에 저장된 refreshToken 찾아서 삭제
+    redisService.deleteRefreshTokenByEmail(email);
     return true;
   }
+
 
 
   @Override

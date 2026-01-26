@@ -15,9 +15,19 @@ public class RedisService {
 
   // FOR Refresh token(whiteList)
   // key-value 설정
-  public void setValue(String token, String username) {
+  public void setValue(String refreshToken, String email) {
     ValueOperations<String, String> values = redisTemplate.opsForValue();
-    values.set(token, username, Duration.ofDays(7));
+
+    values.set(refreshToken, email, Duration.ofDays(7));
+    values.set(email, refreshToken, Duration.ofDays(7));
+  }
+
+  public void deleteRefreshTokenByEmail(String email) {
+    String refreshToken = redisTemplate.opsForValue().get(email).toString();
+    if (refreshToken != null) {
+      redisTemplate.delete(refreshToken);
+      redisTemplate.delete(email);
+    }
   }
 
   // key 값으로 value 가져오기

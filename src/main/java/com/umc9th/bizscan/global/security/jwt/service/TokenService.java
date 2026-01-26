@@ -17,7 +17,7 @@ public interface TokenService {
 
   boolean validateToken(String token);
 
-  boolean logout(String refreshToken);
+  boolean logout(String email);
 
   boolean existsRefreshToken(String refreshToken);
 
