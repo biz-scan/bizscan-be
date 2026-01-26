@@ -76,11 +76,10 @@ public class TokenServiceImpl implements TokenService {
     Member member = memberQueryService.getMemberByEmail(email);
 
     Authentication authentication =
-            new UsernamePasswordAuthenticationToken(member, "", member.getAuthorities());
+        new UsernamePasswordAuthenticationToken(member, "", member.getAuthorities());
 
     return generateToken(authentication);
   }
-
 
   @Override
   public JwtToken generateToken(Authentication authentication) {
@@ -171,8 +170,6 @@ public class TokenServiceImpl implements TokenService {
     return true;
   }
 
-
-
   @Override
   public boolean existsRefreshToken(String refreshToken) {
     return redisService.getValue(refreshToken) != null;
@@ -204,5 +201,4 @@ public class TokenServiceImpl implements TokenService {
     }
     return token;
   }
-
 }

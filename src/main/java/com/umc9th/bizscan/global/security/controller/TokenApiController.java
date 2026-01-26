@@ -1,6 +1,5 @@
 package com.umc9th.bizscan.global.security.controller;
 
-import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.domain.member.service.MemberQueryService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
@@ -8,17 +7,13 @@ import com.umc9th.bizscan.global.security.jwt.dto.JwtToken;
 import com.umc9th.bizscan.global.security.jwt.dto.MemberLoginRequestDto;
 import com.umc9th.bizscan.global.security.jwt.service.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import static com.umc9th.bizscan.global.apiPayload.code.SuccessCode.MEMBER_LOGOUT_SUCCESS;
 
 @Slf4j
 @Tag(name = "Token API", description = "JWT 토큰 관련 API")
@@ -48,26 +43,22 @@ public class TokenApiController {
   }
 
   @Operation(
-          summary = "로그아웃",
-          description = """
+      summary = "로그아웃",
+      description =
+          """
     사용자를 로그아웃 처리합니다.
 
     - Authorization 헤더에 포함된 Access Token을 통해 요청합니다.
     - 내부적으로 Redis에 저장된 Refresh Token을 삭제합니다.
     - 로그아웃 이후에는 기존 Refresh Token으로 토큰 재발급이 불가능합니다.
     - Access Token은 만료 시점까지 유효하지만, 재발급은 차단됩니다.
-    """
-  )
+    """)
   @PostMapping("/logout")
-  public ApiResponse<Void> logout(
-          @AuthenticationPrincipal User user
-  ) {
+  public ApiResponse<Void> logout(@AuthenticationPrincipal User user) {
     tokenService.logout(user.getUsername());
-    return ApiResponse.onSuccess(
-            SuccessCode.MEMBER_LOGOUT_SUCCESS,
-            null
-    );
+    return ApiResponse.onSuccess(SuccessCode.MEMBER_LOGOUT_SUCCESS, null);
   }
+
   /*@PostMapping("/logout")
   public ApiResponse<Void> logout(@AuthenticationPrincipal UserDetails user, @RequestParam String refreshToken) {
     tokenService.logout(refreshToken);
