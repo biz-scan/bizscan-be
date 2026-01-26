@@ -8,16 +8,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public class MemberResponseDto {
 
-    private Long id;
-    private String email;
-    private String nickname;
+  private Long id;
+  private String email;
+  private String nickname;
 
-    public static MemberResponseDto from(Member member) {
-        return new MemberResponseDto(
-                member.getId(),
-                member.getEmail(),
-                member.getNickname()
-        );
-    }
+  public static MemberResponseDto from(Member member) {
+    return new MemberResponseDto(member.getId(), member.getEmail(), member.getNickname());
+  }
 }
-

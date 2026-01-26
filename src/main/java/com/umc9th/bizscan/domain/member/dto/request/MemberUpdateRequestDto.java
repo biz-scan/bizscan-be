@@ -7,6 +7,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class MemberUpdateRequestDto {
-    @NotBlank
-    private String nickname;
+  @NotBlank private String nickname;
 }

@@ -2,14 +2,13 @@ package com.umc9th.bizscan.domain.member.entity;
 
 import com.umc9th.bizscan.global.common.BaseEntity;
 import jakarta.persistence.*;
+import java.util.Collection;
+import java.util.Collections;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
-import java.util.Collections;
 
 @Entity
 @Getter
@@ -38,30 +37,30 @@ public class Member extends BaseEntity implements UserDetails {
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return Collections.singleton(new SimpleGrantedAuthority("ROLE_MEMBER"));
   }
+
   @Override
   public String getPassword() {
     return this.password;
   }
 
-
   @Override
   public boolean isAccountNonExpired() {
-    return true;
+    return false;
   }
 
   @Override
   public boolean isAccountNonLocked() {
-    return true;
+    return false;
   }
 
   @Override
   public boolean isCredentialsNonExpired() {
-    return true;
+    return false;
   }
 
   @Override
   public boolean isEnabled() {
-    return true;
+    return false;
   }
 
   @Override
@@ -72,6 +71,4 @@ public class Member extends BaseEntity implements UserDetails {
   public void updateNickname(String nickname) {
     this.nickname = nickname;
   }
-
-
 }

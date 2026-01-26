@@ -55,9 +55,10 @@ public class MemberCommandServiceImpl implements MemberCommandService {
   @Override
   public void updateMember(Long memberId, MemberUpdateRequestDto dto) {
 
-    Member member = memberRepository.findById(memberId)
-            .orElseThrow(() ->
-                    new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
+    Member member =
+        memberRepository
+            .findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
 
     member.updateNickname(dto.getNickname());
   }
@@ -65,12 +66,11 @@ public class MemberCommandServiceImpl implements MemberCommandService {
   @Override
   public void deleteMember(Long memberId) {
 
-    Member member = memberRepository.findById(memberId)
-            .orElseThrow(() ->
-                    new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
+    Member member =
+        memberRepository
+            .findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
 
     memberRepository.delete(member);
   }
-
-
 }

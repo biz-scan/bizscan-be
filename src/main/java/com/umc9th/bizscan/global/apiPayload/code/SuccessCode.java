@@ -22,11 +22,7 @@ public enum SuccessCode implements BaseSuccessCode {
   TOKEN_REISSUE_SUCCESS(HttpStatus.OK, "TOKEN200_2", "토큰이 정상적으로 재발급되었습니다."),
 
   // Validation / Duplication
-  MEMBER_DUPLICATION_CHECK_SUCCESS(
-          HttpStatus.OK,
-      "MEMBER200_6",
-              "중복 검사 요청이 정상적으로 처리되었습니다."
-  );
+  MEMBER_DUPLICATION_CHECK_SUCCESS(HttpStatus.OK, "MEMBER200_6", "중복 검사 요청이 정상적으로 처리되었습니다.");
 
   private final HttpStatus status;
   private final String code;

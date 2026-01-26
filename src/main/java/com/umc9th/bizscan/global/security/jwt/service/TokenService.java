@@ -1,27 +1,25 @@
 package com.umc9th.bizscan.global.security.jwt.service;
 
-
 import com.umc9th.bizscan.global.security.jwt.dto.JwtToken;
 import com.umc9th.bizscan.global.security.jwt.dto.MemberLoginRequestDto;
-import org.springframework.security.core.Authentication;
-
 import java.util.Date;
+import org.springframework.security.core.Authentication;
 
 public interface TokenService {
 
-    JwtToken login(MemberLoginRequestDto memberLoginRequestDto);
-    JwtToken issueTokens(String refreshToken);
+  JwtToken login(MemberLoginRequestDto memberLoginRequestDto);
 
-    JwtToken generateToken(Authentication authentication);
+  JwtToken issueTokens(String refreshToken);
 
-    Authentication getAuthentication(String accessToken);
+  JwtToken generateToken(Authentication authentication);
 
-    boolean validateToken(String token);
+  Authentication getAuthentication(String accessToken);
 
-    boolean logout(String refreshToken);
+  boolean validateToken(String token);
 
-    boolean existsRefreshToken(String refreshToken);
+  boolean logout(String refreshToken);
 
-    Date parseExpiration(String token);
+  boolean existsRefreshToken(String refreshToken);
 
+  Date parseExpiration(String token);
 }
