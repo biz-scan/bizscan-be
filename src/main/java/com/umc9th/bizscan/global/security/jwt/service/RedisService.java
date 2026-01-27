@@ -1,4 +1,4 @@
-package com.umc9th.bizscan.global.common;
+package com.umc9th.bizscan.global.security.jwt.service;
 
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;

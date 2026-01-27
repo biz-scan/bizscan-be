@@ -17,7 +17,6 @@ public class SdotPop {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  // 부모(RegionMaster)와 연결
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "region_id")
   private RegionMaster regionMaster;
@@ -25,6 +24,7 @@ public class SdotPop {
   private String modelNm;
   private String serialNo;
   private String placeNm;
+  private String adstrdNm;
 
   private LocalDateTime measureDate;
   private Long popCount;

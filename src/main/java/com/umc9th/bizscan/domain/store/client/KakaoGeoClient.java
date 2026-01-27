@@ -14,7 +14,7 @@ public class KakaoGeoClient {
 
   private final WebClient webClient = WebClient.builder().baseUrl("https://dapi.kakao.com").build();
 
-  @Value("${kakao.rest-api-key}")
+  @Value("${kakao.api.key}")
   private String apiKey;
 
   /** 주소 → 위도/경도 변환 */

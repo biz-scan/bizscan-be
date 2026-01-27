@@ -1,7 +1,7 @@
 package com.umc9th.bizscan.global.security.filter;
 
-import static com.umc9th.bizscan.global.common.consts.StaticVariable.HEALTH_CHECK_ENDPOINT;
-import static com.umc9th.bizscan.global.common.consts.StaticVariable.REISSUE_ENDPOINT;
+import static com.umc9th.bizscan.global.security.consts.StaticVariable.HEALTH_CHECK_ENDPOINT;
+import static com.umc9th.bizscan.global.security.consts.StaticVariable.REISSUE_ENDPOINT;
 
 import com.umc9th.bizscan.global.security.exception.JwtAuthenticationException;
 import com.umc9th.bizscan.global.security.exception.JwtAuthenticationExpiredException;

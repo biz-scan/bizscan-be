@@ -1,4 +1,4 @@
-package com.umc9th.bizscan.global.common.consts;
+package com.umc9th.bizscan.global.security.consts;
 
 public class StaticVariable {
   public static final String SWAGGER_JWT = "JWT";

@@ -35,4 +35,12 @@ naver:
     customer-id: ${NAVER_AD_CUSTOMER_ID}
 
 kakao:
-  rest-api-key: ${KAKAO_REST_API_KEY}
+  api:
+    key: ${KAKAO_API_KEY}
+    url: "https://dapi.kakao.com/v2/local/search/address.json"
+
+ai:
+  fastapi:
+    base-url: http://127.0.0.1:8000
+    analysis-path: /ai-analysis
+    diagnosis-path: /ai-diagnosis

@@ -1,4 +1,4 @@
-package com.umc9th.bizscan.global.apiPayload;
+package com.umc9th.bizscan.global.apiPayload.dto;
 
 import java.util.List;
 import java.util.function.Function;
