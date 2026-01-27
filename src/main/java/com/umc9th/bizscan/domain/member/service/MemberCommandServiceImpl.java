@@ -1,10 +1,12 @@
 package com.umc9th.bizscan.domain.member.service;
 
 import com.umc9th.bizscan.domain.member.dto.RegisterMemberDto;
+import com.umc9th.bizscan.domain.member.dto.request.MemberUpdateRequestDto;
 import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.domain.member.exception.MemberException;
 import com.umc9th.bizscan.domain.member.repository.MemberRepository;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
+import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,5 +50,27 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
     // 5. 저장
     return memberRepository.save(member).getId();
+  }
+
+  @Override
+  public void updateMember(Long memberId, MemberUpdateRequestDto dto) {
+
+    Member member =
+        memberRepository
+            .findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
+
+    member.updateNickname(dto.getNickname());
+  }
+
+  @Override
+  public void deleteMember(Long memberId) {
+
+    Member member =
+        memberRepository
+            .findById(memberId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
+
+    memberRepository.delete(member);
   }
 }
