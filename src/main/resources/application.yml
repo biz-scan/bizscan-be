@@ -44,3 +44,7 @@ ai:
     base-url: http://127.0.0.1:8000
     analysis-path: /ai-analysis
     diagnosis-path: /ai-diagnosis
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
