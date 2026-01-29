@@ -9,6 +9,9 @@ public class FastApiAiAnalysisResponse {
   private SwotPart swot;
   private List<ActionPlanPart> actionPlans;
 
+  // badge
+  private String catchphrase;
+
   // SWOT
   @Getter
   public static class SwotPart {

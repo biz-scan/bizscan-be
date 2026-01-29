@@ -91,7 +91,7 @@ public class AiAnalysisService {
       }
 
       // 6. 완료 처리
-      request.complete();
+      request.complete(aiResponse.getCatchphrase());
 
     } catch (Exception e) {
       request.fail("분석 중 오류가 발생했습니다.");
@@ -110,6 +110,16 @@ public class AiAnalysisService {
             .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND));
 
     return new AnalysisStatusResponse(request.getStatus(), request.getProgressMessage());
+  }
+
+  /** ai 캐치프레이즈 badge */
+  public CatchphraseResponse getLatestCatchphrase(Long storeId) {
+    AnalysisRequest request =
+        analysisRequestRepository
+            .findTopByStoreIdOrderByCreatedAtDesc(storeId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND));
+
+    return new CatchphraseResponse(request.getCatchphrase());
   }
 
   /** 최신 SWOT 조회 (대시보드용) */
@@ -225,7 +235,7 @@ public class AiAnalysisService {
         actionPlanRepository.save(plan);
       }
 
-      request.complete();
+      request.complete(result.getCatchphrase());
 
     } catch (Exception e) {
       request.fail("분석 중 오류가 발생했습니다.");
