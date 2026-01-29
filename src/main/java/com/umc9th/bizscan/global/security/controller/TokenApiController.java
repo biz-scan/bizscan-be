@@ -43,11 +43,12 @@ public class TokenApiController {
 
     response.addCookie(refreshTokenCookie);
 
-    // Access Token만 body로 반환
-    AccessTokenResponse accessTokenResponse = new AccessTokenResponse(token.getAccessToken());
+    // Access Token → Header
+    response.setHeader("Authorization", "Bearer " + token.getAccessToken());
 
     return ResponseEntity.ok(
-        ApiResponse.onSuccess(SuccessCode.MEMBER_LOGIN_SUCCESS, accessTokenResponse));
+            ApiResponse.onSuccess(SuccessCode.MEMBER_LOGIN_SUCCESS, null)
+    );
   }
 
   @Operation(
@@ -55,19 +56,33 @@ public class TokenApiController {
       description = "HttpOnly Cookie에 저장된 Refresh Token을 이용해 Access Token을 재발급합니다.")
   @PostMapping("/reissue")
   public ResponseEntity<ApiResponse<AccessTokenResponse>> reissue(
-      @CookieValue(value = "refreshToken", required = false) String refreshToken) {
+      @CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
     JwtToken token = tokenService.issueTokens(refreshToken);
-    String newAccessToken = token.getAccessToken();
+
+    // Access Token → Header
+    response.setHeader("Authorization", "Bearer " + token.getAccessToken());
 
     return ResponseEntity.ok(
-        ApiResponse.onSuccess(
-            SuccessCode.TOKEN_ISSUE_SUCCESS, new AccessTokenResponse(newAccessToken)));
+            ApiResponse.onSuccess(SuccessCode.TOKEN_ISSUE_SUCCESS, null)
+    );
   }
 
   @Operation(summary = "로그아웃", description = "사용자를 로그아웃 처리합니다.")
   @PostMapping("/logout")
-  public ApiResponse<Void> logout(@AuthenticationPrincipal User user) {
+  public ApiResponse<Void> logout(
+          @AuthenticationPrincipal User user,
+          HttpServletResponse response
+  ) {
     tokenService.logout(user.getUsername());
+
+    // RefreshToken Cookie 삭제
+    Cookie deleteCookie = new Cookie("refreshToken", null);
+    deleteCookie.setHttpOnly(true);
+    deleteCookie.setSecure(true);
+    deleteCookie.setPath("/");
+    deleteCookie.setMaxAge(0); // 즉시 삭제
+    response.addCookie(deleteCookie);
+
     return ApiResponse.onSuccess(SuccessCode.MEMBER_LOGOUT_SUCCESS, null);
   }
 
