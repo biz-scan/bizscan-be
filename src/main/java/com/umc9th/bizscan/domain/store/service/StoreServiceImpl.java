@@ -2,7 +2,6 @@ package com.umc9th.bizscan.domain.store.service;
 
 import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.domain.member.repository.MemberRepository;
-import com.umc9th.bizscan.domain.store.client.KakaoGeoClient;
 import com.umc9th.bizscan.domain.store.dto.request.StoreRequest;
 import com.umc9th.bizscan.domain.store.dto.response.StoreDeleteResponse;
 import com.umc9th.bizscan.domain.store.dto.response.StoreResponse;
@@ -16,6 +15,10 @@ import com.umc9th.bizscan.domain.store.repository.StoreRepository;
 import com.umc9th.bizscan.domain.store.repository.StoreTagRepository;
 import com.umc9th.bizscan.domain.store.repository.TagRepository;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
+import com.umc9th.bizscan.global.client.kakao.KakaoClient;
+import com.umc9th.bizscan.global.client.kakao.dto.GeoPoint;
+import com.umc9th.bizscan.global.client.kakao.dto.KakaoApiResponse;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -43,7 +46,7 @@ public class StoreServiceImpl implements StoreService {
   private final StoreTagRepository storeTagRepository;
   private final MemberRepository memberRepository;
   private final StoreMapper storeMapper;
-  private final KakaoGeoClient kakaoGeoClient;
+  private final KakaoClient kakaoClient;
 
   @Override
   public StoreResponse createStore(StoreRequest request) {
@@ -66,21 +69,33 @@ public class StoreServiceImpl implements StoreService {
                   return new GeneralException(StoreErrorCode.MEMBER_NOT_FOUND);
                 });
 
-    KakaoGeoClient.GeoPoint geo;
+    GeoPoint geoPoint;
     try {
-      geo = kakaoGeoClient.getCoordinates(request.getAddress());
+      KakaoApiResponse response = kakaoClient.searchAddress(request.getAddress());
+
+      if (response == null
+          || response.getDocuments() == null
+          || response.getDocuments().isEmpty()) {
+        log.warn("Geocode result is empty. address={}", request.getAddress());
+        throw new GeneralException(StoreErrorCode.ADDRESS_INVALID);
+      }
+
+      KakaoApiResponse.Address addressInfo = response.getDocuments().get(0).getAddress();
+
+      geoPoint =
+          new GeoPoint(
+              new BigDecimal(addressInfo.getY()), // 위도
+              new BigDecimal(addressInfo.getX()) // 경도
+              );
+
     } catch (Exception e) {
       log.warn(
           "Failed to geocode address. address={}, reason={}", request.getAddress(), e.getMessage());
       throw new GeneralException(StoreErrorCode.ADDRESS_INVALID);
     }
 
-    if (geo == null || geo.lat() == null || geo.lon() == null) {
-      log.warn("Geocode result is empty. address={}", request.getAddress());
-      throw new GeneralException(StoreErrorCode.ADDRESS_INVALID);
-    }
-
-    Store saved = storeRepository.save(storeMapper.toEntity(member, request, geo.lat(), geo.lon()));
+    Store saved =
+        storeRepository.save(storeMapper.toEntity(member, request, geoPoint.lat(), geoPoint.lon()));
 
     log.info(
         "Store saved. storeId={}, address={}, lat={}, lon={}",

@@ -39,7 +39,7 @@ public class RegionTrendService {
   // SNS 해시태그 추천용 (DB 저장 X, 즉시 리턴)
   public List<HashtagDto> recommendHashtags(String keyword) {
 
-    // 1. API 호출 (기존 로직 동일)
+    // 1. API 호출
     String timestamp = String.valueOf(System.currentTimeMillis());
     String signature = generateSignature(timestamp, "GET", "/keywordstool", secretKey);
 

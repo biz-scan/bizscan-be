@@ -1,7 +1,6 @@
 package com.umc9th.bizscan.domain.analysis.service;
 
 import com.umc9th.bizscan.domain.analysis.dto.AnalysisSummaryDto;
-import com.umc9th.bizscan.domain.analysis.entity.AnalysisSummary;
 import com.umc9th.bizscan.domain.analysis.repository.AnalysisSummaryRepository;
 import com.umc9th.bizscan.domain.commercial.dto.OpportunityResponseDto;
 import com.umc9th.bizscan.domain.commercial.entity.SalesEstimate;
@@ -15,15 +14,15 @@ import com.umc9th.bizscan.domain.hinterland.entity.IncomeStat;
 import com.umc9th.bizscan.domain.hinterland.repository.HousingRepository;
 import com.umc9th.bizscan.domain.hinterland.repository.IncomeRepository;
 import com.umc9th.bizscan.domain.region.dto.HashtagDto;
-import com.umc9th.bizscan.domain.region.dto.KakaoApiResponseDto;
 import com.umc9th.bizscan.domain.region.entity.RegionMaster;
-import com.umc9th.bizscan.domain.region.infrastructure.KakaoApiClient;
 import com.umc9th.bizscan.domain.region.repository.RegionRepository;
 import com.umc9th.bizscan.domain.region.service.RegionTrendService;
 import com.umc9th.bizscan.domain.store.dto.WeaknessResponseDto;
 import com.umc9th.bizscan.domain.store.entity.StoreCrawlingData;
 import com.umc9th.bizscan.domain.store.repository.StoreCrawlingDataRepository;
 import com.umc9th.bizscan.domain.store.service.ReviewCrawlerService;
+import com.umc9th.bizscan.global.client.kakao.KakaoClient;
+import com.umc9th.bizscan.global.client.kakao.dto.KakaoApiResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +37,7 @@ public class DataVerificationService {
 
   private final SalesRepository salesRepository;
   private final RegionRepository regionRepository;
-  private final KakaoApiClient kakaoApiClient;
+  private final KakaoClient kakaoClient;
   private final CompetitorRepository competitorRepository;
   private final IncomeRepository incomeRepository;
   private final ReviewCrawlerService reviewCrawlerService;
@@ -83,18 +82,24 @@ public class DataVerificationService {
   }
 
   private RegionMaster getRegionByAddress(String address) {
-    KakaoApiResponseDto.Document.Address addressInfo = kakaoApiClient.searchAddress(address);
+    KakaoApiResponse response = kakaoClient.searchAddress(address);
 
-    if (addressInfo == null) {
+    if (response == null || response.getDocuments() == null || response.getDocuments().isEmpty()) {
       throw new IllegalArgumentException("입력하신 주소를 찾을 수 없습니다.");
     }
+
+    KakaoApiResponse.Address addressInfo = response.getDocuments().get(0).getAddress();
 
     double lat = Double.parseDouble(addressInfo.getY());
     double lon = Double.parseDouble(addressInfo.getX());
 
     return regionRepository
         .findNearestRegionWithData(lat, lon)
-        .orElseGet(() -> regionRepository.findByTrdarCd("3110114").get());
+        .orElseGet(
+            () ->
+                regionRepository
+                    .findByTrdarCd("3110114")
+                    .orElseThrow(() -> new IllegalArgumentException("기본 상권 데이터를 찾을 수 없습니다.")));
   }
 
   private String mapGuToZone(String guName) {
@@ -150,69 +155,103 @@ public class DataVerificationService {
   public WeaknessResponseDto analyzeWeakness(String address, String storeName) {
     try {
       String cleanedAddress = cleanAddress(address);
-      String myPlaceId = reviewCrawlerService.findPlaceId(cleanedAddress, storeName);
+      log.info("약점 분석 시작: 가게명={}, 주소={}", storeName, cleanedAddress);
 
+      // 1. 내 가게 ID 찾기
+      String myPlaceId = reviewCrawlerService.findPlaceId(cleanedAddress, storeName);
       if (myPlaceId == null || myPlaceId.isEmpty()) {
-        throw new RuntimeException("가게를 찾을 수 없습니다.");
+        throw new RuntimeException("내 가게의 위치 정보를 찾을 수 없습니다."); // 메시지 구체화
       }
 
-      // 1. 내 가게 데이터 가져오기
+      // 2. 내 가게 크롤링
       StoreCrawlingData myData = reviewCrawlerService.getStoreCrawlingData(myPlaceId, storeName);
 
-      // 2. 주변 경쟁사 데이터 수집
+      // 내 데이터가 제대로 왔는지 확인
+      log.info("내 가게 크롤링 결과 - 리뷰: {}, 별점: {}", myData.getReviewCount(), myData.getRating());
+
+      // 3. 주변 경쟁사 데이터 수집
       RegionMaster region = getRegionByAddress(cleanedAddress);
-      String searchKeyword = storeName.contains("카페") ? "카페" : "음식";
+
+      String searchKeyword = "음식";
+      if (storeName != null) {
+        String nameUpper = storeName.toUpperCase(); // 대소문자 무시
+        if (nameUpper.contains("카페")
+            || nameUpper.contains("커피")
+            || nameUpper.contains("COFFEE")
+            || nameUpper.contains("베이커리")
+            || nameUpper.contains("빵")
+            || nameUpper.contains("디저트")) {
+          searchKeyword = "카페";
+        }
+      }
+      log.info("경쟁사 검색 키워드 결정: '{}' (원본 이름: {})", searchKeyword, storeName);
+
       List<CompetitorStore> competitors =
           competitorRepository.findNearbyCompetitors(
               region.getLat(), region.getLon(), searchKeyword, 0.5);
 
+      log.info("DB에서 조회된 경쟁사 수: {}개", competitors.size());
+
       double totalCompReviews = 0;
-      double totalCompRating = 0;
+      double totalCompRatingSum = 0; // 변수명 명확하게 변경
       int count = 0;
 
       for (CompetitorStore comp : competitors) {
         if (count >= 3) break;
+
+        // 내 가게와 이름이 비슷하면 제외
         if (comp.getStoreNm().contains(storeName) || storeName.contains(comp.getStoreNm()))
           continue;
 
         try {
-          String compId =
-              reviewCrawlerService.findPlaceId(
-                  cleanAddress(comp.getAddress()), comp.getStoreNm().split(" ")[0]);
+          String compCleanAddr = cleanAddress(comp.getAddress());
+          String compSimpleName = comp.getStoreNm().split(" ")[0]; // "스타벅스 성수점" -> "스타벅스"
+
+          String compId = reviewCrawlerService.findPlaceId(compCleanAddr, compSimpleName);
           if (compId != null) {
-            StoreCrawlingData cData = reviewCrawlerService.getStoreCrawlingData(compId, "");
+            StoreCrawlingData cData =
+                reviewCrawlerService.getStoreCrawlingData(compId, comp.getStoreNm());
 
             if (cData.getReviewCount() > 0) {
               totalCompReviews += cData.getReviewCount();
-              totalCompRating += cData.getRating(); // 경쟁사 평점들만 따로 합산
+              totalCompRatingSum += cData.getRating();
               count++;
+              log.info(
+                  " - 경쟁사({}) 확보: 리뷰 {}, 별점 {}",
+                  comp.getStoreNm(),
+                  cData.getReviewCount(),
+                  cData.getRating());
             }
+          } else {
+            log.warn(" - 경쟁사({}) Place ID 찾기 실패", comp.getStoreNm());
           }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+          log.warn(" - 경쟁사({}) 크롤링 중 에러: {}", comp.getStoreNm(), e.getMessage());
         }
       }
 
-      // 3. 경쟁사 평균 계산
+      // 4. 경쟁사 평균 계산
       double avgCompReviews = (count > 0) ? (totalCompReviews / count) : 0;
-      double avgCompRating = (count > 0) ? (totalCompRating / count) : 0;
+      double avgCompRating = (count > 0) ? (totalCompRatingSum / count) : 0;
+
+      log.info("최종 경쟁사 평균: 리뷰 {:.1f}, 별점 {:.1f} (표본 {}개)", avgCompReviews, avgCompRating, count);
 
       List<String> reviewList =
-          (myData.getReviewContents() != null)
+          (myData.getReviewContents() != null && !myData.getReviewContents().isEmpty())
               ? List.of(myData.getReviewContents().split("\\|"))
               : List.of();
 
-      // 4. 내 데이터와 경쟁사 데이터를 각각 필드에 매핑
       return WeaknessResponseDto.builder()
           .storeName(myData.getStoreName())
           .myReviewCount(myData.getReviewCount())
-          .myRating(myData.getRating()) // 내 별점
+          .myRating(myData.getRating())
           .avgCompReviewCount(Math.round(avgCompReviews * 10.0) / 10.0)
-          .avgCompRating(Math.round(avgCompRating * 100.0) / 100.0) // 경쟁사 평균 별점
+          .avgCompRating(Math.round(avgCompRating * 100.0) / 100.0)
           .reviewList(reviewList)
           .build();
 
     } catch (Exception e) {
-      log.error("약점 분석 중 오류: {}", e.getMessage());
+      log.error("약점 분석 중 치명적 오류: ", e); // 스택트레이스 전체 출력
       throw new RuntimeException("분석 실패: " + e.getMessage());
     }
   }
@@ -304,14 +343,60 @@ public class DataVerificationService {
       String cleanedAddr = cleanAddress(address);
       RegionMaster region = getRegionByAddress(cleanedAddr);
 
-      // 반경 500m 내 경쟁업체 수 조회 (DB의 category_sm 등과 매핑됨)
+      String searchKeyword = "";
+
+      // 1. 소분류가 있으면 우선적으로 키워드 할당
+      if (subCategory != null && !subCategory.isEmpty()) {
+        String sub = subCategory.replace(" ", "");
+
+        if (sub.contains("호프") || sub.contains("맥주")) {
+          searchKeyword = "호프";
+        } else if (sub.contains("치킨") || sub.contains("통닭")) {
+          searchKeyword = "치킨";
+        } else if (sub.contains("이자카야") || sub.contains("꼬치") || sub.contains("선술집")) {
+          searchKeyword = "일식";
+        } else if (sub.contains("와인") || sub.contains("바") || sub.contains("칵테일")) {
+          searchKeyword = "칵테일";
+        } else if (sub.contains("포차") || sub.contains("요리주점")) {
+          searchKeyword = "포차";
+        }
+
+        // [식당]
+        else if (sub.contains("고기") || sub.contains("구이")) {
+          searchKeyword = "육류";
+        } else if (sub.contains("한식") || sub.contains("백반")) {
+          searchKeyword = "한식";
+        } else if (sub.contains("양식") || sub.contains("파스타")) {
+          searchKeyword = "양식";
+        }
+      }
+
+      // 2. 소분류에서 못 잡았으면 대분류로 포괄적 매핑
+      if (searchKeyword.isEmpty() && bizType != null) {
+        String upperCat = bizType.toUpperCase();
+        if (upperCat.contains("CAFE") || upperCat.contains("BAKERY") || upperCat.contains("카페")) {
+          searchKeyword = "카페";
+        } else if (upperCat.contains("RESTAURANT") || upperCat.contains("식당")) {
+          searchKeyword = "음식";
+        } else if (upperCat.contains("BAR")
+            || upperCat.contains("PUB")
+            || upperCat.contains("술집")
+            || upperCat.contains("주점")) {
+          searchKeyword = "호프";
+        }
+      }
+
+      if (searchKeyword.isEmpty()) searchKeyword = "음식";
+
+      log.info("위협 분석 키워드 변환: '{}'/'{}' -> '{}'", bizType, subCategory, searchKeyword);
       int count =
-          competitorRepository.countCompetitors(region.getLat(), region.getLon(), bizType, 0.5);
+          competitorRepository.countCompetitors(
+              region.getLat(), region.getLon(), searchKeyword, 0.5);
 
       // 경쟁 상태 판별
       String status;
-      if (count >= 10) status = "과포화";
-      else if (count >= 5) status = "경쟁 치열";
+      if (count >= 15) status = "과포화";
+      else if (count >= 10) status = "경쟁 치열";
       else status = "블루오션";
 
       return ThreatResponseDto.builder()
@@ -329,9 +414,8 @@ public class DataVerificationService {
   }
 
   // ================================================================
-  // 5. [AI 전용] 요약 데이터 추출 (최종)
+  // 5. [AI 전용] 요약 데이터 추출
   // ================================================================
-  // @Transactional 제거! (500 에러 해결의 핵심)
   public AnalysisSummaryDto extractAnalysisSummary(
       String address, String bizCategory, String storeName, String keyword) {
 
@@ -342,25 +426,46 @@ public class DataVerificationService {
     RegionMaster region = getRegionByAddress(cleanedAddress);
     String dongName = region.getAdstrdNm();
 
+    // 카테고리 매핑 (Enum -> 한글 키워드)
+    String searchKeyword = "음식";
+    if (bizCategory != null) {
+      String upperCat = bizCategory.toUpperCase();
+      if (upperCat.contains("CAFE") || upperCat.contains("BAKERY") || upperCat.contains("카페")) {
+        searchKeyword = "카페";
+      } else if (upperCat.contains("RESTAURANT") || upperCat.contains("식당")) {
+        searchKeyword = "음식";
+      } else if (upperCat.contains("BAR")
+          || upperCat.contains("PUB")
+          || upperCat.contains("술집")
+          || upperCat.contains("주점")) {
+        searchKeyword = "술집";
+      }
+    }
+    log.info("실시간 분석 키워드: '{}' -> '{}'", bizCategory, searchKeyword);
+
+    // 상권 데이터 조회 (없으면 빈 객체)
     SalesEstimate sales =
         salesRepository
             .findLatestByTrdarCd(region.getTrdarCd())
             .orElse(SalesEstimate.builder().build());
 
+    // 경쟁 업체 수 실시간 카운트
     int compCount =
-        competitorRepository.countCompetitors(region.getLat(), region.getLon(), bizCategory, 0.5);
+        competitorRepository.countCompetitors(region.getLat(), region.getLon(), searchKeyword, 0.5);
 
+    // 소득 데이터
     long avgIncome =
         incomeRepository
             .findFirstByAdstrdNmOrderByStdDateDesc(dongName)
             .map(IncomeStat::getAvgMonIncome)
             .orElse(3300000L);
 
+    // 주거 형태
     String zoneNm = mapGuToZone(region.getGuNm());
     HousingStat housing =
         housingRepository.findFirstByZoneNmOrderByStdDateDesc(zoneNm).orElse(null);
 
-    // --- 데이터 가공 ---
+    // --- 데이터 가공 (연령/성별 등) ---
     String mainAge = "정보 없음";
     long maxAgeCnt = 0;
     if (sales.getAge10Count() != null && sales.getAge10Count() > maxAgeCnt) {
@@ -431,43 +536,53 @@ public class DataVerificationService {
     }
 
     String hashtags = "정보 없음";
+
     try {
-      String searchKeyword;
+      // 1. "1가", "2동" 같은 군더더기 제거 ("성수동1가" -> "성수동")
+      String simpleDong = dongName.replaceAll("[0-9]+(가|동|로)$", "").trim();
 
-      // [전략 1] 사용자가 입력한 키워드가 있으면 최우선 (예: "커피")
-      if (keyword != null && !keyword.isBlank()) {
-        searchKeyword = keyword;
-      }
-      // [전략 2] 없으면 '행정동 + 업종' 조합 (예: "성수동 카페")
-      else {
-        // 주소에서 '구'나 '동'만 깔끔하게 추출
-        // 예: "서울 성동구 성수동1가 656-442" -> "성동구 성수동1가"
-        String simpleAddr = extractDongFromAddress(cleanedAddress);
-        searchKeyword = simpleAddr + " " + bizCategory;
-      }
+      if (simpleDong.isEmpty()) simpleDong = dongName;
 
-      log.info("SNS API 요청 키워드(1차): {}", searchKeyword);
-      List<HashtagDto> tags = regionTrendService.recommendHashtags(searchKeyword);
+      // 2. 가운데 공백(" ") 없이 바로 이어 붙임 (+)
+      String derivedKeyword = simpleDong + searchKeyword;
 
-      // [전략 3] 1차 검색 결과가 없으면? -> 업종명(예: "카페")만으로 재검색 (범위를 넓힘)
+      // 우선순위: 사용자 입력 > 가공된 키워드(성수동카페)
+      String snsKeyword = (keyword != null && !keyword.isBlank()) ? keyword : derivedKeyword;
+
+      log.info("SNS 키워드 결정: 사용자입력='{}', 자동생성='{}' (원래동: {})", keyword, derivedKeyword, dongName);
+
+      // 1차 검색 시도
+      List<HashtagDto> tags = regionTrendService.recommendHashtags(snsKeyword);
+
+      // 2차 검색 시도 (실패 시 업종명만, 예: "카페")
       if (tags == null || tags.isEmpty()) {
-        log.info("1차 검색 결과 없음. 업종명('{}')으로 재검색 시도...", bizCategory);
-        tags = regionTrendService.recommendHashtags(bizCategory);
+        log.info("1차 실패. 업종명('{}')으로 재시도", searchKeyword);
+        tags = regionTrendService.recommendHashtags(searchKeyword);
       }
 
-      // 결과 매핑 (상위 5개)
+      // 3차 검색 시도 (실패 시 동이름만, 예: "성수동")
+      if (tags == null || tags.isEmpty()) {
+        log.info("2차 실패. 지역명('{}')으로 재시도", simpleDong);
+        tags = regionTrendService.recommendHashtags(simpleDong);
+      }
+
       if (tags != null && !tags.isEmpty()) {
         hashtags =
             tags.stream().limit(5).map(HashtagDto::getHashtag).collect(Collectors.joining(", "));
+        log.info("해시태그 확보: {}", hashtags);
+      } else {
+        hashtags = String.format("#%s%s, #%s맛집, #데이트, #핫플", simpleDong, searchKeyword, simpleDong);
       }
-      // 끝까지 없으면 그냥 빈칸 ("정보 없음") 유지. 가짜 데이터 생성 X.
 
     } catch (Exception e) {
-      log.warn("SNS 트렌드 조회 중 API 오류 발생: {}", e.getMessage());
-      // 오류 나도 전체 로직 멈추지 않음. hashtags는 "정보 없음" 상태 유지.
+      log.warn("SNS 트렌드 조회 실패: {}", e.getMessage());
+      String simpleDong = dongName.replaceAll("[0-9]+(가|동|로)$", "");
+      hashtags = String.format("#%s%s, #%s핫플", simpleDong, searchKeyword, simpleDong);
     }
 
-    // 리뷰 데이터 (크롤링)
+    // ================================================================
+    // 리뷰 데이터 크롤링
+    // ================================================================
     int myReviewCount = 0;
     double avgCompReviewCount = 0.0;
     double myRating = 0.0;
@@ -475,7 +590,7 @@ public class DataVerificationService {
 
     if (storeName != null && !storeName.isEmpty()) {
       try {
-        // 내 가게 크롤링
+        // 1. 내 가게 정보
         String myPlaceId = reviewCrawlerService.findPlaceId(cleanedAddress, storeName);
         if (myPlaceId != null) {
           StoreCrawlingData myData =
@@ -485,15 +600,17 @@ public class DataVerificationService {
           myReviewContents = myData.getReviewContents();
         }
 
-        // 경쟁사 (3개 제한)
+        // 2. 경쟁사 정보 (실시간 주변 검색)
         List<CompetitorStore> competitors =
             competitorRepository.findNearbyCompetitors(
-                region.getLat(), region.getLon(), bizCategory, 0.5);
+                region.getLat(), region.getLon(), searchKeyword, 0.5);
+
+        log.info("'{}' 주변 경쟁사(실시간) {}개 발견", cleanedAddress, competitors.size());
+
         double totalCompReviews = 0;
         int count = 0;
 
         for (CompetitorStore comp : competitors) {
-          // [속도 개선] 3개 채워지면 중단
           if (count >= 3) break;
 
           if (comp.getStoreNm().contains(storeName) || storeName.contains(comp.getStoreNm()))
@@ -501,50 +618,30 @@ public class DataVerificationService {
 
           try {
             String compCleanAddr = cleanAddress(comp.getAddress());
-            String compId = reviewCrawlerService.findPlaceId(compCleanAddr, comp.getStoreNm());
+            String compSimpleName = comp.getStoreNm().split(" ")[0];
+
+            String compId = reviewCrawlerService.findPlaceId(compCleanAddr, compSimpleName);
             if (compId != null) {
               StoreCrawlingData cData =
                   reviewCrawlerService.getStoreCrawlingData(compId, comp.getStoreNm());
-              totalCompReviews += cData.getReviewCount();
-              count++;
+
+              if (cData.getReviewCount() > 0) {
+                totalCompReviews += cData.getReviewCount();
+                count++;
+              }
             }
           } catch (Exception ignored) {
           }
         }
+
+        // 평균 계산 (누적 없이 이번 요청에 대한 평균만 계산)
         avgCompReviewCount = (count > 0) ? (totalCompReviews / count) : 0.0;
-      } catch (Exception ignored) {
+
+      } catch (Exception e) {
+        log.error("리뷰 분석 실패: {}", e.getMessage());
       }
     }
 
-    AnalysisSummary summaryEntity =
-        AnalysisSummary.builder()
-            .regionMaster(region)
-            .stdDate(java.time.LocalDate.now()) // 분석 기준일
-            // [O: 기회]
-            .mainAgeGroup(mainAge)
-            .mainGender(mainGender)
-            .avgDailyPop(avgDailyPop)
-            .peakTime(peakTime)
-            // [T: 위협]
-            .competitorCount((long) compCount)
-            .competitionLevel(compLevel)
-            // [S: 강점]
-            .avgMonIncome(avgIncome)
-            // [Trend]
-            .housingType(mainHousing)
-            .topHashtags(hashtags)
-            // [W: 약점]
-            .myReviewCount(myReviewCount)
-            .myRating(myRating)
-            .avgCompReviewCount(avgCompReviewCount)
-            .myReviewContents(myReviewContents)
-            .build();
-
-    //  2. DB에 실제 저장
-    analysisSummaryRepository.save(summaryEntity);
-    log.info("분석 요약 데이터가 tb_analysis_summary에 저장되었습니다. ID: {}", summaryEntity.getId());
-
-    // 3. 기존대로 DTO 반환
     return AnalysisSummaryDto.builder()
         .mainAgeGroup(mainAge)
         .mainGender(mainGender)

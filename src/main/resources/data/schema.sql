@@ -1,4 +1,3 @@
-
 // 지역 마스터
 create TABLE `tb_region_master` (
     `id`            BIGINT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
