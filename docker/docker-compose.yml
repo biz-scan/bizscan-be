@@ -14,6 +14,8 @@ services:
       NAVER_AD_SECRET_KEY: ${NAVER_AD_SECRET_KEY}
       NAVER_AD_CUSTOMER_ID: ${NAVER_AD_CUSTOMER_ID}
       KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY}
+      KAKAO_API_KEY: ${KAKAO_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
     depends_on:
       mysql:
         condition: service_healthy
