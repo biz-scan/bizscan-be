@@ -37,6 +37,10 @@ public class AnalysisRequest extends BaseEntity {
   // 완료 시간
   private LocalDateTime completedAt;
 
+  // AI 캐치프레이즈
+  @Column(length = 30)
+  private String catchphrase;
+
   // ===== 상태 전이 메서드 =====
 
   public void start() {
@@ -48,9 +52,10 @@ public class AnalysisRequest extends BaseEntity {
     this.progressMessage = message;
   }
 
-  public void complete() {
+  public void complete(String catchphrase) {
     this.status = AnalysisStatus.COMPLETED;
     this.completedAt = LocalDateTime.now();
+    this.catchphrase = catchphrase;
     this.progressMessage = null;
   }
 

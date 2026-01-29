@@ -51,6 +51,29 @@ public class AiAnalysisController {
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getAnalysisStatus(requestId));
   }
 
+  // AI 캐치프레이즈 badge
+  @Operation(
+      summary = "AI 캐치프레이즈 조회",
+      description =
+          """
+              특정 매장의 최신 AI 분석 결과에서
+              AI가 생성한 캐치프레이즈를 조회합니다.
+
+              - 대시보드 상단 환영 영역의 뱃지(Badge)에 사용됩니다.
+              - AI 분석이 완료된 이후 조회 가능합니다.
+              - 캐치프레이즈는 매장의 핵심 정체성을 요약한 문구입니다.
+              - 최대 15자 이내의 텍스트로 제공됩니다.
+
+              [예외 처리]
+              - 캐치프레이즈가 존재하지 않는 경우 null이 반환될 수 있습니다.
+              - 프론트엔드에서는 catchphrase 값이 null일 경우
+                해당 뱃지 UI를 렌더링하지 않습니다.
+              """)
+  @GetMapping("/{storeId}/catchphrase")
+  public ApiResponse<CatchphraseResponse> getCatchphrase(@PathVariable Long storeId) {
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getLatestCatchphrase(storeId));
+  }
+
   // SWOT 대시보드
   @Operation(
       summary = "SWOT 대시보드 조회",
