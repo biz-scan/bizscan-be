@@ -1,4 +1,4 @@
-package com.umc9th.bizscan.global.config.security;
+package com.umc9th.bizscan.global.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
