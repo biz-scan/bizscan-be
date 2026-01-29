@@ -70,6 +70,10 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+tasks.named('compileJava') {
+    options.compilerArgs.add('-parameters')
+}
+
 spotless {
     java {
         // 자바 코드 자동 포맷 (Google Java Style)

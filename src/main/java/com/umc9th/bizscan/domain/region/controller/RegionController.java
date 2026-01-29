@@ -11,7 +11,6 @@ import com.umc9th.bizscan.domain.store.dto.WeaknessResponseDto;
 import com.umc9th.bizscan.domain.store.service.ReviewCrawlerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Trend Test API", description = "네이버 트렌드 수집 및 해시태그 추천 테스트용 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/test")
-public class TestController {
+@RequestMapping("/api/swot")
+public class RegionController {
 
   private final RegionTrendService regionTrendService;
   private final ReviewCrawlerService reviewCrawlerService;
@@ -83,7 +81,7 @@ public class TestController {
   public OpportunityResponseDto testOpportunity(
       @Parameter(description = "주소 입력 (예: 서울시 성동구 행당동 168-1)", required = true)
           @RequestParam(name = "address")
-          String address) { // ✨ trdarCd -> address 로 변경
+          String address) {
 
     // 사용자가 입력한 '주소'를 서비스로 넘김
     return dataVerificationService.analyzeOpportunity(address);
