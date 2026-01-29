@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "AI Analysis", description = "AI 기반 SWOT 분석 및 실행 전략 추천 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/ai-analysis")
+@RequestMapping("/api/analysis")
 public class AiAnalysisController {
 
   private final AiAnalysisService aiAnalysisService;
