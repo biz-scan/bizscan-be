@@ -3,11 +3,14 @@ package com.umc9th.bizscan.global.security.controller;
 import com.umc9th.bizscan.domain.member.service.MemberQueryService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
+import com.umc9th.bizscan.global.security.jwt.dto.AccessTokenResponse;
 import com.umc9th.bizscan.global.security.jwt.dto.JwtToken;
 import com.umc9th.bizscan.global.security.jwt.dto.MemberLoginRequestDto;
 import com.umc9th.bizscan.global.security.jwt.service.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -27,20 +30,52 @@ public class TokenApiController {
 
   @Operation(summary = "이메일로 JWT 토큰 발급")
   @PostMapping("/login")
-  public ResponseEntity<ApiResponse<JwtToken>> login(
-      @RequestBody MemberLoginRequestDto memberLoginRequestDto) {
+  public ResponseEntity<ApiResponse<AccessTokenResponse>> login(
+          @RequestBody MemberLoginRequestDto memberLoginRequestDto,
+          HttpServletResponse response
+  ) {
     JwtToken token = tokenService.login(memberLoginRequestDto);
 
-    return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.MEMBER_LOGIN_SUCCESS, token));
+    //Refresh Token → HttpOnly Cookie
+    Cookie refreshTokenCookie = new Cookie("refreshToken", token.getRefreshToken());
+    refreshTokenCookie.setHttpOnly(true);
+    refreshTokenCookie.setSecure(true); // HTTPS 환경
+    refreshTokenCookie.setPath("/");
+    refreshTokenCookie.setMaxAge(14 * 24 * 60 * 60); // 14일
+
+    response.addCookie(refreshTokenCookie);
+
+    // Access Token만 body로 반환
+    AccessTokenResponse accessTokenResponse =
+            new AccessTokenResponse(token.getAccessToken());
+
+    return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                    SuccessCode.MEMBER_LOGIN_SUCCESS,
+                    accessTokenResponse
+            )
+    );
   }
 
-  @Operation(summary = "토큰 재발급", description = "Refresh Token으로 Access Token을 재발급합니다.")
+  @Operation(
+          summary = "Access Token 재발급",
+          description = "HttpOnly Cookie에 저장된 Refresh Token을 이용해 Access Token을 재발급합니다."
+  )
   @PostMapping("/reissue")
-  public ResponseEntity<ApiResponse<JwtToken>> issueToken(@RequestParam String refresh) {
-    JwtToken token = tokenService.issueTokens(refresh);
+  public ResponseEntity<ApiResponse<AccessTokenResponse>> reissue(
+          @CookieValue(value = "refreshToken", required = false) String refreshToken
+  ) {
+    JwtToken token = tokenService.issueTokens(refreshToken);
+    String newAccessToken = token.getAccessToken();
 
-    return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.TOKEN_REISSUE_SUCCESS, token));
+    return ResponseEntity.ok(
+            ApiResponse.onSuccess(
+                    SuccessCode.TOKEN_ISSUE_SUCCESS,
+                    new AccessTokenResponse(newAccessToken)
+            )
+    );
   }
+
 
   @Operation(summary = "로그아웃", description = "사용자를 로그아웃 처리합니다.")
   @PostMapping("/logout")
