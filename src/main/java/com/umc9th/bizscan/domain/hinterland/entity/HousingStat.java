@@ -24,6 +24,7 @@ public class HousingStat {
   private Double multiplexHouseRatio;
   private Double townHouseRatio;
   private Double aptRatio;
+  private Double nonAptRatio;
   private Double officetelRatio;
   private Double studioRatio;
 }

@@ -16,6 +16,7 @@ import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRequestRepository
 import com.umc9th.bizscan.domain.aiAnalysis.repository.SwotRepository;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
+import com.umc9th.bizscan.global.config.FastApiProperties;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class AiAnalysisService {
   private final AnalysisRequestRepository analysisRequestRepository;
   private final ObjectMapper objectMapper;
 
+  private final FastApiProperties fastApiProperties;
   private final RestTemplate restTemplate = new RestTemplate();
 
   /** AI 분석 요청 (프론트에서 최초 1회 호출) requestId 반환 → 프론트에서 폴링 */
@@ -117,13 +119,11 @@ public class AiAnalysisService {
         .orElseThrow(() -> new GeneralException(ErrorCode.SWOT_NOT_FOUND));
   }
 
-  /** 정밀 진단 조회 */
+  /** 정밀 진단 조회 -> url 수정 */
   public DiagnosisResponse generateDiagnosis(DiagnosisRequest request) {
-    String url = "http://localhost:8000/ai-diagnosis";
+    String url = fastApiProperties.getBaseUrl() + fastApiProperties.getDiagnosisPath();
 
-    DiagnosisResponse response = restTemplate.postForObject(url, request, DiagnosisResponse.class);
-
-    return response;
+    return restTemplate.postForObject(url, request, DiagnosisResponse.class);
   }
 
   /** 실행 전략 목록 조회 */
@@ -176,9 +176,9 @@ public class AiAnalysisService {
         );
   }
 
-  /** FastAPI 호출 */
+  /** FastAPI 호출 -> url 수정 */
   private FastApiAiAnalysisResponse callFastApi(Long storeId) {
-    String url = "http://localhost:8000/ai-analysis";
+    String url = fastApiProperties.getBaseUrl() + fastApiProperties.getAnalysisPath();
 
     return restTemplate.postForObject(
         url, new AiAnalysisRequest(storeId), FastApiAiAnalysisResponse.class);

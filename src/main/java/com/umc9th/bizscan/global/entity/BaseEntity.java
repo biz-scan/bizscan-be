@@ -1,4 +1,4 @@
-package com.umc9th.bizscan.global.common;
+package com.umc9th.bizscan.global.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
