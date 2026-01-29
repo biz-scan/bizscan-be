@@ -31,12 +31,10 @@ public class TokenApiController {
   @Operation(summary = "이메일로 JWT 토큰 발급")
   @PostMapping("/login")
   public ResponseEntity<ApiResponse<AccessTokenResponse>> login(
-          @RequestBody MemberLoginRequestDto memberLoginRequestDto,
-          HttpServletResponse response
-  ) {
+      @RequestBody MemberLoginRequestDto memberLoginRequestDto, HttpServletResponse response) {
     JwtToken token = tokenService.login(memberLoginRequestDto);
 
-    //Refresh Token → HttpOnly Cookie
+    // Refresh Token → HttpOnly Cookie
     Cookie refreshTokenCookie = new Cookie("refreshToken", token.getRefreshToken());
     refreshTokenCookie.setHttpOnly(true);
     refreshTokenCookie.setSecure(true); // HTTPS 환경
@@ -46,36 +44,25 @@ public class TokenApiController {
     response.addCookie(refreshTokenCookie);
 
     // Access Token만 body로 반환
-    AccessTokenResponse accessTokenResponse =
-            new AccessTokenResponse(token.getAccessToken());
+    AccessTokenResponse accessTokenResponse = new AccessTokenResponse(token.getAccessToken());
 
     return ResponseEntity.ok(
-            ApiResponse.onSuccess(
-                    SuccessCode.MEMBER_LOGIN_SUCCESS,
-                    accessTokenResponse
-            )
-    );
+        ApiResponse.onSuccess(SuccessCode.MEMBER_LOGIN_SUCCESS, accessTokenResponse));
   }
 
   @Operation(
-          summary = "Access Token 재발급",
-          description = "HttpOnly Cookie에 저장된 Refresh Token을 이용해 Access Token을 재발급합니다."
-  )
+      summary = "Access Token 재발급",
+      description = "HttpOnly Cookie에 저장된 Refresh Token을 이용해 Access Token을 재발급합니다.")
   @PostMapping("/reissue")
   public ResponseEntity<ApiResponse<AccessTokenResponse>> reissue(
-          @CookieValue(value = "refreshToken", required = false) String refreshToken
-  ) {
+      @CookieValue(value = "refreshToken", required = false) String refreshToken) {
     JwtToken token = tokenService.issueTokens(refreshToken);
     String newAccessToken = token.getAccessToken();
 
     return ResponseEntity.ok(
-            ApiResponse.onSuccess(
-                    SuccessCode.TOKEN_ISSUE_SUCCESS,
-                    new AccessTokenResponse(newAccessToken)
-            )
-    );
+        ApiResponse.onSuccess(
+            SuccessCode.TOKEN_ISSUE_SUCCESS, new AccessTokenResponse(newAccessToken)));
   }
-
 
   @Operation(summary = "로그아웃", description = "사용자를 로그아웃 처리합니다.")
   @PostMapping("/logout")
