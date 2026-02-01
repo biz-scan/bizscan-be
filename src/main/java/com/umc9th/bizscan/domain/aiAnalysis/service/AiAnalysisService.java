@@ -58,7 +58,7 @@ public class AiAnalysisService {
         AnalysisRequest.builder()
             .requestId(requestId)
             .storeId(storeId)
-            .status(AnalysisStatus.PROCESSING)
+            .status(AnalysisStatus.REQUEST)
             .progressMessage("AI 분석 요청 중입니다.")
             .build();
 
@@ -82,6 +82,17 @@ public class AiAnalysisService {
     return requestId;
   }
 
+  /** pollingTime 계산 로직 */
+  private int calculatePoolingTime(AnalysisStatus status) {
+    return switch (status) {
+      case REQUEST -> 30000; // 초반
+      case SWOT_PROCESSING -> 10000; // 중반
+      case ACTIONPLAN_PROCESSING -> 10000; // 중반
+      case ACTIONDETAIL_PROCESSING -> 2000; // 후반
+      case COMPLETED, FAILED -> 0; // 폴링 종료
+    };
+  }
+
   /** 분석 상태 조회 (폴링 API) */
   public AnalysisStatusResponse getAnalysisStatus(String requestId) {
     AnalysisRequest request =
@@ -89,7 +100,9 @@ public class AiAnalysisService {
             .findByRequestId(requestId)
             .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND));
 
-    return new AnalysisStatusResponse(request.getStatus(), request.getProgressMessage());
+    int poolingTime = calculatePoolingTime(request.getStatus());
+    return new AnalysisStatusResponse(
+        request.getStatus(), request.getProgressMessage(), poolingTime);
   }
 
   /** ai 캐치프레이즈 badge */
@@ -166,7 +179,7 @@ public class AiAnalysisService {
         );
   }
 
-  /** FastAPI 콜백 처리 (비동기 전환 대비) */
+  /** FastAPI 콜백 처리 */
   @Transactional
   public void completeAnalysis(AiAnalysisCallbackRequest callback) {
 
@@ -176,6 +189,10 @@ public class AiAnalysisService {
             .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND));
 
     try {
+      // 1. SWOT 처리 시작
+      request.updateProgress("SWOT 분석 중입니다.");
+      request.setStatus(AnalysisStatus.SWOT_PROCESSING);
+
       FastApiAiAnalysisResponse result = callback.getResult();
 
       Swot swot =
@@ -190,6 +207,10 @@ public class AiAnalysisService {
               result.getSwot().getTTitle(),
               result.getSwot().getTDetail());
       swotRepository.save(swot);
+
+      // 2. ActionPlan 처리 시작
+      request.updateProgress("실행 전략을 생성 중입니다.");
+      request.setStatus(AnalysisStatus.ACTIONPLAN_PROCESSING);
 
       for (FastApiAiAnalysisResponse.ActionPlanPart planDto : result.getActionPlans()) {
 
@@ -207,6 +228,11 @@ public class AiAnalysisService {
         actionPlanRepository.save(plan);
       }
 
+      // 3. ActionDetail 처리 시작
+      request.updateProgress("실행 전략 상세를 생성 중입니다.");
+      request.setStatus(AnalysisStatus.ACTIONDETAIL_PROCESSING);
+
+      // 4. 완료
       request.complete(result.getCatchphrase());
 
     } catch (Exception e) {

@@ -43,11 +43,6 @@ public class AnalysisRequest extends BaseEntity {
 
   // ===== 상태 전이 메서드 =====
 
-  public void start() {
-    this.status = AnalysisStatus.PROCESSING;
-    this.progressMessage = "매장 정보를 분석 중입니다.";
-  }
-
   public void updateProgress(String message) {
     this.progressMessage = message;
   }
@@ -62,5 +57,9 @@ public class AnalysisRequest extends BaseEntity {
   public void fail(String message) {
     this.status = AnalysisStatus.FAILED;
     this.progressMessage = message;
+  }
+
+  public void setStatus(AnalysisStatus status) {
+    this.status = status;
   }
 }
