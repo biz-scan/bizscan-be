@@ -3,8 +3,8 @@ package com.umc9th.bizscan.domain.aiAnalysis.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.AiAnalysisCallbackRequest;
-import com.umc9th.bizscan.domain.aiAnalysis.dto.request.AiAnalysisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.DiagnosisRequest;
+import com.umc9th.bizscan.domain.aiAnalysis.dto.request.FastApiAnalysisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.ActionPlan;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.AnalysisRequest;
@@ -14,6 +14,8 @@ import com.umc9th.bizscan.domain.aiAnalysis.enums.AnalysisStatus;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.ActionPlanRepository;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRequestRepository;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.SwotRepository;
+import com.umc9th.bizscan.domain.store.entity.Store;
+import com.umc9th.bizscan.domain.store.repository.StoreRepository;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import com.umc9th.bizscan.global.config.FastApiProperties;
@@ -30,6 +32,7 @@ import org.springframework.web.client.RestTemplate;
 public class AiAnalysisService {
 
   private final SwotRepository swotRepository;
+  private final StoreRepository storeRepository;
   private final ActionPlanRepository actionPlanRepository;
   private final AnalysisRequestRepository analysisRequestRepository;
   private final ObjectMapper objectMapper;
@@ -41,6 +44,12 @@ public class AiAnalysisService {
   @Transactional
   public String analyzeStore(Long storeId) {
 
+    // 0. 매장 조회 (Spring에서만 DB 접근)
+    Store store =
+        storeRepository
+            .findById(storeId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.STORE_NOT_FOUND));
+
     // 1. requestId 생성
     String requestId = UUID.randomUUID().toString();
 
@@ -50,55 +59,26 @@ public class AiAnalysisService {
             .requestId(requestId)
             .storeId(storeId)
             .status(AnalysisStatus.PROCESSING)
-            .progressMessage("매장 정보를 분석 중입니다.")
+            .progressMessage("AI 분석 요청 중입니다.")
             .build();
 
     analysisRequestRepository.save(request);
 
+    // 3. FastAPI 요청 DTO 생성
+    FastApiAnalysisRequest fastApiRequest = toFastApiRequest(store, requestId);
+
+    // 4. FastAPI 호출 (응답 기다리지 않음)
     try {
-      // 3. FastAPI 호출 (현재는 동기)
-      FastApiAiAnalysisResponse aiResponse = callFastApi(storeId);
-
-      // 4. SWOT 저장
-      Swot swot =
-          new Swot(
-              storeId,
-              aiResponse.getSwot().getSTitle(),
-              aiResponse.getSwot().getSDetail(),
-              aiResponse.getSwot().getWTitle(),
-              aiResponse.getSwot().getWDetail(),
-              aiResponse.getSwot().getOTitle(),
-              aiResponse.getSwot().getODetail(),
-              aiResponse.getSwot().getTTitle(),
-              aiResponse.getSwot().getTDetail());
-      swotRepository.save(swot);
-
-      // 5. ActionPlan 저장
-      for (FastApiAiAnalysisResponse.ActionPlanPart planDto : aiResponse.getActionPlans()) {
-
-        String tagsJson = objectMapper.writeValueAsString(planDto.getTags());
-
-        ActionPlan plan =
-            ActionPlan.builder()
-                .swot(swot)
-                .title(planDto.getTitle())
-                .category(ActionCategory.valueOf(planDto.getCategory()))
-                .tags(tagsJson)
-                .reason(planDto.getReason())
-                .build();
-
-        actionPlanRepository.save(plan);
-      }
-
-      // 6. 완료 처리
-      request.complete(aiResponse.getCatchphrase());
-
+      restTemplate.postForObject(
+          fastApiProperties.getBaseUrl() + fastApiProperties.getAnalysisPath(),
+          fastApiRequest,
+          Void.class);
     } catch (Exception e) {
-      request.fail("분석 중 오류가 발생했습니다.");
-      throw new RuntimeException(e);
+      request.fail("AI 분석 요청 실패");
+      throw e;
     }
 
-    // 7. requestId 반환 (폴링용)
+    // 5. 즉시 requestId 반환
     return requestId;
   }
 
@@ -186,14 +166,6 @@ public class AiAnalysisService {
         );
   }
 
-  /** FastAPI 호출 -> url 수정 */
-  private FastApiAiAnalysisResponse callFastApi(Long storeId) {
-    String url = fastApiProperties.getBaseUrl() + fastApiProperties.getAnalysisPath();
-
-    return restTemplate.postForObject(
-        url, new AiAnalysisRequest(storeId), FastApiAiAnalysisResponse.class);
-  }
-
   /** FastAPI 콜백 처리 (비동기 전환 대비) */
   @Transactional
   public void completeAnalysis(AiAnalysisCallbackRequest callback) {
@@ -241,5 +213,28 @@ public class AiAnalysisService {
       request.fail("분석 중 오류가 발생했습니다.");
       throw new RuntimeException(e);
     }
+  }
+
+  private FastApiAnalysisRequest toFastApiRequest(Store store, String requestId) {
+
+    return FastApiAnalysisRequest.builder()
+        // callback 식별용
+        .requestId(requestId)
+
+        // store 기본 정보
+        .storeId(store.getId())
+        .name(store.getName())
+        .address(store.getAddress())
+
+        // Enum → 한글 변환
+        .category(store.getCategory().getKorean())
+        .categoryDetail(store.getCategoryDetail().getKorean())
+        .price(store.getPrice().getKorean())
+        .target(store.getTarget().getKorean())
+        .painPoint(store.getPainPoint().getKorean())
+
+        // 기타
+        .signature(store.getSignature())
+        .build();
   }
 }

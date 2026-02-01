@@ -35,6 +35,9 @@ public enum ErrorCode implements BaseErrorCode {
   ANALYSIS_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "ANALYSIS404_1", "해당 분석 요청을 찾을 수 없습니다."),
   ACTION_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "ACTION_PLAN_404", "실행 전략을 찾을 수 없습니다."),
 
+  // Store
+  STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE404_1", "해당 매장을 찾을 수 없습니다."),
+
   PAGE_INVALID(HttpStatus.BAD_REQUEST, "PAGE400_1", "유효하지 않은 페이지 범위입니다.");
 
   private final HttpStatus status;
