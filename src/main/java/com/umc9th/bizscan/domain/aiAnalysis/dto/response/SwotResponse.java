@@ -20,16 +20,16 @@ public class SwotResponse {
   private String tTitle;
   private String tDetail;
 
-  public static SwotResponse from(Swot swot) {
-    return SwotResponse.builder()
-        .sTitle(swot.getSTitle())
-        .sDetail(swot.getSDetail())
-        .wTitle(swot.getWTitle())
-        .wDetail(swot.getWDetail())
-        .oTitle(swot.getOTitle())
-        .oDetail(swot.getODetail())
-        .tTitle(swot.getTTitle())
-        .tDetail(swot.getTDetail())
-        .build();
-  }
+//  public static SwotResponse from(Swot swot) {
+//    return SwotResponse.builder()
+//        .sTitle(swot.getSTitle())
+//        .sDetail(swot.getSDetail())
+//        .wTitle(swot.getWTitle())
+//        .wDetail(swot.getWDetail())
+//        .oTitle(swot.getOTitle())
+//        .oDetail(swot.getODetail())
+//        .tTitle(swot.getTTitle())
+//        .tDetail(swot.getTDetail())
+//        .build();
+//  }
 }

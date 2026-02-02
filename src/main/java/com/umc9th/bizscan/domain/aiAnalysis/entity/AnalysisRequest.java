@@ -28,7 +28,7 @@ public class AnalysisRequest extends BaseEntity {
   private Analysis analysis;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column(nullable = false, length = 50)
   private AnalysisStatus status;
 
   // 진행 중 메시지 (폴링 응답용)

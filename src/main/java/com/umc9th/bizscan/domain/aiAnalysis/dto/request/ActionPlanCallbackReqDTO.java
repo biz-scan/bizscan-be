@@ -17,10 +17,14 @@ public class ActionPlanCallbackReqDTO {
     ) implements CommonCallback {}
 
     public record FinalSelectReqDTO(
-            @JsonProperty("final_select") List<FinalSelectResult> selections
+            @JsonProperty("final_select") FinalSelectResult finalSelect
     ) {}
 
     public record FinalSelectResult(
+            List<FinalSelect> selections
+    ) {}
+
+    public record FinalSelect(
             int id,
             String title,
             List<String> tags,

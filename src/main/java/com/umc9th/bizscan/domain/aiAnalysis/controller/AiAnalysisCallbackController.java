@@ -25,6 +25,7 @@ public class AiAnalysisCallbackController {
 
     @PostMapping("/callback/action-plan")
     public ApiResponse<Void> callbackActionPlan(@RequestBody ActionPlanCallbackReqDTO.FinalSelectCallbackDTO request) {
+
         callbackService.saveActionPlans(request);
         return ApiResponse.onSuccess(SuccessCode.OK, null);
     }

@@ -12,11 +12,13 @@ import com.umc9th.bizscan.domain.aiAnalysis.repository.*;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CallbackService {
@@ -80,16 +82,24 @@ public class CallbackService {
      */
     @Transactional
     public void saveActionPlans(ActionPlanCallbackReqDTO.FinalSelectCallbackDTO request) {
+        log.info("[saveActionPlans] 3차 콜백 시작 - RequestId: {}, Selections Count: {}",
+                request.requestId(), request.result().finalSelect().selections().size());
+
         AnalysisRequest analysisRequest = analysisRequestRepository.findByRequestId(request.requestId())
-                .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("[saveActionPlans] AnalysisRequest 조회 실패 - RequestId: {}", request.requestId());
+                    return new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND);
+                });
 
         Analysis analysis = analysisRequest.getAnalysis();
 
-        for (ActionPlanCallbackReqDTO.FinalSelectResult selection : request.result().selections()) {
+        for (ActionPlanCallbackReqDTO.FinalSelect selection : request.result().finalSelect().selections()) {
             // Enum 변환
             RelatedSwotType swotType = toRelatedSwotType(selection.related_swot());
+
             // ActionPlan 생성 및 저장
             ActionPlan actionPlan = actionPlanRepository.save(ActionPlanConverter.toActionPlan(selection, analysis, swotType));
+
 
             // 태그 생성 및 저장
             List<String> tags = selection.tags();
@@ -98,9 +108,12 @@ public class CallbackService {
                 String content = tags.get(i);
                 actionPlanTagRepository.save(ActionPlanConverter.toActionPlanTag(content, actionPlan, type));
             }
+            log.debug("[saveActionPlans] ActionPlan 및 태그 저장 완료 - Plan ID: {}, Tags: {}", actionPlan.getId(), tags);
         }
 
         analysisRequest.updateStatus(AnalysisStatus.ACTION_DETAIL_PROCESSING);
+        log.info("[saveActionPlans] 3차 콜백 완료 - RequestId: {}, Next Status: {}",
+                request.requestId(), analysisRequest.getStatus());
     }
 
     /**
@@ -108,22 +121,34 @@ public class CallbackService {
      */
     @Transactional
     public void saveActionDetails(ActionPlanCallbackReqDTO.ActionDetailCallbackDTO request) {
+        log.info("[saveActionDetails] 4차 콜백 시작 - RequestId: {}", request.requestId());
+
         AnalysisRequest analysisRequest = analysisRequestRepository.findByRequestId(request.requestId())
-                .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("[saveActionDetails] AnalysisRequest 조회 실패 - RequestId: {}", request.requestId());
+                    return new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND);
+                });
 
         Analysis analysis = analysisRequest.getAnalysis();
 
         for (ActionPlanCallbackReqDTO.ActionPlan planDto : request.result().actionPlan().plans()) {
             ActionPlan actionPlan = actionPlanRepository.findByAnalysisAndAiRefId(analysis, planDto.id())
-                    .orElseThrow(() -> new GeneralException(ErrorCode.ACTION_PLAN_NOT_FOUND));
+                    .orElseThrow(() -> {
+                        log.warn("[saveActionDetails] ActionPlan을 찾을 수 없음 - AnalysisId: {}, RefId: {}", analysis.getId(), planDto.id());
+                        return new GeneralException(ErrorCode.ACTION_PLAN_NOT_FOUND);
+                    });
 
             // 세부 실행 계획 리스트 저장
             planDto.actionDetail().forEach(detailDto ->
                     actionDetailRepository.save(ActionPlanConverter.toActionDetail(detailDto, actionPlan))
             );
+            log.debug("[saveActionDetails] 세부 실행 계획 저장 완료 - ActionPlan ID: {}, Detail Count: {}",
+                    actionPlan.getId(), planDto.actionDetail().size());
         }
 
         analysisRequest.updateStatus(AnalysisStatus.COMPLETED);
+        log.info("[saveActionDetails] 4차 콜백 완료 및 분석 종료 - RequestId: {}, Final Status: {}",
+                request.requestId(), analysisRequest.getStatus());
     }
 
 

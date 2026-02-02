@@ -10,7 +10,7 @@ import com.umc9th.bizscan.domain.aiAnalysis.enums.TagType;
 
 public class ActionPlanConverter {
     // 전략(ActionPlan) 엔티티 변환
-    public static ActionPlan toActionPlan(ActionPlanCallbackReqDTO.FinalSelectResult dto, Analysis analysis, RelatedSwotType swotType) {
+    public static ActionPlan toActionPlan(ActionPlanCallbackReqDTO.FinalSelect dto, Analysis analysis, RelatedSwotType swotType) {
         return ActionPlan.builder()
                 .analysis(analysis)
                 .aiRefId(dto.id())
