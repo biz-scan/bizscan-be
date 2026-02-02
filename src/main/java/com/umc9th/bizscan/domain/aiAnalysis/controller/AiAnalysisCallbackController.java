@@ -16,25 +16,24 @@ import org.springframework.web.bind.annotation.*;
 public class AiAnalysisCallbackController {
   private final CallbackService callbackService;
 
-
   @PostMapping("/callback/swot")
   public ApiResponse<Void> callbackSwot(@RequestBody SwotCallbackReqDTO.SwotCallbackDTO request) {
-      callbackService.saveSwot(request);
+    callbackService.saveSwot(request);
     return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
-    @PostMapping("/callback/action-plan")
-    public ApiResponse<Void> callbackActionPlan(@RequestBody ActionPlanCallbackReqDTO.FinalSelectCallbackDTO request) {
+  @PostMapping("/callback/action-plan")
+  public ApiResponse<Void> callbackActionPlan(
+      @RequestBody ActionPlanCallbackReqDTO.FinalSelectCallbackDTO request) {
 
-        callbackService.saveActionPlans(request);
-        return ApiResponse.onSuccess(SuccessCode.OK, null);
-    }
+    callbackService.saveActionPlans(request);
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
+  }
 
-    @PostMapping("/callback/action-detail")
-    public ApiResponse<Void> callbackActionDetail(@RequestBody ActionPlanCallbackReqDTO.ActionDetailCallbackDTO request) {
-        callbackService.saveActionDetails(request);
-        return ApiResponse.onSuccess(SuccessCode.OK, null);
-    }
-
-
+  @PostMapping("/callback/action-detail")
+  public ApiResponse<Void> callbackActionDetail(
+      @RequestBody ActionPlanCallbackReqDTO.ActionDetailCallbackDTO request) {
+    callbackService.saveActionDetails(request);
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
+  }
 }

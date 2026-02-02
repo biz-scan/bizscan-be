@@ -11,26 +11,26 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class ActionDetail extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "action_plan_id", nullable = false)
-    private ActionPlan actionPlan;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "action_plan_id", nullable = false)
+  private ActionPlan actionPlan;
 
-    private String title;
+  private String title;
 
-    private Integer step;
+  private Integer step;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+  @Column(columnDefinition = "TEXT")
+  private String content;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+  @Column(columnDefinition = "TEXT")
+  private String description;
 
-    @Column(columnDefinition = "TEXT")
-    private String expectedOutcome;
+  @Column(columnDefinition = "TEXT")
+  private String expectedOutcome;
 
-    private Boolean isCompleted;
+  private Boolean isCompleted;
 }

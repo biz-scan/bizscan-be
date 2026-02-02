@@ -1,8 +1,6 @@
 package com.umc9th.bizscan.domain.aiAnalysis.repository;
 
 import com.umc9th.bizscan.domain.aiAnalysis.entity.ActionDetail;
-import com.umc9th.bizscan.domain.aiAnalysis.entity.Analysis;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ActionDetailRepository extends JpaRepository<ActionDetail, Long> {
-}
+public interface ActionDetailRepository extends JpaRepository<ActionDetail, Long> {}

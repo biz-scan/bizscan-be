@@ -12,16 +12,16 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class ActionPlanTag extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "action_plan_id", nullable = false)
-    private ActionPlan actionPlan;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "action_plan_id", nullable = false)
+  private ActionPlan actionPlan;
 
-    @Enumerated(EnumType.STRING)
-    private TagType type;
+  @Enumerated(EnumType.STRING)
+  private TagType type;
 
-    private String content;
+  private String content;
 }

@@ -3,8 +3,6 @@ package com.umc9th.bizscan.domain.aiAnalysis.entity;
 import com.umc9th.bizscan.domain.aiAnalysis.enums.SwotType;
 import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -16,22 +14,22 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "swot")
 public class Swot extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "analysis_id")
-    private Analysis analysis;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "analysis_id")
+  private Analysis analysis;
 
-    @Enumerated(EnumType.STRING)
-    private SwotType type;
+  @Enumerated(EnumType.STRING)
+  private SwotType type;
 
-    private String keyword;
+  private String keyword;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+  @Column(columnDefinition = "TEXT")
+  private String description;
 
-    @Column(columnDefinition = "TEXT")
-    private String diagnosis;
+  @Column(columnDefinition = "TEXT")
+  private String diagnosis;
 }
