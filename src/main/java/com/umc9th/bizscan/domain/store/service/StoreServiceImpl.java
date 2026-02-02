@@ -86,7 +86,7 @@ public class StoreServiceImpl implements StoreService {
           new GeoPoint(
               new BigDecimal(addressInfo.getY()), // 위도
               new BigDecimal(addressInfo.getX()) // 경도
-          );
+              );
 
     } catch (Exception e) {
       log.warn(
@@ -180,8 +180,10 @@ public class StoreServiceImpl implements StoreService {
                     Collectors.mapping(StoreTag::getTag, Collectors.toList())));
 
     return stores.stream()
-        .map(store -> storeMapper.toCreateResponse(store,
-            tagsByStoreId.getOrDefault(store.getId(), List.of())))
+        .map(
+            store ->
+                storeMapper.toCreateResponse(
+                    store, tagsByStoreId.getOrDefault(store.getId(), List.of())))
         .toList();
   }
 
@@ -200,9 +202,7 @@ public class StoreServiceImpl implements StoreService {
                 });
 
     List<Tag> tags =
-        storeTagRepository.findAllByStoreFetchTag(store).stream()
-            .map(StoreTag::getTag)
-            .toList();
+        storeTagRepository.findAllByStoreFetchTag(store).stream().map(StoreTag::getTag).toList();
 
     return storeMapper.toCreateResponse(store, tags);
   }

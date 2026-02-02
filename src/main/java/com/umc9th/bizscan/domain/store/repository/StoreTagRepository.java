@@ -9,7 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface StoreTagRepository extends JpaRepository<StoreTag, Long> {
 
-  @Query("""
+  @Query(
+      """
       select st
       from StoreTag st
       join fetch st.tag
@@ -17,7 +18,8 @@ public interface StoreTagRepository extends JpaRepository<StoreTag, Long> {
       """)
   List<StoreTag> findAllByStoreInFetchTag(@Param("stores") List<Store> stores);
 
-  @Query("""
+  @Query(
+      """
       select st
       from StoreTag st
       join fetch st.tag
