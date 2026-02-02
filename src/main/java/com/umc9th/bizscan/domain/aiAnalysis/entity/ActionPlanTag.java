@@ -1,6 +1,6 @@
 package com.umc9th.bizscan.domain.aiAnalysis.entity;
 
-import com.umc9th.bizscan.domain.aiAnalysis.enums.SwotType;
+import com.umc9th.bizscan.domain.aiAnalysis.enums.TagType;
 import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,25 +11,17 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @SuperBuilder
-@Table(name = "swot")
-public class Swot extends BaseEntity {
-
+public class ActionPlanTag extends BaseEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "analysis_id")
-  private Analysis analysis;
+  @JoinColumn(name = "action_plan_id", nullable = false)
+  private ActionPlan actionPlan;
 
   @Enumerated(EnumType.STRING)
-  private SwotType type;
+  private TagType type;
 
-  private String keyword;
-
-  @Column(columnDefinition = "TEXT")
-  private String description;
-
-  @Column(columnDefinition = "TEXT")
-  private String diagnosis;
+  private String content;
 }

@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AnalysisRequestRepository extends JpaRepository<AnalysisRequest, Long> {
   Optional<AnalysisRequest> findByRequestId(String requestId);
 
-  Optional<AnalysisRequest> findTopByStoreIdOrderByCreatedAtDesc(Long storeId);
+  //  Optional<AnalysisRequest> findTopByStoreIdOrderByCreatedAtDesc(Long storeId);
 }

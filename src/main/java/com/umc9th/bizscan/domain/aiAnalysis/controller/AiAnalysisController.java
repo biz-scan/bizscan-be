@@ -2,7 +2,6 @@ package com.umc9th.bizscan.domain.aiAnalysis.controller;
 
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.DiagnosisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
-import com.umc9th.bizscan.domain.aiAnalysis.entity.Swot;
 import com.umc9th.bizscan.domain.aiAnalysis.service.AiAnalysisService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
@@ -86,9 +85,10 @@ public class AiAnalysisController {
     """)
   @GetMapping("/dashboard/swot")
   public ApiResponse<DashboardSwotResponse> getDashboardSwot(@RequestParam Long storeId) {
-    Swot swot = aiAnalysisService.getLatestSwotEntity(storeId);
-
-    return ApiResponse.onSuccess(SuccessCode.OK, DashboardSwotResponse.from(swot));
+    //    Swot swot = aiAnalysisService.getLatestSwotEntity(storeId);
+    //
+    //    return ApiResponse.onSuccess(SuccessCode.OK, DashboardSwotResponse.from(swot));
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
   // AI 정밀 진단
@@ -104,7 +104,9 @@ public class AiAnalysisController {
     """)
   @PostMapping("/diagnosis")
   public ApiResponse<DiagnosisResponse> diagnose(@RequestBody DiagnosisRequest request) {
-    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.generateDiagnosis(request));
+    //    return ApiResponse.onSuccess(SuccessCode.OK,
+    // aiAnalysisService.generateDiagnosis(request));
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
   // 맞춤 실행 전략
@@ -118,7 +120,8 @@ public class AiAnalysisController {
     """)
   @GetMapping("/action-plans")
   public ApiResponse<ActionPlanListResponse> getActionPlans(@RequestParam Long storeId) {
-    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlans(storeId));
+    //    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlans(storeId));
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
   @GetMapping("/action-plans/{solutionId}")
@@ -131,6 +134,8 @@ public class AiAnalysisController {
     - 실행 전략의 배경, 기대 효과, 실행 방법 등의 상세 정보를 제공합니다.
     """)
   public ApiResponse<ActionPlanDetailResponse> getActionPlanDetail(@PathVariable Long solutionId) {
-    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlanDetail(solutionId));
+    //    return ApiResponse.onSuccess(SuccessCode.OK,
+    // aiAnalysisService.getActionPlanDetail(solutionId));
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 }

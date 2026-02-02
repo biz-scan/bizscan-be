@@ -1,8 +1,5 @@
 package com.umc9th.bizscan.domain.aiAnalysis.dto.response;
 
-import static org.apache.commons.lang3.StringUtils.wrap;
-
-import com.umc9th.bizscan.domain.aiAnalysis.entity.Swot;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,13 +27,13 @@ public class DashboardSwotResponse {
   }
 
   // SWOT 엔티티 -> 대시보드 DTO 변환
-  public static DashboardSwotResponse from(Swot swot) {
-    return new DashboardSwotResponse(
-        wrap(swot.getSTitle(), swot.getSDetail()),
-        wrap(swot.getWTitle(), swot.getWDetail()),
-        wrap(swot.getOTitle(), swot.getODetail()),
-        wrap(swot.getTTitle(), swot.getTDetail()));
-  }
+  //  public static DashboardSwotResponse from(Swot swot) {
+  //    return new DashboardSwotResponse(
+  //        wrap(swot.getSTitle(), swot.getSDetail()),
+  //        wrap(swot.getWTitle(), swot.getWDetail()),
+  //        wrap(swot.getOTitle(), swot.getODetail()),
+  //        wrap(swot.getTTitle(), swot.getTDetail()));
+  //  }
 
   private static SwotGroup wrap(String title, String detail) {
     if (title == null || detail == null) {
