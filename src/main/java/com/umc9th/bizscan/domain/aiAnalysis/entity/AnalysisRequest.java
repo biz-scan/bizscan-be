@@ -22,9 +22,10 @@ public class AnalysisRequest extends BaseEntity {
   @Column(nullable = false, unique = true)
   private String requestId;
 
-  // 어떤 매장 분석인지
-  @Column(nullable = false)
-  private Long storeId;
+  // 어떤 분석인지
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "analysis_id")
+  private Analysis analysis;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -37,10 +38,6 @@ public class AnalysisRequest extends BaseEntity {
   // 완료 시간
   private LocalDateTime completedAt;
 
-  // AI 캐치프레이즈
-  @Column(length = 30)
-  private String catchphrase;
-
   // ===== 상태 전이 메서드 =====
 
   public void updateProgress(String message) {
@@ -50,7 +47,6 @@ public class AnalysisRequest extends BaseEntity {
   public void complete(String catchphrase) {
     this.status = AnalysisStatus.COMPLETED;
     this.completedAt = LocalDateTime.now();
-    this.catchphrase = catchphrase;
     this.progressMessage = null;
   }
 
@@ -59,7 +55,7 @@ public class AnalysisRequest extends BaseEntity {
     this.progressMessage = message;
   }
 
-  public void setStatus(AnalysisStatus status) {
+  public void updateStatus(AnalysisStatus status) {
     this.status = status;
   }
 }

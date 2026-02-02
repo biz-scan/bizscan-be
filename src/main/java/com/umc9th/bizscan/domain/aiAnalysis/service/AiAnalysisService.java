@@ -87,8 +87,8 @@ public class AiAnalysisService {
     return switch (status) {
       case REQUEST -> 30000; // 초반
       case SWOT_PROCESSING -> 10000; // 중반
-      case ACTIONPLAN_PROCESSING -> 10000; // 중반
-      case ACTIONDETAIL_PROCESSING -> 2000; // 후반
+      case ACTION_PLAN_PROCESSING -> 10000; // 중반
+      case ACTION_DETAIL_PROCESSING -> 2000; // 후반
       case COMPLETED, FAILED -> 0; // 폴링 종료
     };
   }
@@ -191,7 +191,7 @@ public class AiAnalysisService {
     try {
       // 1. SWOT 처리 시작
       request.updateProgress("SWOT 분석 중입니다.");
-      request.setStatus(AnalysisStatus.SWOT_PROCESSING);
+      request.updateStatus(AnalysisStatus.SWOT_PROCESSING);
 
       FastApiAiAnalysisResponse result = callback.getResult();
 
@@ -210,7 +210,7 @@ public class AiAnalysisService {
 
       // 2. ActionPlan 처리 시작
       request.updateProgress("실행 전략을 생성 중입니다.");
-      request.setStatus(AnalysisStatus.ACTIONPLAN_PROCESSING);
+      request.updateStatus(AnalysisStatus.ACTION_PLAN_PROCESSING);
 
       for (FastApiAiAnalysisResponse.ActionPlanPart planDto : result.getActionPlans()) {
 
@@ -230,7 +230,7 @@ public class AiAnalysisService {
 
       // 3. ActionDetail 처리 시작
       request.updateProgress("실행 전략 상세를 생성 중입니다.");
-      request.setStatus(AnalysisStatus.ACTIONDETAIL_PROCESSING);
+      request.updateStatus(AnalysisStatus.ACTION_DETAIL_PROCESSING);
 
       // 4. 완료
       request.complete(result.getCatchphrase());
