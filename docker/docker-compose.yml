@@ -45,6 +45,33 @@ services:
       retries: 10
       start_period: 20s
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    expose:
+      - "6379"
+    environment:
+      TZ: Asia/Seoul
+      REDIS_PASS: ${REDIS_PASS}
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASS}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a $$REDIS_PASS ping | grep PONG" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - bizscan-network
+    restart: unless-stopped
+
   dozzle:
     image: amir20/dozzle:latest
     ports:
@@ -63,3 +90,4 @@ networks:
 
 volumes:
   mysql-data:
+  redis-data:
