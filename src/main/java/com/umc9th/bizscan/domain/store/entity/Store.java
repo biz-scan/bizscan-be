@@ -22,9 +22,9 @@ public class Store extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)   // ManyToOne에서 OneToOne으로 변경
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    private Member member;  
 
   @Column(nullable = false, length = 100)
   private String name;
