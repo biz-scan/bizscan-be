@@ -26,7 +26,7 @@ public class MemberQueryServiceImpl implements MemberQueryService {
   @Override
   public Member getMemberByEmail(String email) {
     return memberRepository
-        .findByEmail(email)
+        .findByEmailWithStore(email) // store도 같이 조회하도록 변경 (FetchJoin)
         .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
   }
 

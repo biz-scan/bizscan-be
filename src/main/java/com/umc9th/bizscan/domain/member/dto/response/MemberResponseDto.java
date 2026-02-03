@@ -11,8 +11,12 @@ public class MemberResponseDto {
   private Long id;
   private String email;
   private String nickname;
+  private Long storeId;
 
   public static MemberResponseDto from(Member member) {
-    return new MemberResponseDto(member.getId(), member.getEmail(), member.getNickname());
+    // member.getStore()가 null인지 확인하여 storeId를 할당합니다.
+    Long storeId = (member.getStore() != null) ? member.getStore().getId() : null;
+
+    return new MemberResponseDto(member.getId(), member.getEmail(), member.getNickname(), storeId);
   }
 }

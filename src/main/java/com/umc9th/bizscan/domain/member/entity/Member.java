@@ -1,5 +1,6 @@
 package com.umc9th.bizscan.domain.member.entity;
 
+import com.umc9th.bizscan.domain.store.entity.Store;
 import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import java.util.Collection;
@@ -33,6 +34,9 @@ public class Member extends BaseEntity implements UserDetails {
   // 비밀번호 : 영어와 숫자를 조합하여 6~15자로 입력하세요.
   @Column(name = "password", nullable = false)
   private String password;
+
+  @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
+  private Store store;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return Collections.singleton(new SimpleGrantedAuthority("ROLE_MEMBER"));

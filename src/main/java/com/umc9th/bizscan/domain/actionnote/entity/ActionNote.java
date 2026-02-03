@@ -1,8 +1,12 @@
-package com.umc9th.bizscan.domain.aiAnalysis.entity;
+package com.umc9th.bizscan.domain.actionnote.entity;
 
+import com.umc9th.bizscan.domain.aiAnalysis.entity.ActionPlan;
 import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -10,27 +14,19 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @SuperBuilder
-public class ActionDetail extends BaseEntity {
+public class ActionNote extends BaseEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "action_plan_id", nullable = false)
   private ActionPlan actionPlan;
 
-  private String title;
-
-  private Integer step;
-
-  @Column(columnDefinition = "TEXT")
-  private String description;
-
-  @Column(columnDefinition = "TEXT")
-  private String expectedOutcome;
-
+  @Column(nullable = false)
   private Boolean isCompleted;
 
+  // 완료 상태 변경
   public void updateIsCompleted(Boolean isCompleted) {
     this.isCompleted = isCompleted;
   }
