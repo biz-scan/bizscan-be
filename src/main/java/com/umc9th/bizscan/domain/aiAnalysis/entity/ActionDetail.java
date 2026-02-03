@@ -31,7 +31,7 @@ public class ActionDetail extends BaseEntity {
 
   private Boolean isCompleted;
 
-    public void updateIsCompleted(Boolean isCompleted) {
-        this.isCompleted = isCompleted;
-    }
+  public void updateIsCompleted(Boolean isCompleted) {
+    this.isCompleted = isCompleted;
+  }
 }

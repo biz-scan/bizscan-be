@@ -15,19 +15,19 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class ActionNote extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "action_plan_id", nullable = false)
-    private ActionPlan actionPlan;
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "action_plan_id", nullable = false)
+  private ActionPlan actionPlan;
 
-    @Column(nullable = false)
-    private Boolean isCompleted;
+  @Column(nullable = false)
+  private Boolean isCompleted;
 
-    // 완료 상태 변경
-    public void updateIsCompleted(Boolean isCompleted) {
-        this.isCompleted = isCompleted;
-    }
+  // 완료 상태 변경
+  public void updateIsCompleted(Boolean isCompleted) {
+    this.isCompleted = isCompleted;
+  }
 }

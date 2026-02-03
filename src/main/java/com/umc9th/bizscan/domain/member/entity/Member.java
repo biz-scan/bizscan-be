@@ -35,8 +35,8 @@ public class Member extends BaseEntity implements UserDetails {
   @Column(name = "password", nullable = false)
   private String password;
 
-    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
-    private Store store;
+  @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
+  private Store store;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return Collections.singleton(new SimpleGrantedAuthority("ROLE_MEMBER"));

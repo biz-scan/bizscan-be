@@ -3,7 +3,6 @@ package com.umc9th.bizscan.domain.store.entity;
 import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,9 +21,9 @@ public class Store extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)   // ManyToOne에서 OneToOne으로 변경
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;  
+  @OneToOne(fetch = FetchType.LAZY) // ManyToOne에서 OneToOne으로 변경
+  @JoinColumn(name = "member_id", nullable = false)
+  private Member member;
 
   @Column(nullable = false, length = 100)
   private String name;

@@ -15,7 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
             "http://localhost:3000", "http://localhost:5173", "https://bizscan.duckdns.org")
         .allowedMethods("*")
         .allowedHeaders("*")
-            .exposedHeaders("Authorization")
+        .exposedHeaders("Authorization")
         .allowCredentials(true);
   }
 }

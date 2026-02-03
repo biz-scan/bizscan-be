@@ -40,10 +40,10 @@ public class ActionPlan extends BaseEntity {
   @OneToMany(mappedBy = "actionPlan", cascade = CascadeType.ALL)
   private List<ActionPlanTag> tags = new ArrayList<>();
 
-    @OneToOne(mappedBy = "actionPlan", cascade = CascadeType.ALL)
-    private ActionNote actionNote;
+  @OneToOne(mappedBy = "actionPlan", cascade = CascadeType.ALL)
+  private ActionNote actionNote;
 
-    public void removeActionNote() {
-        this.actionNote = null;
-    }
+  public void removeActionNote() {
+    this.actionNote = null;
+  }
 }
