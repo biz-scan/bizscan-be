@@ -1,5 +1,6 @@
 package com.umc9th.bizscan.domain.aiAnalysis.entity;
 
+import com.umc9th.bizscan.domain.actionnote.entity.ActionNote;
 import com.umc9th.bizscan.domain.aiAnalysis.enums.RelatedSwotType;
 import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -38,4 +39,11 @@ public class ActionPlan extends BaseEntity {
 
   @OneToMany(mappedBy = "actionPlan", cascade = CascadeType.ALL)
   private List<ActionPlanTag> tags = new ArrayList<>();
+
+    @OneToOne(mappedBy = "actionPlan", cascade = CascadeType.ALL)
+    private ActionNote actionNote;
+
+    public void removeActionNote() {
+        this.actionNote = null;
+    }
 }

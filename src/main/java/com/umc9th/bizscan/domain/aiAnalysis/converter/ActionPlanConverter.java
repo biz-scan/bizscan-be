@@ -30,13 +30,7 @@ public class ActionPlanConverter {
   // 세부 실행 계획(ActionDetail) 엔티티 변환
   public static ActionDetail toActionDetail(
       ActionPlanCallbackReqDTO.ActionDetail dto, ActionPlan actionPlan) {
-    return com.umc9th
-        .bizscan
-        .domain
-        .aiAnalysis
-        .entity
-        .ActionDetail
-        .builder()
+    return ActionDetail.builder()
         .actionPlan(actionPlan)
         .step(dto.step())
         .title(dto.title())

@@ -24,13 +24,14 @@ public class ActionDetail extends BaseEntity {
   private Integer step;
 
   @Column(columnDefinition = "TEXT")
-  private String content;
-
-  @Column(columnDefinition = "TEXT")
   private String description;
 
   @Column(columnDefinition = "TEXT")
   private String expectedOutcome;
 
   private Boolean isCompleted;
+
+    public void updateIsCompleted(Boolean isCompleted) {
+        this.isCompleted = isCompleted;
+    }
 }
