@@ -76,9 +76,12 @@ public class MemberController {
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.MEMBER_DELETE_SUCCESS, null));
   }
 
-  @Operation(summary = "내 정보 조회", description = "JWT 인증을 통해 로그인한 사용자의 정보를 조회합니다." +
-          "+ storeId 응답 데이터 추가  " +
-          "++ 비밀번호 변경기능은 수요일까지 만들게요...")
+  @Operation(
+      summary = "내 정보 조회",
+      description =
+          "JWT 인증을 통해 로그인한 사용자의 정보를 조회합니다."
+              + "+ storeId 응답 데이터 추가  "
+              + "++ 비밀번호 변경기능은 수요일까지 만들게요...")
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<MemberResponseDto>> getMyInfo(Authentication authentication) {
     // JWT subject == email
