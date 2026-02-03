@@ -33,9 +33,9 @@ public class ActionNoteController {
       summary = "실행 노트 삭제 API",
       description = "특정 실행 전략(ActionPlan)을 연관된 실행 노트(ActionNote)에서 삭제합니다.")
   @ApiErrorCodeExamples({ErrorCode.ACTION_NOTE_NOT_FOUND})
-  @DeleteMapping("/{actionPlanId}")
+  @DeleteMapping("")
   public ApiResponse<ActionNoteResDTO.DeleteDTO> deleteActionNote(
-      @Parameter(description = "실행 전략 ID", example = "1") @PathVariable Long actionPlanId) {
+      @Parameter(description = "실행 전략 ID", example = "1") @RequestParam Long actionPlanId) {
     return ApiResponse.onSuccess(SuccessCode.OK, actionNoteService.deleteActionNote(actionPlanId));
   }
 
@@ -58,9 +58,9 @@ public class ActionNoteController {
           "특정 실행 전략(ActionPlan)의 내용과 포함된 상세 실행 전략(ActionDetail) 리스트, 진행도를 조회합니다. "
               + "포함된 상세 실행 전략 리스트는 단계(step) 순으로 정렬되어 반환됩니다.")
   @ApiErrorCodeExamples({ErrorCode.ACTION_PLAN_NOT_FOUND})
-  @GetMapping("/{actionPlanId}")
+  @GetMapping("/detail")
   public ApiResponse<ActionNoteResDTO.ActionNoteDTO> getActionNote(
-      @Parameter(description = "조회할 실행 전략 ID", example = "1") @PathVariable Long actionPlanId) {
+      @Parameter(description = "조회할 실행 전략 ID", example = "1") @RequestParam Long actionPlanId) {
     return ApiResponse.onSuccess(SuccessCode.OK, actionNoteService.getActionNote(actionPlanId));
   }
 
@@ -68,9 +68,9 @@ public class ActionNoteController {
       summary = "상세 미션 완료 상태 수정 API",
       description = "특정 상세 미션의 완료 여부를 수정합니다. 수정 시 해당 전략의 전체 진행도와 노트의 완료 여부가 자동 갱신됩니다.")
   @ApiErrorCodeExamples({ErrorCode.ACTION_DETAIL_NOT_FOUND})
-  @PatchMapping("/{actionDetailId}")
+  @PatchMapping("")
   public ApiResponse<ActionNoteResDTO.UpdateActionDetailDTO> updateActionDetail(
-      @Parameter(description = "상세 미션 ID", example = "10") @PathVariable Long actionDetailId,
+      @Parameter(description = "상세 미션 ID", example = "10") @RequestParam Long actionDetailId,
       @Parameter(description = "완료 여부", example = "true") @RequestParam Boolean isCompleted) {
     return ApiResponse.onSuccess(
         SuccessCode.OK, actionNoteService.updateActionDetail(actionDetailId, isCompleted));
