@@ -23,9 +23,9 @@ spring:
       mode: always
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
-
+      password: ${REDIS_PASS}
 
 naver:
   ad:
