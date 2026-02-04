@@ -41,7 +41,7 @@ kakao:
 
 ai:
   fastapi:
-    base-url: http://127.0.0.1:8000
+    base-url: http://bizscan-ai-dev:8000
     analysis-path: /ai-analysis
     diagnosis-path: /ai-diagnosis
 
