@@ -9,7 +9,8 @@ import org.springframework.data.repository.query.Param;
 public interface AnalysisRepository extends JpaRepository<Analysis, Long> {
   Optional<Analysis> findByStoreId(long id);
 
-  @Query("""
+  @Query(
+      """
   SELECT DISTINCT a FROM Analysis a
   LEFT JOIN FETCH a.swots s
   LEFT JOIN FETCH a.actionPlans ap
@@ -17,8 +18,5 @@ public interface AnalysisRepository extends JpaRepository<Analysis, Long> {
   LEFT JOIN FETCH ap.details d
   WHERE a.store.id = :storeId
 """)
-  Optional<Analysis> findByStoreIdWithAll(
-          @Param("storeId") Long storeId
-  );
-
+  Optional<Analysis> findByStoreIdWithAll(@Param("storeId") Long storeId);
 }

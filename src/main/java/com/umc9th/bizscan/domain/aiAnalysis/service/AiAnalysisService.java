@@ -69,15 +69,15 @@ public class AiAnalysisService {
     FastApiAnalysisRequest fastApiRequest = toFastApiRequest(store, requestId);
 
     // 4. FastAPI 호출 (응답 기다리지 않음)
-        try {
-          restTemplate.postForObject(
-              fastApiProperties.getBaseUrl() + fastApiProperties.getAnalysisPath(),
-              fastApiRequest,
-              Void.class);
-        } catch (Exception e) {
-          request.fail("AI 분석 요청 실패");
-          throw e;
-        }
+    try {
+      restTemplate.postForObject(
+          fastApiProperties.getBaseUrl() + fastApiProperties.getAnalysisPath(),
+          fastApiRequest,
+          Void.class);
+    } catch (Exception e) {
+      request.fail("AI 분석 요청 실패");
+      throw e;
+    }
 
     // 5. 즉시 requestId 반환
     return requestId;
