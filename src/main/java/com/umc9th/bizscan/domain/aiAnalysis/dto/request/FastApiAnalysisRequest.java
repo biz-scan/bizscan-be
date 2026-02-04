@@ -1,15 +1,12 @@
 package com.umc9th.bizscan.domain.aiAnalysis.dto.request;
 
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
 public class FastApiAnalysisRequest {
-
-  // callback
-  private String requestId;
-  private String callbackUrl;
 
   // store info
   private Long storeId;
@@ -18,9 +15,22 @@ public class FastApiAnalysisRequest {
 
   private String category;
   private String categoryDetail;
-  private String signature;
-
   private String price;
   private String target;
   private String painPoint;
+  private String signature;
+  private List<TagInfoRequest> tags;
+
+  // callback
+  private String requestId;
+  private String swotCallbackUrl;
+  private String actionPlanCallbackUrl;
+  private String actionDetailCallbackUrl;
+
+  @Getter
+  @Builder
+  public static class TagInfoRequest {
+    private String type;
+    private String name;
+  }
 }

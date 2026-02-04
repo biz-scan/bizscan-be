@@ -10,7 +10,9 @@ import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRepository;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRequestRepository;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.SwotRepository;
 import com.umc9th.bizscan.domain.store.entity.Store;
+import com.umc9th.bizscan.domain.store.entity.StoreTag;
 import com.umc9th.bizscan.domain.store.repository.StoreRepository;
+import com.umc9th.bizscan.domain.store.repository.StoreTagRepository;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import com.umc9th.bizscan.global.config.FastApiProperties;
@@ -28,6 +30,7 @@ public class AiAnalysisService {
 
   private final SwotRepository swotRepository;
   private final StoreRepository storeRepository;
+  private final StoreTagRepository storeTagRepository;
   private final ActionPlanRepository actionPlanRepository;
   private final AnalysisRequestRepository analysisRequestRepository;
   private final AnalysisRepository analysisRepository;
@@ -38,13 +41,15 @@ public class AiAnalysisService {
 
   /** AI 분석 요청 (프론트에서 최초 1회 호출) requestId 반환 → 프론트에서 폴링 */
   @Transactional
-  public String analyzeStore(Long storeId) {
+  public AnalysisRequestResponse analyzeStore(Long storeId) {
 
     // 0. 매장 조회 (Spring에서만 DB 접근)
     Store store =
         storeRepository
             .findById(storeId)
             .orElseThrow(() -> new GeneralException(ErrorCode.STORE_NOT_FOUND));
+
+    List<StoreTag> storeTags = storeTagRepository.findAllByStoreFetchTag(store);
 
     // 1. requestId 생성
     String requestId = UUID.randomUUID().toString();
@@ -66,7 +71,7 @@ public class AiAnalysisService {
     analysisRequestRepository.save(request);
 
     // 3. FastAPI 요청 DTO 생성
-    FastApiAnalysisRequest fastApiRequest = toFastApiRequest(store, requestId);
+    FastApiAnalysisRequest fastApiRequest = toFastApiRequest(store, storeTags, requestId);
 
     // 4. FastAPI 호출 (응답 기다리지 않음)
     try {
@@ -80,7 +85,7 @@ public class AiAnalysisService {
     }
 
     // 5. 즉시 requestId 반환
-    return requestId;
+    return new AnalysisRequestResponse(requestId);
   }
 
   /** 분석 상태 조회 (폴링 API) */
@@ -162,11 +167,25 @@ public class AiAnalysisService {
     };
   }
 
-  private FastApiAnalysisRequest toFastApiRequest(Store store, String requestId) {
+  private FastApiAnalysisRequest toFastApiRequest(
+      Store store, List<StoreTag> storeTags, String requestId) {
+    // 1. Tag 엔티티 리스트를 FastAPI용 TagInfoRequest 리스트로 변환
+    List<FastApiAnalysisRequest.TagInfoRequest> tagInfos =
+        storeTags.stream()
+            .map(
+                st ->
+                    FastApiAnalysisRequest.TagInfoRequest.builder()
+                        .type(st.getTag().getType().getKorean()) // "분위기"
+                        .name(st.getTag().getName().getKorean()) // "#뷰맛집"
+                        .build())
+            .toList();
 
     return FastApiAnalysisRequest.builder()
         // callback 식별용
         .requestId(requestId)
+        .swotCallbackUrl("http://localhost:8080/api/analysis/callback/swots")
+        .actionPlanCallbackUrl("http://localhost:8080/api/analysis/callback/action-plans")
+        .actionDetailCallbackUrl("http://localhost:8080/api/analysis/callback/action-plans")
 
         // store 기본 정보
         .storeId(store.getId())
@@ -182,6 +201,7 @@ public class AiAnalysisService {
 
         // 기타
         .signature(store.getSignature())
+        .tags(tagInfos)
         .build();
   }
 }

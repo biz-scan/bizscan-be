@@ -1,6 +1,7 @@
 package com.umc9th.bizscan.domain.store.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
@@ -66,29 +67,37 @@ public enum TagCode {
     this.name = name;
   }
 
+  @Getter
+  @AllArgsConstructor
   public enum Type {
-    MOOD,
-    FEATURE,
-    OPERATION
+    MOOD("분위기"),
+    FEATURE("특징"),
+    OPERATION("운영");
+
+    private final String korean;
   }
 
+  @Getter
+  @AllArgsConstructor
   public enum Name {
     // mood
-    VIEW,
-    HIP,
-    QUIET,
-    RETRO,
-    LUXURY,
-    LIVELY,
+    VIEW("#뷰맛집"),
+    HIP("#힙한"),
+    QUIET("#조용한"),
+    RETRO("#레트로"),
+    LUXURY("#고급진"),
+    LIVELY("#활기찬"),
     // feature
-    GOOD_VALUE,
-    SOLO_FRIENDLY,
-    GROUP_SEAT,
-    PET_FRIENDLY,
-    PHOTO_SPOT,
+    GOOD_VALUE("#가성비"),
+    SOLO_FRIENDLY("#혼밥환영"),
+    GROUP_SEAT("#단체석"),
+    PET_FRIENDLY("#반려동물"),
+    PHOTO_SPOT("#사진스팟"),
     // operation
-    HALL_SERVICE,
-    DELIVERY_AVAILABLE,
-    TAKEOUT_ONLY
+    HALL_SERVICE("#홀영업"),
+    DELIVERY_AVAILABLE("#배달가능"),
+    TAKEOUT_ONLY("#포장전문");
+
+    private final String korean;
   }
 }
