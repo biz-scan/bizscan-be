@@ -60,7 +60,12 @@ public class MemberController {
   }
 
   @PatchMapping("/{memberId}")
-  @Operation(summary = "회원 정보 수정", description = "회원 닉네임을 수정합니다.")
+  @Operation(summary = "회원 정보 수정", description = "회원 닉네임 및 비밀번호를 수정합니다.")
+  @ApiErrorCodeExamples({
+    ErrorCode.MEMBER_NOT_FOUND,
+    ErrorCode.INVALID_PASSWORD,
+    ErrorCode.SAME_AS_OLD_PASSWORD
+  })
   public ResponseEntity<ApiResponse<Void>> updateMember(
       @PathVariable Long memberId, @RequestBody @Valid MemberUpdateRequestDto dto) {
     memberCommandService.updateMember(memberId, dto);
@@ -76,12 +81,7 @@ public class MemberController {
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.MEMBER_DELETE_SUCCESS, null));
   }
 
-  @Operation(
-      summary = "내 정보 조회",
-      description =
-          "JWT 인증을 통해 로그인한 사용자의 정보를 조회합니다."
-              + "+ storeId 응답 데이터 추가  "
-              + "++ 비밀번호 변경기능은 수요일까지 만들게요...")
+  @Operation(summary = "내 정보 조회", description = "JWT 인증을 통해 로그인한 사용자의 정보를 조회합니다.")
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<MemberResponseDto>> getMyInfo(Authentication authentication) {
     // JWT subject == email

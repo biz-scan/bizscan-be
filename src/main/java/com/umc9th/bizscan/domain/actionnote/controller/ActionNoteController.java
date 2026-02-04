@@ -65,12 +65,13 @@ public class ActionNoteController {
   }
 
   @Operation(
-      summary = "상세 미션 완료 상태 수정 API",
-      description = "특정 상세 미션의 완료 여부를 수정합니다. 수정 시 해당 전략의 전체 진행도와 노트의 완료 여부가 자동 갱신됩니다.")
+      summary = "상세 실행 전략 완료 상태 수정 API",
+      description =
+          "특정 상세 실행 전략의 완료 여부를 수정합니다. 수정 시 해당 전략의 전체 진행도와 실행 전략(ActionPlan)의 완료 여부가 자동 갱신됩니다.")
   @ApiErrorCodeExamples({ErrorCode.ACTION_DETAIL_NOT_FOUND})
   @PatchMapping("")
   public ApiResponse<ActionNoteResDTO.UpdateActionDetailDTO> updateActionDetail(
-      @Parameter(description = "상세 미션 ID", example = "10") @RequestParam Long actionDetailId,
+      @Parameter(description = "상세 실행 전략 ID", example = "10") @RequestParam Long actionDetailId,
       @Parameter(description = "완료 여부", example = "true") @RequestParam Boolean isCompleted) {
     return ApiResponse.onSuccess(
         SuccessCode.OK, actionNoteService.updateActionDetail(actionDetailId, isCompleted));
