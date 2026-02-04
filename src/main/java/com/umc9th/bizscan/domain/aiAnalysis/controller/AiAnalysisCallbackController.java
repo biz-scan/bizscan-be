@@ -12,17 +12,17 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "AI Analysis - Callback", description = "AI 서버(FastAPI)에서 호출하는 분석 결과 콜백 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/analysis")
+@RequestMapping("/api/analysis/callback")
 public class AiAnalysisCallbackController {
   private final CallbackService callbackService;
 
-  @PostMapping("/callback/swot")
+  @PostMapping("/swot")
   public ApiResponse<Void> callbackSwot(@RequestBody SwotCallbackReqDTO.SwotCallbackDTO request) {
     callbackService.saveSwot(request);
     return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
-  @PostMapping("/callback/action-plan")
+  @PostMapping("/action-plan")
   public ApiResponse<Void> callbackActionPlan(
       @RequestBody ActionPlanCallbackReqDTO.FinalSelectCallbackDTO request) {
 
@@ -30,7 +30,7 @@ public class AiAnalysisCallbackController {
     return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
-  @PostMapping("/callback/action-detail")
+  @PostMapping("/action-detail")
   public ApiResponse<Void> callbackActionDetail(
       @RequestBody ActionPlanCallbackReqDTO.ActionDetailCallbackDTO request) {
     callbackService.saveActionDetails(request);

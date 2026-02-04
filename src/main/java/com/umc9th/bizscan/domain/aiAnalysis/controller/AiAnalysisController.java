@@ -1,12 +1,15 @@
 package com.umc9th.bizscan.domain.aiAnalysis.controller;
 
-import com.umc9th.bizscan.domain.aiAnalysis.dto.request.DiagnosisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
 import com.umc9th.bizscan.domain.aiAnalysis.service.AiAnalysisService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
+import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
+import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,7 +58,7 @@ public class AiAnalysisController {
       summary = "AI 캐치프레이즈 조회",
       description =
           """
-              특정 매장의 최신 AI 분석 결과에서
+              특정 매장의 AI 분석 결과에서
               AI가 생성한 캐치프레이즈를 조회합니다.
 
               - 대시보드 상단 환영 영역의 뱃지(Badge)에 사용됩니다.
@@ -68,8 +71,10 @@ public class AiAnalysisController {
               - 프론트엔드에서는 catchphrase 값이 null일 경우
                 해당 뱃지 UI를 렌더링하지 않습니다.
               """)
-  @GetMapping("/{storeId}/catchphrase")
-  public ApiResponse<CatchphraseResponse> getCatchphrase(@PathVariable Long storeId) {
+  @ApiErrorCodeExamples({ErrorCode.ANALYSIS_NOT_FOUND})
+  @GetMapping("/catchphrase")
+  public ApiResponse<CatchphraseResponse> getCatchphrase(
+      @Parameter(description = "매장 ID", example = "1") @RequestParam Long storeId) {
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getLatestCatchphrase(storeId));
   }
 
@@ -78,64 +83,66 @@ public class AiAnalysisController {
       summary = "SWOT 대시보드 조회",
       description =
           """
-    특정 매장의 최신 AI SWOT 분석 결과를 조회합니다.
+          특정 매장의 최신 AI SWOT 분석 결과를 조회합니다.
 
-    - AI 분석이 완료된 이후 조회 가능합니다.
-    - 대시보드 화면에 사용되는 핵심 SWOT 요약 정보입니다.
-    """)
-  @GetMapping("/dashboard/swot")
-  public ApiResponse<DashboardSwotResponse> getDashboardSwot(@RequestParam Long storeId) {
-    //    Swot swot = aiAnalysisService.getLatestSwotEntity(storeId);
-    //
-    //    return ApiResponse.onSuccess(SuccessCode.OK, DashboardSwotResponse.from(swot));
-    return ApiResponse.onSuccess(SuccessCode.OK, null);
+          - AI 분석이 완료된 이후 조회 가능합니다.
+          - 대시보드 화면에 사용되는 핵심 SWOT 요약 정보(강점, 약점, 기회, 위협)입니다.
+          """)
+  @ApiErrorCodeExamples({ErrorCode.ANALYSIS_NOT_FOUND})
+  @GetMapping("/swots")
+  public ApiResponse<List<AnalysisResDTO.SwotDTO>> getDashboardSwot(
+      @Parameter(description = "매장 ID", example = "1") @RequestParam Long storeId) {
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getSwots(storeId));
   }
 
   // AI 정밀 진단
   @Operation(
-      summary = "AI 정밀 진단 생성",
+      summary = "SWOT 정밀 진단 조회",
       description =
           """
-    SWOT 분석 결과 및 매장 정보를 기반으로
-    AI 정밀 진단 결과를 생성합니다.
+          매장 정보를 기반으로 생성된 특정 SWOT 항목의 AI 정밀 진단 결과를 조회합니다.
 
-    - 사용자의 선택 또는 추가 입력을 반영하여 진단을 수행합니다.
-    - 단순 요약이 아닌 해석 및 개선 방향 중심의 진단 결과를 제공합니다.
-    """)
-  @PostMapping("/diagnosis")
-  public ApiResponse<DiagnosisResponse> diagnose(@RequestBody DiagnosisRequest request) {
-    //    return ApiResponse.onSuccess(SuccessCode.OK,
-    // aiAnalysisService.generateDiagnosis(request));
-    return ApiResponse.onSuccess(SuccessCode.OK, null);
+          - 특정 강점이나 약점 등에 대한 AI의 심층 분석 내용을 제공합니다.
+          - SWOT 아이템 ID를 경로 변수로 받습니다.
+          """)
+  @ApiErrorCodeExamples({ErrorCode.SWOT_NOT_FOUND})
+  @GetMapping("/swots/{swotId}/diagnosis")
+  public ApiResponse<DiagnosisResponse> getDiagnose(
+      @Parameter(description = "SWOT 아이템 ID", example = "10") @PathVariable Long swotId) {
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getDiagnosis(swotId));
   }
 
   // 맞춤 실행 전략
   @Operation(
-      summary = "맞춤 실행 전략 목록 조회",
+      summary = "실행 전략 목록 조회",
       description =
           """
-    AI 분석 결과를 기반으로 생성된 맞춤 실행 전략(Action Plan) 목록을 조회합니다.
+          AI 분석 결과를 기반으로 생성된 실행 전략(Action Plan) 목록을 조회합니다.
 
-    - 매장 특성과 SWOT 분석 결과를 반영한 전략 리스트입니다.
-    """)
+          - 매장 특성과 SWOT 분석 결과를 반영한 전략 리스트입니다.
+          - 각 전략은 제목과 관련 태그(예: 마케팅, 운영 등)를 포함합니다.
+          """)
+  @ApiErrorCodeExamples({ErrorCode.ANALYSIS_NOT_FOUND})
   @GetMapping("/action-plans")
-  public ApiResponse<ActionPlanListResponse> getActionPlans(@RequestParam Long storeId) {
-    //    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlans(storeId));
-    return ApiResponse.onSuccess(SuccessCode.OK, null);
+  public ApiResponse<List<AnalysisResDTO.ActionPlanDTO>> getActionPlans(
+      @Parameter(description = "매장 ID", example = "1") @RequestParam Long storeId) {
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlans(storeId));
   }
 
-  @GetMapping("/action-plans/{solutionId}")
   @Operation(
-      summary = "맞춤 실행 전략 상세 조회",
+      summary = "실행 전략 상세 조회",
       description =
           """
-    특정 실행 전략(solutionId)의 상세 정보를 조회합니다.
+          AI가 생성한 특정 실행 전략(ActionPlan)의 전체 내용과 단계별 상세 지침(ActionDetail)을 조회합니다.
 
-    - 실행 전략의 배경, 기대 효과, 실행 방법 등의 상세 정보를 제공합니다.
-    """)
-  public ApiResponse<ActionPlanDetailResponse> getActionPlanDetail(@PathVariable Long solutionId) {
-    //    return ApiResponse.onSuccess(SuccessCode.OK,
-    // aiAnalysisService.getActionPlanDetail(solutionId));
-    return ApiResponse.onSuccess(SuccessCode.OK, null);
+          - 전략의 수립 배경(Reason)과 관련 태그 정보를 포함합니다.
+          - 상세 지침(details)은 실행 단계(step) 순으로 제공됩니다.
+          """)
+  @ApiErrorCodeExamples({ErrorCode.ACTION_PLAN_NOT_FOUND})
+  @GetMapping("/action-plans/{actionPlanId}")
+  public ApiResponse<AnalysisResDTO.ActionPlanDetailDTO> getActionPlanDetail(
+      @Parameter(description = "조회할 실행 전략 ID", example = "1") @PathVariable Long actionPlanId) {
+    return ApiResponse.onSuccess(
+        SuccessCode.OK, aiAnalysisService.getActionPlanDetail(actionPlanId));
   }
 }

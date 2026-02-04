@@ -38,6 +38,7 @@ public enum ErrorCode implements BaseErrorCode {
   ACTION_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "ACTION_PLAN_404", "실행 전략을 찾을 수 없습니다."),
   INVALID_CALLBACK_DATA(
       HttpStatus.BAD_REQUEST, "ANALYSIS400_1", "AI 분석 콜백 데이터가 유효하지 않거나 결과 값이 누락되었습니다."),
+  ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "ANALYSIS404_2", "해당 매장이 진행한 분석이 없습니다."),
 
   // Store
   STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE404_1", "해당 매장을 찾을 수 없습니다."),
