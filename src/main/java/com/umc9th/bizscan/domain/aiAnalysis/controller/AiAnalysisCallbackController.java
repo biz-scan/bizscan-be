@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.*;
 public class AiAnalysisCallbackController {
   private final CallbackService callbackService;
 
-  @PostMapping("/swot")
+  @PostMapping("/swots")
   public ApiResponse<Void> callbackSwot(@RequestBody SwotCallbackReqDTO.SwotCallbackDTO request) {
     callbackService.saveSwot(request);
     return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
-  @PostMapping("/action-plan")
+  @PostMapping("/action-plans")
   public ApiResponse<Void> callbackActionPlan(
       @RequestBody ActionPlanCallbackReqDTO.FinalSelectCallbackDTO request) {
 
@@ -30,7 +30,7 @@ public class AiAnalysisCallbackController {
     return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
-  @PostMapping("/action-detail")
+  @PostMapping("/action-details")
   public ApiResponse<Void> callbackActionDetail(
       @RequestBody ActionPlanCallbackReqDTO.ActionDetailCallbackDTO request) {
     callbackService.saveActionDetails(request);

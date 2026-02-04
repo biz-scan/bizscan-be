@@ -33,9 +33,8 @@ public class AiAnalysisController {
     - 반환된 requestId는 이후 분석 상태 조회 및 결과 조회에 사용됩니다.
     """)
   @PostMapping
-  public ApiResponse<String> analyze(@RequestParam Long storeId) {
-    String requestId = aiAnalysisService.analyzeStore(storeId);
-    return ApiResponse.onSuccess(SuccessCode.OK, requestId);
+  public ApiResponse<AnalysisRequestResponse> analyze(@RequestParam Long storeId) {
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.analyzeStore(storeId));
   }
 
   // 분석 상태 조회 (폴링용)
