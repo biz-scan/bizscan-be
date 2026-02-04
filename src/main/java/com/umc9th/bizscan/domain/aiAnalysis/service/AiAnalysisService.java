@@ -3,8 +3,7 @@ package com.umc9th.bizscan.domain.aiAnalysis.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.FastApiAnalysisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
-import com.umc9th.bizscan.domain.aiAnalysis.entity.Analysis;
-import com.umc9th.bizscan.domain.aiAnalysis.entity.AnalysisRequest;
+import com.umc9th.bizscan.domain.aiAnalysis.entity.*;
 import com.umc9th.bizscan.domain.aiAnalysis.enums.AnalysisStatus;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.ActionPlanRepository;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRepository;
@@ -15,6 +14,7 @@ import com.umc9th.bizscan.domain.store.repository.StoreRepository;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import com.umc9th.bizscan.global.config.FastApiProperties;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -83,17 +83,6 @@ public class AiAnalysisService {
     return requestId;
   }
 
-  /** pollingTime 계산 로직 */
-  private int calculatePoolingTime(AnalysisStatus status) {
-    return switch (status) {
-      case REQUEST -> 30000; // 초반
-      case SWOT_PROCESSING -> 10000; // 중반
-      case ACTION_PLAN_PROCESSING -> 10000; // 중반
-      case ACTION_DETAIL_PROCESSING -> 2000; // 후반
-      case COMPLETED, FAILED -> 0; // 폴링 종료
-    };
-  }
-
   /** 분석 상태 조회 (폴링 API) */
   public AnalysisStatusResponse getAnalysisStatus(String requestId) {
     AnalysisRequest request =
@@ -108,18 +97,69 @@ public class AiAnalysisService {
 
   /** ai 캐치프레이즈 badge */
   public CatchphraseResponse getLatestCatchphrase(Long storeId) {
-    // 추가: analysis에 catchphrase 존재
     Analysis analysis =
         analysisRepository
             .findByStoreId(storeId)
-            .orElseThrow(() -> new GeneralException(ErrorCode.STORE_NOT_FOUND));
-
-    //    AnalysisRequest request =
-    //        analysisRequestRepository
-    //            .findTopByStoreIdOrderByCreatedAtDesc(storeId)
-    //            .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_NOT_FOUND));
 
     return new CatchphraseResponse(analysis.getCatchphrase());
+  }
+
+  public List<AnalysisResDTO.SwotDTO> getSwots(Long storeId) {
+    Analysis analysis =
+        analysisRepository
+            .findByStoreIdWithSwot(storeId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_NOT_FOUND));
+
+    return analysis.getSwots().stream().map(AnalysisResDTO.SwotDTO::of).toList();
+  }
+
+  public DiagnosisResponse getDiagnosis(Long swotId) {
+    Swot swot =
+        swotRepository
+            .findById(swotId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.SWOT_NOT_FOUND));
+
+    return new DiagnosisResponse(swot.getDiagnosis());
+  }
+
+  public List<AnalysisResDTO.ActionPlanDTO> getActionPlans(Long storeId) {
+    Analysis analysis =
+        analysisRepository
+            .findByStoreIdWithActionPlan(storeId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_NOT_FOUND));
+
+    return analysis.getActionPlans().stream().map(AnalysisResDTO.ActionPlanDTO::of).toList();
+  }
+
+  public AnalysisResDTO.ActionPlanDetailDTO getActionPlanDetail(Long actionPlanId) {
+    // N+1 및 MultipleBagFetchException 방지용 FetchJoin 쿼리 2번 (또는 BatchSize 사용해야함)
+    // ActionPlan + Tag (영속성 컨텍스트에 저장)
+    ActionPlan actionPlan =
+        actionPlanRepository
+            .findByIdWithTags(actionPlanId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.ACTION_PLAN_NOT_FOUND));
+
+    // + ActionDetail (Hibernate가 1차 캐시에 있는 기존 actionPlan 객체에 details 리스트를 채움)
+    actionPlanRepository.findByIdWithDetails(actionPlanId);
+
+    List<AnalysisResDTO.ActionDetailDTO> details =
+        actionPlan.getDetails().stream().map(AnalysisResDTO.ActionDetailDTO::of).toList();
+
+    return AnalysisResDTO.ActionPlanDetailDTO.of(actionPlan, details);
+  }
+
+  // Utils
+
+  /** pollingTime 계산 로직 */
+  private int calculatePoolingTime(AnalysisStatus status) {
+    return switch (status) {
+      case REQUEST -> 30000; // 초반
+      case SWOT_PROCESSING -> 10000; // 중반
+      case ACTION_PLAN_PROCESSING -> 10000; // 중반
+      case ACTION_DETAIL_PROCESSING -> 2000; // 후반
+      case COMPLETED, FAILED -> 0; // 폴링 종료
+    };
   }
 
   private FastApiAnalysisRequest toFastApiRequest(Store store, String requestId) {

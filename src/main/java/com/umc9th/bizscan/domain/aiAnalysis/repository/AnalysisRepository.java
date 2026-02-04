@@ -13,10 +13,16 @@ public interface AnalysisRepository extends JpaRepository<Analysis, Long> {
       """
   SELECT DISTINCT a FROM Analysis a
   LEFT JOIN FETCH a.swots s
-  LEFT JOIN FETCH a.actionPlans ap
-  LEFT JOIN FETCH ap.tags t
-  LEFT JOIN FETCH ap.details d
   WHERE a.store.id = :storeId
 """)
-  Optional<Analysis> findByStoreIdWithAll(@Param("storeId") Long storeId);
+  Optional<Analysis> findByStoreIdWithSwot(@Param("storeId") Long storeId);
+
+  @Query(
+      """
+    SELECT DISTINCT a FROM Analysis a
+    LEFT JOIN FETCH a.actionPlans ap
+    LEFT JOIN FETCH ap.tags
+    WHERE a.store.id = :storeId
+""")
+  Optional<Analysis> findByStoreIdWithActionPlan(@Param("storeId") Long storeId);
 }
