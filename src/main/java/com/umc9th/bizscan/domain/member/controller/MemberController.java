@@ -60,7 +60,8 @@ public class MemberController {
   }
 
   @PatchMapping("/{memberId}")
-  @Operation(summary = "회원 정보 수정", description = "회원 닉네임을 수정합니다.")
+  @Operation(summary = "회원 정보 수정", description = "회원 닉네임 및 비밀번호를 수정합니다.")
+  @ApiErrorCodeExamples({ErrorCode.MEMBER_NOT_FOUND, ErrorCode.INVALID_PASSWORD, ErrorCode.SAME_AS_OLD_PASSWORD})
   public ResponseEntity<ApiResponse<Void>> updateMember(
       @PathVariable Long memberId, @RequestBody @Valid MemberUpdateRequestDto dto) {
     memberCommandService.updateMember(memberId, dto);

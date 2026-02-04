@@ -29,6 +29,8 @@ public enum ErrorCode implements BaseErrorCode {
   EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "MEMBER409_2", "이미 사용 중인 이메일입니다."),
   NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "MEMBER409_3", "이미 사용 중인 닉네임입니다."),
   MEMBER_NAME_BAD_REQUEST(HttpStatus.BAD_REQUEST, "MEMBER400_1", "이름의 형식이 맞지 않습니다."),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "MEMBER400_2", "현재 비밀번호가 일치하지 않습니다."),
+    SAME_AS_OLD_PASSWORD(HttpStatus.BAD_REQUEST, "MEMBER400_3", "새 비밀번호는 기존 비밀번호와 다르게 설정해야 합니다."),
 
   // AiAnalysis
   SWOT_NOT_FOUND(HttpStatus.NOT_FOUND, "SWOT404", "해당 매장의 SWOT 분석 결과가 존재하지 않습니다."),

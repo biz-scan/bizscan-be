@@ -75,4 +75,8 @@ public class Member extends BaseEntity implements UserDetails {
   public void updateNickname(String nickname) {
     this.nickname = nickname;
   }
+
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }

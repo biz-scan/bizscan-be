@@ -54,13 +54,27 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
   @Override
   public void updateMember(Long memberId, MemberUpdateRequestDto dto) {
+      // 회원 조회
+      Member member = memberRepository.findById(memberId)
+              .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
 
-    Member member =
-        memberRepository
-            .findById(memberId)
-            .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
+      // 현재 비밀번호 일치 여부 확인
+      if (!passwordEncoder.matches(dto.getCurrentPassword(), member.getPassword())) {
+          // 비밀번호가 일치하지 않을 경우 예외 발생
+          throw new GeneralException(ErrorCode.INVALID_PASSWORD);
+      }
 
-    member.updateNickname(dto.getNickname());
+      // 새 비밀번호가 기존과 동일한지 확인
+      if (passwordEncoder.matches(dto.getNewPassword(), member.getPassword())) {
+          throw new GeneralException(ErrorCode.SAME_AS_OLD_PASSWORD);
+      }
+
+      // 닉네임 수정
+      member.updateNickname(dto.getNickname());
+
+      // 새 비밀번호 암호화 및 수정
+      String encodedNewPassword = passwordEncoder.encode(dto.getNewPassword());
+      member.updatePassword(encodedNewPassword);
   }
 
   @Override
