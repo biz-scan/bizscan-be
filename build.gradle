@@ -36,6 +36,14 @@ dependencies {
     //security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
+    //Jwt
+    implementation 'com.auth0:java-jwt:4.2.1'
+    // JWT 토큰 생성을 위한 JJWT 라이브러리
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JSON 파싱을 위해 jackson 사용
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.13'
@@ -60,6 +68,10 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('compileJava') {
+    options.compilerArgs.add('-parameters')
 }
 
 spotless {

@@ -1,19 +1,16 @@
 package com.umc9th.bizscan.domain.aiAnalysis.entity;
 
+import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Builder
-@Table(name = "action_detail")
-public class ActionDetail {
-
+@SuperBuilder
+public class ActionDetail extends BaseEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -22,8 +19,19 @@ public class ActionDetail {
   @JoinColumn(name = "action_plan_id", nullable = false)
   private ActionPlan actionPlan;
 
+  private String title;
+
+  private Integer step;
+
   @Column(columnDefinition = "TEXT")
-  private String content;
+  private String description;
+
+  @Column(columnDefinition = "TEXT")
+  private String expectedOutcome;
 
   private Boolean isCompleted;
+
+  public void updateIsCompleted(Boolean isCompleted) {
+    this.isCompleted = isCompleted;
+  }
 }

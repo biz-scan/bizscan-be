@@ -1,6 +1,5 @@
 package com.umc9th.bizscan.domain.aiAnalysis.dto.response;
 
-import com.umc9th.bizscan.domain.aiAnalysis.entity.Swot;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -20,16 +19,16 @@ public class SwotResponse {
   private String tTitle;
   private String tDetail;
 
-  public static SwotResponse from(Swot swot) {
-    return SwotResponse.builder()
-        .sTitle(swot.getSTitle())
-        .sDetail(swot.getSDetail())
-        .wTitle(swot.getWTitle())
-        .wDetail(swot.getWDetail())
-        .oTitle(swot.getOTitle())
-        .oDetail(swot.getODetail())
-        .tTitle(swot.getTTitle())
-        .tDetail(swot.getTDetail())
-        .build();
-  }
+  //  public static SwotResponse from(Swot swot) {
+  //    return SwotResponse.builder()
+  //        .sTitle(swot.getSTitle())
+  //        .sDetail(swot.getSDetail())
+  //        .wTitle(swot.getWTitle())
+  //        .wDetail(swot.getWDetail())
+  //        .oTitle(swot.getOTitle())
+  //        .oDetail(swot.getODetail())
+  //        .tTitle(swot.getTTitle())
+  //        .tDetail(swot.getTDetail())
+  //        .build();
+  //  }
 }

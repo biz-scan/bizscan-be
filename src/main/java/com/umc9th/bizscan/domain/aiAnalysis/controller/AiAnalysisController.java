@@ -2,7 +2,6 @@ package com.umc9th.bizscan.domain.aiAnalysis.controller;
 
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.DiagnosisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
-import com.umc9th.bizscan.domain.aiAnalysis.entity.Swot;
 import com.umc9th.bizscan.domain.aiAnalysis.service.AiAnalysisService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "AI Analysis", description = "AI 기반 SWOT 분석 및 실행 전략 추천 API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/ai-analysis")
+@RequestMapping("/api/analysis")
 public class AiAnalysisController {
 
   private final AiAnalysisService aiAnalysisService;
@@ -51,6 +50,29 @@ public class AiAnalysisController {
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getAnalysisStatus(requestId));
   }
 
+  // AI 캐치프레이즈 badge
+  @Operation(
+      summary = "AI 캐치프레이즈 조회",
+      description =
+          """
+              특정 매장의 최신 AI 분석 결과에서
+              AI가 생성한 캐치프레이즈를 조회합니다.
+
+              - 대시보드 상단 환영 영역의 뱃지(Badge)에 사용됩니다.
+              - AI 분석이 완료된 이후 조회 가능합니다.
+              - 캐치프레이즈는 매장의 핵심 정체성을 요약한 문구입니다.
+              - 최대 15자 이내의 텍스트로 제공됩니다.
+
+              [예외 처리]
+              - 캐치프레이즈가 존재하지 않는 경우 null이 반환될 수 있습니다.
+              - 프론트엔드에서는 catchphrase 값이 null일 경우
+                해당 뱃지 UI를 렌더링하지 않습니다.
+              """)
+  @GetMapping("/{storeId}/catchphrase")
+  public ApiResponse<CatchphraseResponse> getCatchphrase(@PathVariable Long storeId) {
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getLatestCatchphrase(storeId));
+  }
+
   // SWOT 대시보드
   @Operation(
       summary = "SWOT 대시보드 조회",
@@ -63,9 +85,10 @@ public class AiAnalysisController {
     """)
   @GetMapping("/dashboard/swot")
   public ApiResponse<DashboardSwotResponse> getDashboardSwot(@RequestParam Long storeId) {
-    Swot swot = aiAnalysisService.getLatestSwotEntity(storeId);
-
-    return ApiResponse.onSuccess(SuccessCode.OK, DashboardSwotResponse.from(swot));
+    //    Swot swot = aiAnalysisService.getLatestSwotEntity(storeId);
+    //
+    //    return ApiResponse.onSuccess(SuccessCode.OK, DashboardSwotResponse.from(swot));
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
   // AI 정밀 진단
@@ -81,7 +104,9 @@ public class AiAnalysisController {
     """)
   @PostMapping("/diagnosis")
   public ApiResponse<DiagnosisResponse> diagnose(@RequestBody DiagnosisRequest request) {
-    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.generateDiagnosis(request));
+    //    return ApiResponse.onSuccess(SuccessCode.OK,
+    // aiAnalysisService.generateDiagnosis(request));
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
   // 맞춤 실행 전략
@@ -95,7 +120,8 @@ public class AiAnalysisController {
     """)
   @GetMapping("/action-plans")
   public ApiResponse<ActionPlanListResponse> getActionPlans(@RequestParam Long storeId) {
-    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlans(storeId));
+    //    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlans(storeId));
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 
   @GetMapping("/action-plans/{solutionId}")
@@ -108,6 +134,8 @@ public class AiAnalysisController {
     - 실행 전략의 배경, 기대 효과, 실행 방법 등의 상세 정보를 제공합니다.
     """)
   public ApiResponse<ActionPlanDetailResponse> getActionPlanDetail(@PathVariable Long solutionId) {
-    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlanDetail(solutionId));
+    //    return ApiResponse.onSuccess(SuccessCode.OK,
+    // aiAnalysisService.getActionPlanDetail(solutionId));
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 }

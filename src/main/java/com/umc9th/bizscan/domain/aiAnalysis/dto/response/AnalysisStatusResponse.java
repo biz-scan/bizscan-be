@@ -10,4 +10,5 @@ public class AnalysisStatusResponse {
 
   private AnalysisStatus status;
   private String progressMessage;
+  private int pollingTime;
 }

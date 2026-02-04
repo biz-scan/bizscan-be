@@ -34,7 +34,16 @@ public enum ErrorCode implements BaseErrorCode {
   SWOT_NOT_FOUND(HttpStatus.NOT_FOUND, "SWOT404", "해당 매장의 SWOT 분석 결과가 존재하지 않습니다."),
   ANALYSIS_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "ANALYSIS404_1", "해당 분석 요청을 찾을 수 없습니다."),
   ACTION_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "ACTION_PLAN_404", "실행 전략을 찾을 수 없습니다."),
+  INVALID_CALLBACK_DATA(
+      HttpStatus.BAD_REQUEST, "ANALYSIS400_1", "AI 분석 콜백 데이터가 유효하지 않거나 결과 값이 누락되었습니다."),
 
+  // Store
+  STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE404_1", "해당 매장을 찾을 수 없습니다."),
+
+  // ActionNote
+  ACTION_NOTE_ALREADY_EXISTS(HttpStatus.CONFLICT, "ACTION_NOTE409_1", "이미 등록된 실행노트가 존재합니다."),
+  ACTION_NOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "ACTION_NOTE404_1", "실행 노트를 찾을 수 없습니다."),
+  ACTION_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "ACTION_DETAIL404_1", "세부 실행 전략을 찾을 수 없습니다."),
   PAGE_INVALID(HttpStatus.BAD_REQUEST, "PAGE400_1", "유효하지 않은 페이지 범위입니다.");
 
   private final HttpStatus status;

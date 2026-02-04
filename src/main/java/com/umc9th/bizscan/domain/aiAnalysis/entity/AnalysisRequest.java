@@ -22,12 +22,13 @@ public class AnalysisRequest extends BaseEntity {
   @Column(nullable = false, unique = true)
   private String requestId;
 
-  // 어떤 매장 분석인지
-  @Column(nullable = false)
-  private Long storeId;
+  // 어떤 분석인지
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "analysis_id")
+  private Analysis analysis;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column(nullable = false, length = 50)
   private AnalysisStatus status;
 
   // 진행 중 메시지 (폴링 응답용)
@@ -39,16 +40,11 @@ public class AnalysisRequest extends BaseEntity {
 
   // ===== 상태 전이 메서드 =====
 
-  public void start() {
-    this.status = AnalysisStatus.PROCESSING;
-    this.progressMessage = "매장 정보를 분석 중입니다.";
-  }
-
   public void updateProgress(String message) {
     this.progressMessage = message;
   }
 
-  public void complete() {
+  public void complete(String catchphrase) {
     this.status = AnalysisStatus.COMPLETED;
     this.completedAt = LocalDateTime.now();
     this.progressMessage = null;
@@ -57,5 +53,9 @@ public class AnalysisRequest extends BaseEntity {
   public void fail(String message) {
     this.status = AnalysisStatus.FAILED;
     this.progressMessage = message;
+  }
+
+  public void updateStatus(AnalysisStatus status) {
+    this.status = status;
   }
 }
