@@ -1,3 +1,5 @@
 ai:
   fastapi:
     base-url: http://bizscan-ai-dev:8000
+  callback:
+    base-url: http://bizscan-app-dev:8080

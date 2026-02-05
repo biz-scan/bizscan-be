@@ -19,6 +19,7 @@ import com.umc9th.bizscan.global.config.FastApiProperties;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -38,6 +39,9 @@ public class AiAnalysisService {
 
   private final FastApiProperties fastApiProperties;
   private final RestTemplate restTemplate = new RestTemplate();
+
+  @Value("${ai.callback.base-url}")
+  private String callbackBaseUrl;
 
   /** AI 분석 요청 (프론트에서 최초 1회 호출) requestId 반환 → 프론트에서 폴링 */
   @Transactional
@@ -183,9 +187,9 @@ public class AiAnalysisService {
     return FastApiAnalysisRequest.builder()
         // callback 식별용
         .requestId(requestId)
-        .swotCallbackUrl("http://bizscan-ai-dev:8000/api/analysis/callback/swots")
-        .actionPlanCallbackUrl("http://bizscan-ai-dev:8000/api/analysis/callback/action-plans")
-        .actionDetailCallbackUrl("http://bizscan-ai-dev:8000/api/analysis/callback/action-details")
+        .swotCallbackUrl(callbackBaseUrl + "/api/analysis/callback/swots")
+        .actionPlanCallbackUrl(callbackBaseUrl + "/api/analysis/callback/action-plans")
+        .actionDetailCallbackUrl(callbackBaseUrl + "/api/analysis/callback/action-details")
 
         // store 기본 정보
         .storeId(store.getId())
