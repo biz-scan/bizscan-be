@@ -25,12 +25,6 @@ public class MemberController {
   private final MemberCommandService memberCommandService;
   private final MemberQueryService memberQueryService;
 
-  @GetMapping("/test")
-  @ApiErrorCodeExamples({ErrorCode.BAD_REQUEST, ErrorCode.FORBIDDEN, ErrorCode.NOT_FOUND})
-  public String test() {
-    return "Hello, World!";
-  }
-
   @Operation(
       summary = "회원가입",
       description = "신규 사용자를 회원으로 등록합니다. " + "이메일 중복 여부를 검증하고, 비밀번호는 암호화되어 저장됩니다.")

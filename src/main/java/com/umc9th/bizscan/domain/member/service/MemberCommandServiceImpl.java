@@ -60,23 +60,27 @@ public class MemberCommandServiceImpl implements MemberCommandService {
             .findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
 
-    // 현재 비밀번호 일치 여부 확인
-    if (!passwordEncoder.matches(dto.getCurrentPassword(), member.getPassword())) {
-      // 비밀번호가 일치하지 않을 경우 예외 발생
-      throw new GeneralException(ErrorCode.INVALID_PASSWORD);
+    // 1. 닉네임 수정 (입력값이 있을 경우에만)
+    if (dto.getNickname() != null && !dto.getNickname().isBlank()) {
+      member.updateNickname(dto.getNickname());
     }
 
-    // 새 비밀번호가 기존과 동일한지 확인
-    if (passwordEncoder.matches(dto.getNewPassword(), member.getPassword())) {
-      throw new GeneralException(ErrorCode.SAME_AS_OLD_PASSWORD);
+    // 2. 비밀번호 수정 (새 비밀번호 입력값이 있을 경우에만)
+    if (dto.getNewPassword() != null && !dto.getNewPassword().isBlank()) {
+      // 현재 비밀번호 입력 확인
+      if (dto.getCurrentPassword() == null
+          || !passwordEncoder.matches(dto.getCurrentPassword(), member.getPassword())) {
+        throw new GeneralException(ErrorCode.INVALID_PASSWORD);
+      }
+
+      // 기존 비밀번호와 동일한지 확인
+      if (passwordEncoder.matches(dto.getNewPassword(), member.getPassword())) {
+        throw new GeneralException(ErrorCode.SAME_AS_OLD_PASSWORD);
+      }
+
+      String encodedNewPassword = passwordEncoder.encode(dto.getNewPassword());
+      member.updatePassword(encodedNewPassword);
     }
-
-    // 닉네임 수정
-    member.updateNickname(dto.getNickname());
-
-    // 새 비밀번호 암호화 및 수정
-    String encodedNewPassword = passwordEncoder.encode(dto.getNewPassword());
-    member.updatePassword(encodedNewPassword);
   }
 
   @Override
