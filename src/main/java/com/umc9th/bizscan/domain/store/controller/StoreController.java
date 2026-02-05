@@ -1,6 +1,8 @@
 package com.umc9th.bizscan.domain.store.controller;
 
-import com.umc9th.bizscan.domain.store.dto.request.StoreRequest;
+import com.umc9th.bizscan.domain.store.dto.request.StoreCreateRequest;
+import com.umc9th.bizscan.domain.store.dto.request.StoreTagUpdateRequest;
+import com.umc9th.bizscan.domain.store.dto.request.StoreUpdateRequest;
 import com.umc9th.bizscan.domain.store.dto.response.StoreDeleteResponse;
 import com.umc9th.bizscan.domain.store.dto.response.StoreResponse;
 import com.umc9th.bizscan.domain.store.entity.PainPoint;
@@ -12,15 +14,21 @@ import com.umc9th.bizscan.domain.store.entity.Target;
 import com.umc9th.bizscan.domain.store.service.StoreService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
+import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
+import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,8 +57,8 @@ public class StoreController {
               """)
   @PostMapping
   public ResponseEntity<ApiResponse<StoreResponse>> createStore(
-      @Parameter(description = "가게 등록 사용자 ID", example = "1", required = true) @RequestParam
-          Long memberId,
+      @Parameter(hidden = true) @AuthenticationPrincipal
+          org.springframework.security.core.userdetails.User user,
       @Parameter(description = "매장명", example = "문화제빵", required = true) @RequestParam String name,
       @Parameter(description = "주소", example = "서울 종로구 돈화문로 65 1층", required = true) @RequestParam
           String address,
@@ -107,9 +115,16 @@ public class StoreController {
           @RequestParam
           List<TagCode> tags) {
 
-    StoreRequest request =
-        StoreRequest.builder()
-            .memberId(memberId)
+    if (user == null) {
+      throw new com.umc9th.bizscan.global.apiPayload.exception.GeneralException(
+          com.umc9th.bizscan.global.security.exception.SecurityErrorStatus
+              .AUTH_MUST_AUTHORIZED_URI);
+    }
+
+    String email = user.getUsername();
+
+    StoreCreateRequest request =
+        StoreCreateRequest.builder()
             .name(name)
             .address(address)
             .category(category)
@@ -121,7 +136,7 @@ public class StoreController {
             .tags(tags)
             .build();
 
-    StoreResponse result = storeService.createStore(request);
+    StoreResponse result = storeService.createStore(email, request);
 
     return ResponseEntity.status(SuccessCode.OK.getStatus())
         .body(ApiResponse.onSuccess(SuccessCode.OK, result));
@@ -141,6 +156,108 @@ public class StoreController {
           Long storeId) {
 
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.OK, storeService.getStore(storeId)));
+  }
+
+  @Operation(
+      summary = "가게 정보 부분 수정",
+      description =
+          """
+          로그인 사용자가 **본인 가게 정보**를 부분 수정합니다. (PATCH 동작)
+
+          동작 방식
+          - 요청 바디(JSON)에서 **전달된 필드만 변경**됩니다.
+          - 전달되지 않은 필드는 **기존 값 유지**됩니다.
+          - address(주소)가 변경되면 서버에서 **Kakao Geocoding**을 다시 수행하여 lat/lon을 갱신합니다.
+          - 주소 중복(다른 가게가 이미 사용 중인 주소)이면 **400 에러**가 발생합니다.
+
+          권한/소유자
+          - 로그인 필수 (JWT 필요)
+          - 본인 소유(store의 owner)가 아니면 **403 FORBIDDEN**
+
+          tags(태그) 수정은 이 API에서 처리하지 않습니다.
+          - 이 API는 **가게 기본 정보만 수정**합니다. (name/address/category 등)
+          - tags를 수정하려면 아래 전용 API를 사용하세요:
+            PATCH /api/stores/{storeId}/tags
+
+          태그 규칙(등록/수정 공통)
+          - 태그는 "MOOD_VIEW" 같은 **TagCode 문자열**로 입력됩니다.
+          - 최소 1개, 최대 3개
+          - 중복 불가
+          - DB에 존재하지 않는 태그 코드면 에러
+
+          태그 코드 목록 (참고)
+          - 분위기(MOOD):
+            MOOD_VIEW(뷰맛집), MOOD_HIP(힙한), MOOD_QUIET(조용한),
+            MOOD_RETRO(레트로), MOOD_LUXURY(고급진), MOOD_LIVELY(활기찬)
+          - 특징(FEATURE):
+            FEATURE_GOOD_VALUE(가성비), FEATURE_SOLO_FRIENDLY(혼밥환영), FEATURE_GROUP_SEAT(단체석),
+            FEATURE_PET_FRIENDLY(반려동물), FEATURE_PHOTO_SPOT(사진맛집)
+          - 운영(OPERATION):
+            OPERATION_HALL_SERVICE(홀영업), OPERATION_DELIVERY_AVAILABLE(배달가능), OPERATION_TAKEOUT_ONLY(포장전문)
+
+          """)
+  @PatchMapping("/{storeId}")
+  public ResponseEntity<ApiResponse<StoreResponse>> updateStore(
+      @PathVariable Long storeId,
+      @AuthenticationPrincipal org.springframework.security.core.userdetails.User user,
+      @Valid @RequestBody StoreUpdateRequest request) {
+
+    if (user == null) {
+      throw new GeneralException(SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI);
+    }
+
+    String email = user.getUsername();
+
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(SuccessCode.OK, storeService.updateStore(storeId, email, request)));
+  }
+
+  @Operation(
+      summary = "가게 태그 수정",
+      description =
+          """
+          로그인 사용자가 **본인 가게의 태그(tags)만** 수정합니다.
+
+          동작 방식
+          - 기존 태그 매핑(StoreTag)을 **모두 삭제한 뒤**, 요청으로 받은 태그로 **완전히 교체**합니다.
+          - 따라서 이 API는 "추가"가 아니라 "교체"입니다. (Replace)
+
+          권한/소유자
+          - 로그인 필수 (JWT 필요)
+          - 본인 소유(store의 owner)가 아니면 **403 FORBIDDEN**
+
+          tags 규칙 (필수)
+          - 최소 1개, 최대 3개
+          - 중복 불가
+          - 공백/잘못된 문자열/enum에 없는 코드가 포함되면 **400 에러**
+          - DB에 존재하지 않는 태그 코드면 **404 에러**
+
+          태그 코드 목록
+          - 분위기(MOOD):
+            MOOD_VIEW(뷰맛집), MOOD_HIP(힙한), MOOD_QUIET(조용한),
+            MOOD_RETRO(레트로), MOOD_LUXURY(고급진), MOOD_LIVELY(활기찬)
+          - 특징(FEATURE):
+            FEATURE_GOOD_VALUE(가성비), FEATURE_SOLO_FRIENDLY(혼밥환영), FEATURE_GROUP_SEAT(단체석),
+            FEATURE_PET_FRIENDLY(반려동물), FEATURE_PHOTO_SPOT(사진맛집)
+          - 운영(OPERATION):
+            OPERATION_HALL_SERVICE(홀영업), OPERATION_DELIVERY_AVAILABLE(배달가능), OPERATION_TAKEOUT_ONLY(포장전문)
+
+          """)
+  @PatchMapping("/{storeId}/tags")
+  public ResponseEntity<ApiResponse<StoreResponse>> updateStoreTags(
+      @PathVariable Long storeId,
+      @AuthenticationPrincipal org.springframework.security.core.userdetails.User user,
+      @Valid @RequestBody StoreTagUpdateRequest request) {
+
+    if (user == null) {
+      throw new GeneralException(SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI);
+    }
+
+    String email = user.getUsername();
+
+    return ResponseEntity.ok(
+        ApiResponse.onSuccess(
+            SuccessCode.OK, storeService.updateStoreTags(storeId, email, request.getTags())));
   }
 
   @Operation(summary = "가게 삭제", description = "가게를 삭제합니다. (연결된 태그 매핑도 함께 삭제)")

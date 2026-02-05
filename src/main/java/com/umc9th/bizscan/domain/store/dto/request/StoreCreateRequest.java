@@ -21,11 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(title = "StoreRequest: 가게 생성 요청 DTO")
-public class StoreRequest {
-
-  @NotNull
-  @Schema(description = "가게 등록 사용자 ID", example = "1")
-  private Long memberId;
+public class StoreCreateRequest {
 
   @NotBlank
   @Size(max = 100)

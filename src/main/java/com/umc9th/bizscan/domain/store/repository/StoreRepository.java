@@ -9,4 +9,6 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
   Optional<Store> findById(Long id);
 
   boolean existsByAddress(String address);
+
+  boolean existsByAddressAndIdNot(String address, Long id);
 }
