@@ -40,8 +40,8 @@ public class AiAnalysisService {
   private final FastApiProperties fastApiProperties;
   private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${ai.callback.base-url}")
-    private String callbackBaseUrl;
+  @Value("${ai.callback.base-url}")
+  private String callbackBaseUrl;
 
   /** AI 분석 요청 (프론트에서 최초 1회 호출) requestId 반환 → 프론트에서 폴링 */
   @Transactional
@@ -188,10 +188,8 @@ public class AiAnalysisService {
         // callback 식별용
         .requestId(requestId)
         .swotCallbackUrl(callbackBaseUrl + "/api/analysis/callback/swots")
-        .actionPlanCallbackUrl(
-                callbackBaseUrl + "/api/analysis/callback/action-plans")
-        .actionDetailCallbackUrl(
-                callbackBaseUrl + "/api/analysis/callback/action-details")
+        .actionPlanCallbackUrl(callbackBaseUrl + "/api/analysis/callback/action-plans")
+        .actionDetailCallbackUrl(callbackBaseUrl + "/api/analysis/callback/action-details")
 
         // store 기본 정보
         .storeId(store.getId())
