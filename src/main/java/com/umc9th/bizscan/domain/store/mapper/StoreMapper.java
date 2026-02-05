@@ -1,7 +1,7 @@
 package com.umc9th.bizscan.domain.store.mapper;
 
 import com.umc9th.bizscan.domain.member.entity.Member;
-import com.umc9th.bizscan.domain.store.dto.request.StoreRequest;
+import com.umc9th.bizscan.domain.store.dto.request.StoreCreateRequest;
 import com.umc9th.bizscan.domain.store.dto.response.StoreResponse;
 import com.umc9th.bizscan.domain.store.entity.Store;
 import com.umc9th.bizscan.domain.store.entity.Tag;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class StoreMapper {
 
-  public Store toEntity(Member member, StoreRequest request, BigDecimal lat, BigDecimal lon) {
+  public Store toEntity(Member member, StoreCreateRequest request, BigDecimal lat, BigDecimal lon) {
     return Store.builder()
         .member(member)
         .name(request.getName())
