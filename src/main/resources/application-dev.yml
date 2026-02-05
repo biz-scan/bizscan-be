@@ -1,1 +1,3 @@
-
+ai:
+  fastapi:
+    base-url: http://bizscan-ai-dev:8000
