@@ -2,7 +2,8 @@ package com.umc9th.bizscan.domain.store.service;
 
 import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.domain.member.repository.MemberRepository;
-import com.umc9th.bizscan.domain.store.dto.request.StoreRequest;
+import com.umc9th.bizscan.domain.store.dto.request.StoreCreateRequest;
+import com.umc9th.bizscan.domain.store.dto.request.StoreUpdateRequest;
 import com.umc9th.bizscan.domain.store.dto.response.StoreDeleteResponse;
 import com.umc9th.bizscan.domain.store.dto.response.StoreResponse;
 import com.umc9th.bizscan.domain.store.entity.Store;
@@ -38,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class StoreServiceImpl implements StoreService {
 
   private static final Logger log = LoggerFactory.getLogger(StoreServiceImpl.class);
-
   private static final int TAG_MAX_COUNT = 3;
 
   private final StoreRepository storeRepository;
@@ -49,111 +49,25 @@ public class StoreServiceImpl implements StoreService {
   private final KakaoClient kakaoClient;
 
   @Override
-  public StoreResponse createStore(StoreRequest request) {
-    log.info(
-        "Create store request received. memberId={}, address={}",
-        request.getMemberId(),
-        request.getAddress());
+  public StoreResponse createStore(String email, StoreCreateRequest request) {
 
     if (storeRepository.existsByAddress(request.getAddress())) {
-      log.warn("Duplicated address detected. address={}", request.getAddress());
       throw new GeneralException(StoreErrorCode.ADDRESS_DUPLICATED);
     }
 
     Member member =
         memberRepository
-            .findById(request.getMemberId())
-            .orElseThrow(
-                () -> {
-                  log.warn("Member not found. memberId={}", request.getMemberId());
-                  return new GeneralException(StoreErrorCode.MEMBER_NOT_FOUND);
-                });
+            .findByEmail(email)
+            .orElseThrow(() -> new GeneralException(StoreErrorCode.MEMBER_NOT_FOUND));
 
-    GeoPoint geoPoint;
-    try {
-      KakaoApiResponse response = kakaoClient.searchAddress(request.getAddress());
-
-      if (response == null
-          || response.getDocuments() == null
-          || response.getDocuments().isEmpty()) {
-        log.warn("Geocode result is empty. address={}", request.getAddress());
-        throw new GeneralException(StoreErrorCode.ADDRESS_INVALID);
-      }
-
-      KakaoApiResponse.Address addressInfo = response.getDocuments().get(0).getAddress();
-
-      geoPoint =
-          new GeoPoint(
-              new BigDecimal(addressInfo.getY()), // 위도
-              new BigDecimal(addressInfo.getX()) // 경도
-              );
-
-    } catch (Exception e) {
-      log.warn(
-          "Failed to geocode address. address={}, reason={}", request.getAddress(), e.getMessage());
-      throw new GeneralException(StoreErrorCode.ADDRESS_INVALID);
-    }
+    GeoPoint geoPoint = geocode(request.getAddress());
 
     Store saved =
         storeRepository.save(storeMapper.toEntity(member, request, geoPoint.lat(), geoPoint.lon()));
 
-    log.info(
-        "Store saved. storeId={}, address={}, lat={}, lon={}",
-        saved.getId(),
-        saved.getAddress(),
-        saved.getLat(),
-        saved.getLon());
+    List<Tag> tags = resolveTags(request.getTags(), saved.getId());
 
-    // tags null 방어 + null 요소 제거
-    List<TagCode> tagCodes =
-        Optional.ofNullable(request.getTags()).orElseGet(List::of).stream()
-            .filter(Objects::nonNull)
-            .toList();
-
-    if (tagCodes.isEmpty()) {
-      log.warn("Tag is required but empty. storeId={}", saved.getId());
-      throw new GeneralException(StoreErrorCode.TAG_REQUIRED);
-    }
-
-    // 중복 제거 + 순서 보존
-    LinkedHashSet<TagCode> distinct = new LinkedHashSet<>(tagCodes);
-
-    if (distinct.size() != tagCodes.size()) {
-      log.warn("Duplicated tags detected. storeId={}, tags={}", saved.getId(), tagCodes);
-      throw new GeneralException(StoreErrorCode.TAG_DUPLICATED);
-    }
-    if (distinct.size() > TAG_MAX_COUNT) {
-      log.warn("Tag limit exceeded. storeId={}, size={}", saved.getId(), distinct.size());
-      throw new GeneralException(StoreErrorCode.TAG_LIMIT_EXCEEDED);
-    }
-
-    List<TagCode> orderedDistinct = new ArrayList<>(distinct);
-
-    // 필요한 type/name만 뽑아서 한번에 조회
-    List<TagCode.Type> types = orderedDistinct.stream().map(TagCode::getType).distinct().toList();
-
-    List<TagCode.Name> names = orderedDistinct.stream().map(TagCode::getName).distinct().toList();
-
-    List<Tag> candidates = tagRepository.findAllByTypeInAndNameIn(types, names);
-
-    // DB 데이터가 중복되어 있어도 서버가 죽지 않도록 merge 함수 추가
-    Map<String, Tag> tagMap =
-        candidates.stream()
-            .collect(Collectors.toMap(t -> key(t.getType(), t.getName()), t -> t, (a, b) -> a));
-
-    // 요청 순서대로 검증 + 태그 리스트 구성
-    List<Tag> tags = new ArrayList<>();
-    for (TagCode code : orderedDistinct) {
-      Tag tag = tagMap.get(key(code.getType(), code.getName()));
-      if (tag == null) {
-        log.warn("Tag not found in DB. storeId={}, requestedTag={}", saved.getId(), code);
-        throw new GeneralException(StoreErrorCode.TAG_NOT_FOUND);
-      }
-      tags.add(tag);
-    }
-
-    storeTagRepository.saveAll(tags.stream().map(t -> StoreTag.of(saved, t)).toList());
-    log.info("Store tags saved. storeId={}, tagCount={}", saved.getId(), tags.size());
+    storeTagRepository.saveAll(tags.stream().map(tag -> StoreTag.of(saved, tag)).toList());
 
     return storeMapper.toCreateResponse(saved, tags);
   }
@@ -161,10 +75,8 @@ public class StoreServiceImpl implements StoreService {
   @Override
   @Transactional(readOnly = true)
   public List<StoreResponse> getStores() {
-    log.info("Get stores request received.");
 
     List<Store> stores = storeRepository.findAll();
-    log.info("Stores loaded. count={}", stores.size());
 
     if (stores.isEmpty()) {
       return List.of();
@@ -190,16 +102,11 @@ public class StoreServiceImpl implements StoreService {
   @Override
   @Transactional(readOnly = true)
   public StoreResponse getStore(Long storeId) {
-    log.info("Get store request received. storeId={}", storeId);
 
     Store store =
         storeRepository
             .findById(storeId)
-            .orElseThrow(
-                () -> {
-                  log.warn("Store not found. storeId={}", storeId);
-                  return new GeneralException(StoreErrorCode.STORE_NOT_FOUND);
-                });
+            .orElseThrow(() -> new GeneralException(StoreErrorCode.STORE_NOT_FOUND));
 
     List<Tag> tags =
         storeTagRepository.findAllByStoreFetchTag(store).stream().map(StoreTag::getTag).toList();
@@ -208,28 +115,155 @@ public class StoreServiceImpl implements StoreService {
   }
 
   @Override
+  public StoreResponse updateStore(Long storeId, String email, StoreUpdateRequest request) {
+
+    Store store = validateStoreOwner(storeId, email);
+
+    String newAddress = Optional.ofNullable(request.getAddress()).orElse(store.getAddress());
+
+    BigDecimal lat = store.getLat();
+    BigDecimal lon = store.getLon();
+
+    if (!store.getAddress().equals(newAddress)) {
+
+      if (storeRepository.existsByAddressAndIdNot(newAddress, storeId)) {
+        throw new GeneralException(StoreErrorCode.ADDRESS_DUPLICATED);
+      }
+
+      GeoPoint geoPoint = geocode(newAddress);
+      lat = geoPoint.lat();
+      lon = geoPoint.lon();
+    }
+
+    store.update(
+        Optional.ofNullable(request.getName()).orElse(store.getName()),
+        newAddress,
+        lat,
+        lon,
+        Optional.ofNullable(request.getCategory()).orElse(store.getCategory()),
+        Optional.ofNullable(request.getCategoryDetail()).orElse(store.getCategoryDetail()),
+        Optional.ofNullable(request.getSignature()).orElse(store.getSignature()),
+        Optional.ofNullable(request.getPrice()).orElse(store.getPrice()),
+        Optional.ofNullable(request.getTarget()).orElse(store.getTarget()),
+        Optional.ofNullable(request.getPainPoint()).orElse(store.getPainPoint()));
+
+    List<Tag> tags =
+        storeTagRepository.findAllByStoreFetchTag(store).stream().map(StoreTag::getTag).toList();
+
+    return storeMapper.toCreateResponse(store, tags);
+  }
+
+  @Override
+  public StoreResponse updateStoreTags(Long storeId, String email, List<String> tagStrings) {
+
+    Store store = validateStoreOwner(storeId, email);
+
+    List<TagCode> tagCodes = parseTagCodes(tagStrings);
+
+    List<Tag> tags = resolveTags(tagCodes, storeId);
+
+    storeTagRepository.deleteAllByStoreId(storeId);
+
+    storeTagRepository.saveAll(tags.stream().map(tag -> StoreTag.of(store, tag)).toList());
+
+    return storeMapper.toCreateResponse(store, tags);
+  }
+
+  @Override
   public StoreDeleteResponse deleteStore(Long storeId) {
-    log.info("Delete store request received. storeId={}", storeId);
 
-    Store store =
-        storeRepository
-            .findById(storeId)
-            .orElseThrow(
-                () -> {
-                  log.warn("Store not found for delete. storeId={}", storeId);
-                  return new GeneralException(StoreErrorCode.STORE_NOT_FOUND);
-                });
+    storeRepository
+        .findById(storeId)
+        .orElseThrow(() -> new GeneralException(StoreErrorCode.STORE_NOT_FOUND));
 
-    // FK 때문에 store_tag 먼저 삭제
-    storeTagRepository.deleteAllByStore_Id(storeId);
-
-    storeRepository.delete(store);
-    log.info("Store deleted. storeId={}", storeId);
+    storeTagRepository.deleteAllByStoreId(storeId);
+    storeRepository.deleteById(storeId);
 
     return StoreDeleteResponse.of(storeId);
   }
 
-  private String key(TagCode.Type type, TagCode.Name name) {
-    return type.name() + ":" + name.name();
+  private Store validateStoreOwner(Long storeId, String email) {
+
+    Store store =
+        storeRepository
+            .findById(storeId)
+            .orElseThrow(() -> new GeneralException(StoreErrorCode.STORE_NOT_FOUND));
+
+    Member loginMember =
+        memberRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new GeneralException(StoreErrorCode.MEMBER_NOT_FOUND));
+
+    if (!store.getMember().getId().equals(loginMember.getId())) {
+      throw new GeneralException(StoreErrorCode.FORBIDDEN);
+    }
+
+    return store;
+  }
+
+  private List<TagCode> parseTagCodes(List<String> tagStrings) {
+
+    if (tagStrings == null || tagStrings.isEmpty()) {
+      throw new GeneralException(StoreErrorCode.TAG_REQUIRED);
+    }
+
+    try {
+      return tagStrings.stream()
+          .filter(Objects::nonNull)
+          .map(String::trim)
+          .map(TagCode::valueOf)
+          .toList();
+
+    } catch (IllegalArgumentException e) {
+      throw new GeneralException(StoreErrorCode.TAG_CODE_INVALID);
+    }
+  }
+
+  private List<Tag> resolveTags(List<TagCode> tagCodes, Long storeId) {
+
+    if (tagCodes == null || tagCodes.isEmpty()) {
+      throw new GeneralException(StoreErrorCode.TAG_REQUIRED);
+    }
+
+    LinkedHashSet<TagCode> distinct = new LinkedHashSet<>(tagCodes);
+
+    if (distinct.size() > TAG_MAX_COUNT) {
+      throw new GeneralException(StoreErrorCode.TAG_LIMIT_EXCEEDED);
+    }
+
+    List<TagCode> ordered = new ArrayList<>(distinct);
+
+    List<Tag> candidates =
+        tagRepository.findAllByTypeInAndNameIn(
+            ordered.stream().map(TagCode::getType).toList(),
+            ordered.stream().map(TagCode::getName).toList());
+
+    Map<String, Tag> map =
+        candidates.stream()
+            .collect(Collectors.toMap(t -> t.getType().name() + ":" + t.getName().name(), t -> t));
+
+    return ordered.stream()
+        .map(
+            code -> {
+              Tag tag = map.get(code.getType().name() + ":" + code.getName().name());
+              if (tag == null) {
+                throw new GeneralException(StoreErrorCode.TAG_NOT_FOUND);
+              }
+              return tag;
+            })
+        .toList();
+  }
+
+  private GeoPoint geocode(String address) {
+
+    KakaoApiResponse response = kakaoClient.searchAddress(address);
+
+    if (response == null || response.getDocuments().isEmpty()) {
+      throw new GeneralException(StoreErrorCode.ADDRESS_INVALID);
+    }
+
+    var addr = response.getDocuments().get(0).getAddress();
+
+    return new GeoPoint(new BigDecimal(addr.getY()), new BigDecimal(addr.getX()));
   }
 }
