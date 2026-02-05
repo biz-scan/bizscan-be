@@ -1,18 +1,25 @@
 package com.umc9th.bizscan.global.apiPayload.handler;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.BaseErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -41,6 +48,90 @@ public class GeneralExceptionAdvice {
 
     // 에러 코드, 메시지와 함께 errors를 반환
     return ResponseEntity.status(code.getStatus()).body(errorResponse);
+  }
+
+  // @RequestParam / @PathVariable enum, 숫자 타입 등 변환 실패 처리 예: category=CAFE (존재하지 않는 enum)
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  protected ResponseEntity<ApiResponse<Map<String, String>>>
+      handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+
+    Map<String, String> errors = new HashMap<>();
+
+    String paramName = ex.getName();
+    Object value = ex.getValue();
+    Class<?> requiredType = ex.getRequiredType();
+
+    if (requiredType != null && requiredType.isEnum()) {
+      String allowed =
+          java.util.Arrays.stream(requiredType.getEnumConstants())
+              .map(Object::toString)
+              .collect(Collectors.joining(", "));
+
+      errors.put(paramName, "잘못된 값입니다. 입력값=" + value + " / 허용값=[" + allowed + "]");
+    } else {
+      errors.put(paramName, "잘못된 값입니다. 입력값=" + value);
+    }
+
+    ErrorCode code = ErrorCode.INVALID_TYPE_VALUE;
+    return ResponseEntity.status(code.getStatus()).body(ApiResponse.onFailure(code, errors));
+  }
+
+  // @RequestBody(JSON) 파싱 실패 처리 (InvalidFormatException 포함) 예: { "category": "CAFE" } 처럼 enum 값이 잘못
+  // 들어온 경우
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  protected ResponseEntity<ApiResponse<Map<String, String>>> handleHttpMessageNotReadableException(
+      HttpMessageNotReadableException ex) {
+
+    Map<String, String> errors = new HashMap<>();
+
+    Throwable cause = ex.getCause();
+    if (cause instanceof InvalidFormatException ife) {
+      String fieldPath =
+          ife.getPath().stream()
+              .map(JsonMappingException.Reference::getFieldName)
+              .collect(Collectors.joining("."));
+
+      Class<?> targetType = ife.getTargetType();
+      Object value = ife.getValue();
+
+      if (targetType != null && targetType.isEnum()) {
+        String allowed =
+            java.util.Arrays.stream(targetType.getEnumConstants())
+                .map(Object::toString)
+                .collect(Collectors.joining(", "));
+
+        errors.put(fieldPath, "잘못된 enum 값입니다. 입력값=" + value + " / 허용값=[" + allowed + "]");
+      } else {
+        errors.put(fieldPath, "잘못된 형식의 값입니다. 입력값=" + value);
+      }
+
+      ErrorCode code = ErrorCode.INVALID_TYPE_VALUE;
+      return ResponseEntity.status(code.getStatus()).body(ApiResponse.onFailure(code, errors));
+    }
+
+    // InvalidFormatException이 아닌 일반 JSON 파싱 오류(콤마/따옴표 깨짐 등)
+    errors.put("body", "요청 JSON 형식이 올바르지 않습니다.");
+    ErrorCode code = ErrorCode.INVALID_TYPE_VALUE;
+    return ResponseEntity.status(code.getStatus()).body(ApiResponse.onFailure(code, errors));
+  }
+
+  // @RequestParam 등에 붙는 Validation 실패 처리 예: @Min, @NotNull, @Positive 등 (Query Param 검증)
+  @ExceptionHandler(ConstraintViolationException.class)
+  protected ResponseEntity<ApiResponse<Map<String, String>>> handleConstraintViolationException(
+      ConstraintViolationException ex) {
+
+    Map<String, String> errors = new HashMap<>();
+
+    for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
+      String path = violation.getPropertyPath().toString();
+      String field = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
+      errors.put(field, violation.getMessage());
+    }
+
+    ErrorCode code = ErrorCode.INVALID_TYPE_VALUE;
+    return ResponseEntity.status(code.getStatus()).body(ApiResponse.onFailure(code, errors));
   }
 
   // 그 외의 정의되지 않은 모든 예외 처리
