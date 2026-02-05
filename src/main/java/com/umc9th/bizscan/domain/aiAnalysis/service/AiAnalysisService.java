@@ -133,9 +133,10 @@ public class AiAnalysisService {
   }
 
   public List<AnalysisResDTO.ActionPlanDTO> getActionPlans(Long storeId) {
+    // BatchSize 적용 (N+1 및 MultipleBagFetchException 문제 방지)
     Analysis analysis =
         analysisRepository
-            .findByStoreIdWithActionPlan(storeId)
+            .findByStoreId(storeId)
             .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_NOT_FOUND));
 
     return analysis.getActionPlans().stream().map(AnalysisResDTO.ActionPlanDTO::of).toList();

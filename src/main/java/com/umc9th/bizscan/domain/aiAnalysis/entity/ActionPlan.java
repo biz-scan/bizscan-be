@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Getter
@@ -34,9 +35,11 @@ public class ActionPlan extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private RelatedSwotType relatedSwot;
 
+  @BatchSize(size = 100)
   @OneToMany(mappedBy = "actionPlan", cascade = CascadeType.ALL)
   private List<ActionDetail> details = new ArrayList<>();
 
+  @BatchSize(size = 100)
   @OneToMany(mappedBy = "actionPlan", cascade = CascadeType.ALL)
   private List<ActionPlanTag> tags = new ArrayList<>();
 
