@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class ActionNoteController {
   private final ActionNoteService actionNoteService;
 
-  @Operation(summary = "실행 노트 등록 API", description = "특정 실행 전략(ActionPlan)을 바탕으로 실행 노트에 등록합니다.")
+  @Operation(summary = "실행 노트 등록 API", description = "특정 실행 전략(ActionPlan)을 실행 노트에 등록합니다. ")
   @ApiErrorCodeExamples({ErrorCode.ACTION_PLAN_NOT_FOUND, ErrorCode.ACTION_NOTE_ALREADY_EXISTS})
   @PostMapping()
   public ApiResponse<ActionNoteResDTO.AddDTO> addActionNote(
@@ -41,7 +41,9 @@ public class ActionNoteController {
 
   @Operation(
       summary = "실행 노트 목록 조회 API",
-      description = "특정 매장(Store)의 실행 노트 목록을 조회합니다. 완료 여부(isCompleted)에 따라 필터링이 가능합니다.")
+      description =
+          "특정 매장(Store)의 실행 노트 목록을 조회합니다. 완료 여부(isCompleted)에 따라 필터링이 가능합니다. "
+              + "모든 상세 실행 전략(ActionDetail)이 완료될 시 해당 실행 전략(ActionPlan)이 완료로 처리됩니다.")
   @GetMapping()
   public ApiResponse<List<ActionNoteResDTO.ActionNotesDTO>> getActionNotes(
       @Parameter(description = "매장 ID", example = "1") @RequestParam Long storeId,
