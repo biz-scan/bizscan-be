@@ -183,11 +183,9 @@ public class AiAnalysisService {
     return FastApiAnalysisRequest.builder()
         // callback 식별용
         .requestId(requestId)
-        .swotCallbackUrl(fastApiProperties.getBaseUrl() + "/api/analysis/callback/swots")
-        .actionPlanCallbackUrl(
-            fastApiProperties.getBaseUrl() + "/api/analysis/callback/action-plans")
-        .actionDetailCallbackUrl(
-            fastApiProperties.getBaseUrl() + "/api/analysis/callback/action-details")
+        .swotCallbackUrl("http://bizscan-ai-dev:8000/api/analysis/callback/swots")
+        .actionPlanCallbackUrl("http://bizscan-ai-dev:8000/api/analysis/callback/action-plans")
+        .actionDetailCallbackUrl("http://bizscan-ai-dev:8000/api/analysis/callback/action-details")
 
         // store 기본 정보
         .storeId(store.getId())
