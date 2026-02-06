@@ -17,7 +17,7 @@ public class ActionPlanConverter {
         .aiRefId(dto.id())
         .title(dto.title())
         .reason(dto.final_reason())
-        .relatedSwot(swotType)
+        //        .relatedSwot(swotType)
         .build();
   }
 
