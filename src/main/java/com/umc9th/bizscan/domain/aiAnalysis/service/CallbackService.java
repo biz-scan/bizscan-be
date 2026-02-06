@@ -3,6 +3,7 @@ package com.umc9th.bizscan.domain.aiAnalysis.service;
 import com.umc9th.bizscan.domain.aiAnalysis.converter.ActionPlanConverter;
 import com.umc9th.bizscan.domain.aiAnalysis.converter.SwotConverter;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.ActionPlanCallbackReqDTO;
+import com.umc9th.bizscan.domain.aiAnalysis.dto.request.CommonCallback;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.SwotCallbackReqDTO;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.*;
 import com.umc9th.bizscan.domain.aiAnalysis.enums.AnalysisStatus;
@@ -192,5 +193,20 @@ public class CallbackService {
       case 2 -> TagType.CATEGORY;
       default -> TagType.CATEGORY; // 범위를 벗어날 경우 기본값 혹은 예외 처리
     };
+  }
+
+  /** 실패 처리 메서드 */
+  @Transactional
+  public void failAnalysis(CommonCallback request) {
+    AnalysisRequest analysisRequest =
+        analysisRequestRepository
+            .findByRequestId(request.requestId())
+            .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND));
+
+    analysisRequest.fail(request.status());
+    log.warn(
+        "[failAnalysis] AI 분석 실패 처리 완료 - RequestId: {}, Status: {}",
+        request.requestId(),
+        request.status());
   }
 }

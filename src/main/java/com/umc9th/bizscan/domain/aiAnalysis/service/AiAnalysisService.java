@@ -191,6 +191,7 @@ public class AiAnalysisService {
         .swotCallbackUrl(callbackBaseUrl + "/api/analysis/callback/swots")
         .actionPlanCallbackUrl(callbackBaseUrl + "/api/analysis/callback/action-plans")
         .actionDetailCallbackUrl(callbackBaseUrl + "/api/analysis/callback/action-details")
+        .failCallbackUrl(callbackBaseUrl + "/api/analysis/callback/fail")
 
         // store 기본 정보
         .storeId(store.getId())

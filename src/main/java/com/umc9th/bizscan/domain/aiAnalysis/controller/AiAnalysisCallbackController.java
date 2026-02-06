@@ -1,6 +1,7 @@
 package com.umc9th.bizscan.domain.aiAnalysis.controller;
 
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.ActionPlanCallbackReqDTO;
+import com.umc9th.bizscan.domain.aiAnalysis.dto.request.FailCallbackReqDTO;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.SwotCallbackReqDTO;
 import com.umc9th.bizscan.domain.aiAnalysis.service.CallbackService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
@@ -34,6 +35,12 @@ public class AiAnalysisCallbackController {
   public ApiResponse<Void> callbackActionDetail(
       @RequestBody ActionPlanCallbackReqDTO.ActionDetailCallbackDTO request) {
     callbackService.saveActionDetails(request);
+    return ApiResponse.onSuccess(SuccessCode.OK, null);
+  }
+
+  @PostMapping("/fail")
+  public ApiResponse<Void> callbackFail(@RequestBody FailCallbackReqDTO request) {
+    callbackService.failAnalysis(request);
     return ApiResponse.onSuccess(SuccessCode.OK, null);
   }
 }

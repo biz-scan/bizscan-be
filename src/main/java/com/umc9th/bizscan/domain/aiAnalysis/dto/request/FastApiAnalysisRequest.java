@@ -26,6 +26,7 @@ public class FastApiAnalysisRequest {
   private String swotCallbackUrl;
   private String actionPlanCallbackUrl;
   private String actionDetailCallbackUrl;
+  private String failCallbackUrl;
 
   @Getter
   @Builder
