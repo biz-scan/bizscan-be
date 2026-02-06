@@ -97,7 +97,8 @@ public class CallbackService {
     for (ActionPlanCallbackReqDTO.FinalSelect selection :
         request.result().finalSelect().selections()) {
       // Enum 변환
-      RelatedSwotType swotType = toRelatedSwotType(selection.related_swot());
+      //      RelatedSwotType swotType = toRelatedSwotType(selection.related_swot());
+      RelatedSwotType swotType = RelatedSwotType.ST;
 
       // ActionPlan 생성 및 저장
       ActionPlan actionPlan =
