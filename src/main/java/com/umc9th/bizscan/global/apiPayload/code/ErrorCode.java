@@ -39,6 +39,10 @@ public enum ErrorCode implements BaseErrorCode {
   INVALID_CALLBACK_DATA(
       HttpStatus.BAD_REQUEST, "ANALYSIS400_1", "AI 분석 콜백 데이터가 유효하지 않거나 결과 값이 누락되었습니다."),
   ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "ANALYSIS404_2", "해당 매장이 진행한 분석이 없습니다."),
+    ANALYSIS_ALREADY_IN_PROGRESS(HttpStatus.CONFLICT, "ANALYSIS409_1", "이미 분석이 진행 중입니다."),
+
+    ANALYSIS_ALREADY_IN_COMPLETED(HttpStatus.BAD_REQUEST, "ANALYSIS400_1", "이미 완료된 분석 결과가 존재합니다."),
+    ANALYSIS_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ANALYSIS500_1", "AI 분석 서버와의 통신 중 오류가 발생했습니다."),
 
   // Store
   STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE404_1", "해당 매장을 찾을 수 없습니다."),

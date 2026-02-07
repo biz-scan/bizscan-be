@@ -27,14 +27,15 @@ public class Analysis extends BaseEntity {
   private String catchphrase;
 
   @BatchSize(size = 100)
-  @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Swot> swots = new ArrayList<>();
 
   @BatchSize(size = 100)
-  @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ActionPlan> actionPlans = new ArrayList<>();
 
   public void updateCatchphrase(String catchphrase) {
     this.catchphrase = catchphrase;
   }
+
 }

@@ -9,6 +9,8 @@ import java.util.List;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -22,6 +24,7 @@ public class ActionPlan extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "analysis_id", nullable = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private Analysis analysis;
 
   // AI가 부여한 임시 ID (매칭용)
@@ -36,11 +39,11 @@ public class ActionPlan extends BaseEntity {
   private RelatedSwotType relatedSwot;
 
   @BatchSize(size = 100)
-  @OneToMany(mappedBy = "actionPlan", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "actionPlan", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ActionDetail> details = new ArrayList<>();
 
   @BatchSize(size = 100)
-  @OneToMany(mappedBy = "actionPlan", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "actionPlan", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ActionPlanTag> tags = new ArrayList<>();
 
   @OneToOne(mappedBy = "actionPlan", cascade = CascadeType.ALL)
