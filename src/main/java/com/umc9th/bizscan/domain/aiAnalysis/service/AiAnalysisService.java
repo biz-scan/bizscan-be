@@ -70,14 +70,14 @@ public class AiAnalysisService {
                   // Cascade.ALL, @OnDelete로 연쇄 삭제
                   analysisRepository.delete(existingAnalysis);
 
+                  /** [.delete(existingRequest) 필요성에 관해] */
                   /**
-                   * .delete(existingRequest) 필요성에 관해 @OnDelete(action = OnDeleteAction.CASCADE)는 DB
-                   * 레벨에서 연관된 테이블들을 삭제함 delete(existingRequest) 없이 delete(existingAnalysis)로
-                   * Analysis 연쇄 삭제 동작 시 existingRequest는 영속성 컨텍스트에 Managed 상태로 살아있고,
-                   * existingAnalysis는 Removed 상태로 삭제 예정이 됨 이 상태에서 flush() 호출 시 살아있는(Persistent)
-                   * existingRequest가 삭제 예정인 existingAnalysis를 참조하고 있어서 문제가 됨 따라서 JPA 레벨에서 명시적으로
-                   * existingRequest를 삭제해야함. 요약: @OnDelete는 DB 내부에서 삭제 수행, JPA(Hibernate)는 모름,
-                   * JPA(영속성 컨텍스트)에서도 명시적으로 삭제 필요
+                   * @OnDelete(action = OnDeleteAction.CASCADE)는 DB 레벨에서 연관된 테이블들을 삭제한다.
+                   * delete(existingRequest)없이 delete(existingAnalysis)로 Analysis 연쇄 삭제 동작 시
+                   * existingRequest는 영속성 컨텍스트에 Managed 상태로 살아있고, existingAnalysis는 Removed 상태로 삭제
+                   * 예정이 된다. 이 상태에서 flush() 호출 시 살아있는(Persistent) existingRequest가 삭제 예정인
+                   * existingAnalysis를 참조하고 있어서 문제가 된다. 따라서 JPA 레벨에서 명시적으로 existingRequest를 삭제해야 한다.
+                   * 요약: @OnDelete는 DB 내부에서 삭제 수행, JPA(Hibernate)는 모름, JPA(영속성 컨텍스트)에서도 명시적으로 삭제 필요
                    */
                   // 1:1 관계 제약 조건을 위해 delete 쿼리를 즉시 실행
                   analysisRepository.flush();
