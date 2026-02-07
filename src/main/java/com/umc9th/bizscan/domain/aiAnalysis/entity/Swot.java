@@ -5,6 +5,8 @@ import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -20,6 +22,7 @@ public class Swot extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "analysis_id")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private Analysis analysis;
 
   @Enumerated(EnumType.STRING)

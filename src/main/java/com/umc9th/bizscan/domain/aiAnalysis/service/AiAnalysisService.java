@@ -53,6 +53,44 @@ public class AiAnalysisService {
             .findById(storeId)
             .orElseThrow(() -> new GeneralException(ErrorCode.STORE_NOT_FOUND));
 
+    // 재시도 로직: 기존 분석 이력 체크 및 실패 시 삭제
+    analysisRepository
+        .findByStore(store)
+        .ifPresent(
+            existingAnalysis -> {
+              // 해당 분석의 요청 상태 확인
+              AnalysisRequest existingRequest =
+                  analysisRequestRepository.findByAnalysis(existingAnalysis).orElse(null);
+
+              if (existingRequest != null) {
+                // 상태가 FAILED인 경우에만 삭제 후 재시도
+                if (existingRequest.getStatus() == AnalysisStatus.FAILED) {
+                  // @OnDelete는 DB 레벨이므로 영속성 컨텍스트에 남아있는 existingRequest를 삭제해줘야 함
+                  analysisRequestRepository.delete(existingRequest);
+                  // Cascade.ALL, @OnDelete로 연쇄 삭제
+                  analysisRepository.delete(existingAnalysis);
+
+                  /** [.delete(existingRequest) 필요성에 관해] */
+                  /**
+                   * @OnDelete(action = OnDeleteAction.CASCADE)는 DB 레벨에서 연관된 테이블들을 삭제한다.
+                   * delete(existingRequest)없이 delete(existingAnalysis)로 Analysis 연쇄 삭제 동작 시
+                   * existingRequest는 영속성 컨텍스트에 Managed 상태로 살아있고, existingAnalysis는 Removed 상태로 삭제
+                   * 예정이 된다. 이 상태에서 flush() 호출 시 살아있는(Persistent) existingRequest가 삭제 예정인
+                   * existingAnalysis를 참조하고 있어서 문제가 된다. 따라서 JPA 레벨에서 명시적으로 existingRequest를 삭제해야 한다.
+                   * 요약: @OnDelete는 DB 내부에서 삭제 수행, JPA(Hibernate)는 모름, JPA(영속성 컨텍스트)에서도 명시적으로 삭제 필요
+                   */
+                  // 1:1 관계 제약 조건을 위해 delete 쿼리를 즉시 실행
+                  analysisRepository.flush();
+                } else if (existingRequest.getStatus() == AnalysisStatus.COMPLETED) {
+                  // 이미 분석이 완료된 경우
+                  throw new GeneralException(ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED);
+                } else {
+                  // 이미 분석이 진행 중인 경우
+                  throw new GeneralException(ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS);
+                }
+              }
+            });
+
     List<StoreTag> storeTags = storeTagRepository.findAllByStoreFetchTag(store);
 
     // 1. requestId 생성
@@ -85,7 +123,7 @@ public class AiAnalysisService {
           Void.class);
     } catch (Exception e) {
       request.fail("AI 분석 요청 실패");
-      throw e;
+      throw new GeneralException(ErrorCode.ANALYSIS_SERVER_ERROR);
     }
 
     // 5. 즉시 requestId 반환

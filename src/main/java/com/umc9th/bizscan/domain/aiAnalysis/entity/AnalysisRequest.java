@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -25,6 +27,7 @@ public class AnalysisRequest extends BaseEntity {
   // 어떤 분석인지
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "analysis_id")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private Analysis analysis;
 
   @Enumerated(EnumType.STRING)

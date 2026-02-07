@@ -4,6 +4,8 @@ import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -17,6 +19,7 @@ public class ActionDetail extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "action_plan_id", nullable = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ActionPlan actionPlan;
 
   private String title;

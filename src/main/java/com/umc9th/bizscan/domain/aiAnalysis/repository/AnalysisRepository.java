@@ -1,6 +1,7 @@
 package com.umc9th.bizscan.domain.aiAnalysis.repository;
 
 import com.umc9th.bizscan.domain.aiAnalysis.entity.Analysis;
+import com.umc9th.bizscan.domain.store.entity.Store;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +19,6 @@ public interface AnalysisRepository extends JpaRepository<Analysis, Long> {
   Optional<Analysis> findByStoreIdWithSwot(@Param("storeId") Long storeId);
 
   Optional<Analysis> findByStoreId(@Param("storeId") Long storeId);
+
+  Optional<Analysis> findByStore(Store store);
 }
