@@ -37,5 +37,4 @@ public class Analysis extends BaseEntity {
   public void updateCatchphrase(String catchphrase) {
     this.catchphrase = catchphrase;
   }
-
 }
