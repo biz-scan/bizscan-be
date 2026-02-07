@@ -97,8 +97,7 @@ public class CallbackService {
     for (ActionPlanCallbackReqDTO.FinalSelect selection :
         request.result().finalSelect().selections()) {
       // Enum 변환
-      //      RelatedSwotType swotType = toRelatedSwotType(selection.related_swot());
-      RelatedSwotType swotType = RelatedSwotType.ST;
+      RelatedSwotType swotType = RelatedSwotType.from(selection.related_swot());
 
       // ActionPlan 생성 및 저장
       ActionPlan actionPlan =
@@ -178,15 +177,6 @@ public class CallbackService {
   }
 
   // Util
-  private RelatedSwotType toRelatedSwotType(List<String> swotList) {
-    if (swotList == null || swotList.size() < 2) {
-      return null;
-    }
-    // ["S", "O"] -> "SO"로 합친 후 Enum 변환
-    String combined = String.join("", swotList).toUpperCase();
-    return RelatedSwotType.valueOf(combined);
-  }
-
   private TagType toTagType(int index) {
     return switch (index) {
       case 0 -> TagType.GOAL;
