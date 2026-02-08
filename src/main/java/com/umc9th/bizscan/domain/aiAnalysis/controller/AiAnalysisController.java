@@ -1,6 +1,7 @@
 package com.umc9th.bizscan.domain.aiAnalysis.controller;
 
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
+import com.umc9th.bizscan.domain.aiAnalysis.enums.SwotType;
 import com.umc9th.bizscan.domain.aiAnalysis.service.AiAnalysisService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
@@ -124,8 +125,9 @@ public class AiAnalysisController {
   @ApiErrorCodeExamples({ErrorCode.ANALYSIS_NOT_FOUND})
   @GetMapping("/action-plans")
   public ApiResponse<List<AnalysisResDTO.ActionPlanDTO>> getActionPlans(
-      @Parameter(description = "매장 ID", example = "1") @RequestParam Long storeId) {
-    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlans(storeId));
+      @Parameter(description = "매장 ID", example = "1") @RequestParam Long storeId,
+  @Parameter(description = "필터링할 SWOT 타입 (S, W, O, T)", example = "S") @RequestParam(required = false) SwotType swotType) {
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlans(storeId, swotType));
   }
 
   @Operation(
