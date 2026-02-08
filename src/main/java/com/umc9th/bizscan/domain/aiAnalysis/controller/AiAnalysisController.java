@@ -126,8 +126,11 @@ public class AiAnalysisController {
   @GetMapping("/action-plans")
   public ApiResponse<List<AnalysisResDTO.ActionPlanDTO>> getActionPlans(
       @Parameter(description = "매장 ID", example = "1") @RequestParam Long storeId,
-  @Parameter(description = "필터링할 SWOT 타입 (S, W, O, T)", example = "S") @RequestParam(required = false) SwotType swotType) {
-    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getActionPlans(storeId, swotType));
+      @Parameter(description = "필터링할 SWOT 타입 (S, W, O, T)", example = "S")
+          @RequestParam(required = false)
+          SwotType swotType) {
+    return ApiResponse.onSuccess(
+        SuccessCode.OK, aiAnalysisService.getActionPlans(storeId, swotType));
   }
 
   @Operation(

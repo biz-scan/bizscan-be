@@ -46,14 +46,13 @@ public class AnalysisResDTO {
   public record ActionPlanDTO(
       @Schema(description = "실행 전략 ID", example = "1") Long actionPlanId,
       @Schema(description = "실행 전략 제목", example = "오후 5시 '직장인 퇴근길' 예약 프로모션") String title,
-      @Schema(description = "관련 SWOT 타입", example = "SO")
-      RelatedSwotType relatedSwot,
+      @Schema(description = "관련 SWOT 타입", example = "SO") RelatedSwotType relatedSwot,
       @Schema(description = "관련 태그 리스트") List<TagDTO> tags) {
     public static ActionPlanDTO of(ActionPlan actionPlan) {
       return ActionPlanDTO.builder()
           .actionPlanId(actionPlan.getId())
           .title(actionPlan.getTitle())
-              .relatedSwot(actionPlan.getRelatedSwot())
+          .relatedSwot(actionPlan.getRelatedSwot())
           .tags(actionPlan.getTags().stream().map(TagDTO::of).toList())
           .build();
     }

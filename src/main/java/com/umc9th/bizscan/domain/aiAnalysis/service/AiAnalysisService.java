@@ -21,7 +21,6 @@ import com.umc9th.bizscan.global.config.FastApiProperties;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -181,17 +180,17 @@ public class AiAnalysisService {
             .findByStoreId(storeId)
             .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_NOT_FOUND));
 
-      // 1. 해당 분석의 모든 ActionPlan을 스트림으로 변환
-      Stream<ActionPlan> planStream = analysis.getActionPlans().stream();
+    // 1. 해당 분석의 모든 ActionPlan을 스트림으로 변환
+    Stream<ActionPlan> planStream = analysis.getActionPlans().stream();
 
-      // 2. 필터 타입이 들어온 경우 필터링 수행
-      if (swotType != null) {
-          // S를 넣으면 [SO, ST] 리스트가 나옴
-          List<RelatedSwotType> targetTypes = RelatedSwotType.findAllByComponent(swotType);
+    // 2. 필터 타입이 들어온 경우 필터링 수행
+    if (swotType != null) {
+      // S를 넣으면 [SO, ST] 리스트가 나옴
+      List<RelatedSwotType> targetTypes = RelatedSwotType.findAllByComponent(swotType);
 
-          // ActionPlan의 swotType이 targetTypes에 포함되는 것만 남김
-          planStream = planStream.filter(plan -> targetTypes.contains(plan.getRelatedSwot()));
-      }
+      // ActionPlan의 swotType이 targetTypes에 포함되는 것만 남김
+      planStream = planStream.filter(plan -> targetTypes.contains(plan.getRelatedSwot()));
+    }
 
     return planStream.map(AnalysisResDTO.ActionPlanDTO::of).toList();
   }
