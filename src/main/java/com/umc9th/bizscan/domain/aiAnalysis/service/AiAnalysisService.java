@@ -5,6 +5,8 @@ import com.umc9th.bizscan.domain.aiAnalysis.dto.request.FastApiAnalysisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.*;
 import com.umc9th.bizscan.domain.aiAnalysis.enums.AnalysisStatus;
+import com.umc9th.bizscan.domain.aiAnalysis.enums.RelatedSwotType;
+import com.umc9th.bizscan.domain.aiAnalysis.enums.SwotType;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.ActionPlanRepository;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRepository;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRequestRepository;
@@ -18,6 +20,7 @@ import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import com.umc9th.bizscan.global.config.FastApiProperties;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -170,14 +173,26 @@ public class AiAnalysisService {
     return new DiagnosisResponse(swot.getDiagnosis());
   }
 
-  public List<AnalysisResDTO.ActionPlanDTO> getActionPlans(Long storeId) {
+  public List<AnalysisResDTO.ActionPlanDTO> getActionPlans(Long storeId, SwotType swotType) {
     // BatchSize 적용 (N+1 및 MultipleBagFetchException 문제 방지)
     Analysis analysis =
         analysisRepository
             .findByStoreId(storeId)
             .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_NOT_FOUND));
 
-    return analysis.getActionPlans().stream().map(AnalysisResDTO.ActionPlanDTO::of).toList();
+    // 1. 해당 분석의 모든 ActionPlan을 스트림으로 변환
+    Stream<ActionPlan> planStream = analysis.getActionPlans().stream();
+
+    // 2. 필터 타입이 들어온 경우 필터링 수행
+    if (swotType != null) {
+      // S를 넣으면 [SO, ST] 리스트가 나옴
+      List<RelatedSwotType> targetTypes = RelatedSwotType.findAllByComponent(swotType);
+
+      // ActionPlan의 swotType이 targetTypes에 포함되는 것만 남김
+      planStream = planStream.filter(plan -> targetTypes.contains(plan.getRelatedSwot()));
+    }
+
+    return planStream.map(AnalysisResDTO.ActionPlanDTO::of).toList();
   }
 
   public AnalysisResDTO.ActionPlanDetailDTO getActionPlanDetail(Long actionPlanId) {
