@@ -33,6 +33,12 @@ public class AiAnalysisController {
     - 분석 요청이 성공하면 requestId를 반환합니다.
     - 반환된 requestId는 이후 분석 상태 조회 및 결과 조회에 사용됩니다.
     """)
+  @ApiErrorCodeExamples({
+    ErrorCode.STORE_NOT_FOUND,
+    ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED,
+    ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS,
+    ErrorCode.ANALYSIS_SERVER_ERROR
+  })
   @PostMapping
   public ApiResponse<AnalysisRequestResponse> analyze(@RequestParam Long storeId) {
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.analyzeStore(storeId));
@@ -48,6 +54,7 @@ public class AiAnalysisController {
     - 프론트엔드에서 주기적으로 호출하는 폴링용 API입니다.
     - 분석 상태는 WAITING / PROCESSING / COMPLETED / FAILED 등으로 구분됩니다.
     """)
+  @ApiErrorCodeExamples({ErrorCode.ANALYSIS_REQUEST_NOT_FOUND})
   @GetMapping("/{requestId}/status")
   public ApiResponse<AnalysisStatusResponse> getStatus(@PathVariable String requestId) {
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.getAnalysisStatus(requestId));
