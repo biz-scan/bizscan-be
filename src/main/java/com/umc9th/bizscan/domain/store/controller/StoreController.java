@@ -11,10 +11,12 @@ import com.umc9th.bizscan.domain.store.entity.StoreCategory;
 import com.umc9th.bizscan.domain.store.entity.StoreCategoryDetail;
 import com.umc9th.bizscan.domain.store.entity.TagCode;
 import com.umc9th.bizscan.domain.store.entity.Target;
+import com.umc9th.bizscan.domain.store.exception.StoreErrorCode;
 import com.umc9th.bizscan.domain.store.service.StoreService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
+import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
 import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -212,6 +214,7 @@ public class StoreController {
                 OPERATION_HALL_SERVICE(홀영업), OPERATION_DELIVERY_AVAILABLE(배달가능), OPERATION_TAKEOUT_ONLY(포장전문)
 
               """)
+  @ApiErrorCodeExamples(store={StoreErrorCode.ADDRESS_DUPLICATED})
   @PatchMapping("/{storeId}")
   public ResponseEntity<ApiResponse<StoreResponse>> updateStore(
       @PathVariable Long storeId,
