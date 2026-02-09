@@ -31,7 +31,6 @@ services:
       - "6379"
     environment:
       TZ: Asia/Seoul
-    #      REDIS_PASS: ${REDIS_PASS}
     command: >
       redis-server
       --maxmemory 256mb
