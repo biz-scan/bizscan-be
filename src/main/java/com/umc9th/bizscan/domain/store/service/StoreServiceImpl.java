@@ -1,5 +1,6 @@
 package com.umc9th.bizscan.domain.store.service;
 
+import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRepository;
 import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.domain.member.repository.MemberRepository;
 import com.umc9th.bizscan.domain.store.dto.request.StoreCreateRequest;
@@ -47,6 +48,7 @@ public class StoreServiceImpl implements StoreService {
   private final MemberRepository memberRepository;
   private final StoreMapper storeMapper;
   private final KakaoClient kakaoClient;
+  private final AnalysisRepository analysisRepository;
 
   @Override
   public StoreResponse createStore(String email, StoreCreateRequest request) {
@@ -150,7 +152,11 @@ public class StoreServiceImpl implements StoreService {
     List<Tag> tags =
         storeTagRepository.findAllByStoreFetchTag(store).stream().map(StoreTag::getTag).toList();
 
-    return storeMapper.toCreateResponse(store, tags);
+    Long analysisId = analysisRepository
+        .findLatestAnalysisIdByStoreId(storeId)
+        .orElse(null);
+
+    return storeMapper.toCreateResponse(store, tags, analysisId);
   }
 
   @Override
@@ -159,14 +165,16 @@ public class StoreServiceImpl implements StoreService {
     Store store = validateStoreOwner(storeId, email);
 
     List<TagCode> tagCodes = parseTagCodes(tagStrings);
-
     List<Tag> tags = resolveTags(tagCodes, storeId);
 
     storeTagRepository.deleteAllByStoreId(storeId);
-
     storeTagRepository.saveAll(tags.stream().map(tag -> StoreTag.of(store, tag)).toList());
 
-    return storeMapper.toCreateResponse(store, tags);
+    Long analysisId = analysisRepository
+        .findLatestAnalysisIdByStoreId(storeId)
+        .orElse(null);
+
+    return storeMapper.toCreateResponse(store, tags, analysisId);
   }
 
   @Override
