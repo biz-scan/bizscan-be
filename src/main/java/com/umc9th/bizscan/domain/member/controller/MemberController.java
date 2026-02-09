@@ -28,6 +28,11 @@ public class MemberController {
   @Operation(
       summary = "회원가입",
       description = "신규 사용자를 회원으로 등록합니다. " + "이메일 중복 여부를 검증하고, 비밀번호는 암호화되어 저장됩니다.")
+  @ApiErrorCodeExamples({
+          ErrorCode.MEMBER_ALREADY_REGISTERED,
+          ErrorCode.EMAIL_ALREADY_EXISTS,
+          ErrorCode.NICKNAME_ALREADY_EXISTS
+  })
   @PostMapping("/register")
   public ResponseEntity<ApiResponse<Long>> register(@RequestBody @Valid RegisterMemberDto dto) {
     Long memberId = memberCommandService.registerMember(dto);
@@ -36,12 +41,14 @@ public class MemberController {
   }
 
   @Operation(summary = "회원 단건 조회", description = "회원 ID를 통해 특정 회원의 정보를 조회합니다.")
+  @ApiErrorCodeExamples({ErrorCode.MEMBER_NOT_FOUND})
   @GetMapping("/{memberId}")
   public ResponseEntity<ApiResponse<MemberResponseDto>> getMember(@PathVariable Long memberId) {
     Member member = memberQueryService.getMemberById(memberId);
     return ResponseEntity.ok(
         ApiResponse.onSuccess(SuccessCode.MEMBER_GET_SUCCESS, MemberResponseDto.from(member)));
   }
+
 
   @GetMapping
   @Operation(summary = "회원 목록 조회", description = "전체 회원 목록을 조회합니다.")
@@ -52,6 +59,7 @@ public class MemberController {
 
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.MEMBER_LIST_SUCCESS, result));
   }
+
 
   @PatchMapping("/{memberId}")
   @Operation(summary = "회원 정보 수정", description = "회원 닉네임 및 비밀번호를 수정합니다.")
@@ -69,6 +77,7 @@ public class MemberController {
 
   @DeleteMapping("/{memberId}")
   @Operation(summary = "회원 삭제", description = "회원을 삭제합니다.")
+  @ApiErrorCodeExamples({ErrorCode.MEMBER_NOT_FOUND})
   public ResponseEntity<ApiResponse<Void>> deleteMember(@PathVariable Long memberId) {
     memberCommandService.deleteMember(memberId);
 
@@ -76,6 +85,7 @@ public class MemberController {
   }
 
   @Operation(summary = "내 정보 조회", description = "JWT 인증을 통해 로그인한 사용자의 정보를 조회합니다.")
+  @ApiErrorCodeExamples({ErrorCode.MEMBER_NOT_FOUND})
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<MemberResponseDto>> getMyInfo(Authentication authentication) {
     // JWT subject == email

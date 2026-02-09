@@ -2,7 +2,10 @@ package com.umc9th.bizscan.global.security.controller;
 
 import com.umc9th.bizscan.domain.member.service.MemberQueryService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
+import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
+import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
+import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import com.umc9th.bizscan.global.security.jwt.dto.AccessTokenResponse;
 import com.umc9th.bizscan.global.security.jwt.dto.JwtToken;
 import com.umc9th.bizscan.global.security.jwt.dto.MemberLoginRequestDto;
@@ -36,6 +39,10 @@ public class TokenApiController {
   private final MemberQueryService memberQueryService;
 
   @Operation(summary = "이메일로 JWT 토큰 발급")
+  @ApiErrorCodeExamples(
+          value = {ErrorCode.MEMBER_NOT_FOUND},
+          security = {SecurityErrorStatus.AUTH_WRONG_PASSWORD}
+  )
   @PostMapping("/login")
   public ResponseEntity<ApiResponse<AccessTokenResponse>> login(
       @RequestBody MemberLoginRequestDto memberLoginRequestDto, HttpServletResponse response) {
@@ -59,6 +66,14 @@ public class TokenApiController {
   @Operation(
       summary = "Access Token 재발급",
       description = "HttpOnly Cookie에 저장된 Refresh Token을 이용해 Access Token을 재발급합니다.")
+  @ApiErrorCodeExamples(
+          value = {ErrorCode.MEMBER_NOT_FOUND},
+          security = {
+                  SecurityErrorStatus.AUTH_INVALID_REFRESH_TOKEN,
+                  SecurityErrorStatus.AUTH_TOKEN_HAS_EXPIRED,
+                  SecurityErrorStatus.AUTH_INVALID_TOKEN
+          }
+  )
   @PostMapping("/reissue")
   public ResponseEntity<ApiResponse<AccessTokenResponse>> reissue(
       @CookieValue(value = "refreshToken", required = false) String refreshToken,
@@ -72,6 +87,13 @@ public class TokenApiController {
   }
 
   @Operation(summary = "로그아웃", description = "사용자를 로그아웃 처리합니다.")
+  @ApiErrorCodeExamples(
+          security = {
+                  SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI,
+                  SecurityErrorStatus.AUTH_TOKEN_HAS_EXPIRED,
+                  SecurityErrorStatus.AUTH_INVALID_TOKEN
+          }
+  )
   @PostMapping("/logout")
   public ApiResponse<Void> logout(
       @AuthenticationPrincipal User user,
