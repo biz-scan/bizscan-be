@@ -50,8 +50,8 @@ public class AiAnalysisService {
   /** AI 분석 요청 (프론트에서 최초 1회 호출) requestId 반환 → 프론트에서 폴링 */
   @Transactional
   public AnalysisRequestResponse analyzeStore(AnalysisReqDTO.AiAnalysisDTO dto) {
-      Long storeId = dto.storeId();
-      Boolean retry = dto.retry();
+    Long storeId = dto.storeId();
+    Boolean retry = dto.retry();
 
     // 0. 매장 조회 (Spring에서만 DB 접근)
     Store store =

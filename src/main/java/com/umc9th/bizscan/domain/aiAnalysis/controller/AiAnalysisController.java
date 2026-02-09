@@ -10,13 +10,9 @@ import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
 import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
-
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,21 +26,28 @@ public class AiAnalysisController {
 
   // 분석 요청 (프론트에서 최초 1회 호출)
   @Operation(
-          summary = "매장 AI 분석 요청",
-          description = """
+      summary = "매장 AI 분석 요청",
+      description =
+          """
             특정 매장(storeId)에 대해 AI 분석을 요청합니다.
-            
+
             - 분석 요청 시 비동기 방식으로 AI 서버(FastAPI)에 분석을 전달합니다.
             - 분석 요청이 성공하면 requestId를 반환합니다.
             - 반환된 requestId는 이후 분석 상태 조회 및 결과 조회에 사용됩니다.
-            
+
             **[주의사항]**
             1. 이미 분석이 완료된 경우 `ANALYSIS_ALREADY_IN_COMPLETED` 에러가 발생합니다. 재시도를 원할 경우 `retry: true`로 요청하세요.
             2. 이미 분석이 진행 중인 경우 `ANALYSIS_ALREADY_IN_PROGRESS` 에러가 발생합니다.
             """)
-  @ApiErrorCodeExamples({ErrorCode.STORE_NOT_FOUND, ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED, ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS, ErrorCode.ANALYSIS_SERVER_ERROR})
+  @ApiErrorCodeExamples({
+    ErrorCode.STORE_NOT_FOUND,
+    ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED,
+    ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS,
+    ErrorCode.ANALYSIS_SERVER_ERROR
+  })
   @PostMapping
-  public ApiResponse<AnalysisRequestResponse> analyze(@Valid @RequestBody AnalysisReqDTO.AiAnalysisDTO request) {
+  public ApiResponse<AnalysisRequestResponse> analyze(
+      @Valid @RequestBody AnalysisReqDTO.AiAnalysisDTO request) {
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.analyzeStore(request));
   }
 
