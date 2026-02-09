@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -162,40 +163,40 @@ public class StoreController {
       summary = "가게 정보 부분 수정",
       description =
           """
-          로그인 사용자가 **본인 가게 정보**를 부분 수정합니다. (PATCH 동작)
+              로그인 사용자가 **본인 가게 정보**를 부분 수정합니다. (PATCH 동작)
 
-          동작 방식
-          - 요청 바디(JSON)에서 **전달된 필드만 변경**됩니다.
-          - 전달되지 않은 필드는 **기존 값 유지**됩니다.
-          - address(주소)가 변경되면 서버에서 **Kakao Geocoding**을 다시 수행하여 lat/lon을 갱신합니다.
-          - 주소 중복(다른 가게가 이미 사용 중인 주소)이면 **400 에러**가 발생합니다.
+              동작 방식
+              - 요청 바디(JSON)에서 **전달된 필드만 변경**됩니다.
+              - 전달되지 않은 필드는 **기존 값 유지**됩니다.
+              - address(주소)가 변경되면 서버에서 **Kakao Geocoding**을 다시 수행하여 lat/lon을 갱신합니다.
+              - 주소 중복(다른 가게가 이미 사용 중인 주소)이면 **400 에러**가 발생합니다.
 
-          권한/소유자
-          - 로그인 필수 (JWT 필요)
-          - 본인 소유(store의 owner)가 아니면 **403 FORBIDDEN**
+              권한/소유자
+              - 로그인 필수 (JWT 필요)
+              - 본인 소유(store의 owner)가 아니면 **403 FORBIDDEN**
 
-          tags(태그) 수정은 이 API에서 처리하지 않습니다.
-          - 이 API는 **가게 기본 정보만 수정**합니다. (name/address/category 등)
-          - tags를 수정하려면 아래 전용 API를 사용하세요:
-            PATCH /api/stores/{storeId}/tags
+              tags(태그) 수정은 이 API에서 처리하지 않습니다.
+              - 이 API는 **가게 기본 정보만 수정**합니다. (name/address/category 등)
+              - tags를 수정하려면 아래 전용 API를 사용하세요:
+                PUT /api/stores/{storeId}/tags
 
-          태그 규칙(등록/수정 공통)
-          - 태그는 "MOOD_VIEW" 같은 **TagCode 문자열**로 입력됩니다.
-          - 최소 1개, 최대 3개
-          - 중복 불가
-          - DB에 존재하지 않는 태그 코드면 에러
+              태그 규칙(등록/수정 공통)
+              - 태그는 "MOOD_VIEW" 같은 **TagCode 문자열**로 입력됩니다.
+              - 최소 1개, 최대 3개
+              - 중복 불가
+              - DB에 존재하지 않는 태그 코드면 에러
 
-          태그 코드 목록 (참고)
-          - 분위기(MOOD):
-            MOOD_VIEW(뷰맛집), MOOD_HIP(힙한), MOOD_QUIET(조용한),
-            MOOD_RETRO(레트로), MOOD_LUXURY(고급진), MOOD_LIVELY(활기찬)
-          - 특징(FEATURE):
-            FEATURE_GOOD_VALUE(가성비), FEATURE_SOLO_FRIENDLY(혼밥환영), FEATURE_GROUP_SEAT(단체석),
-            FEATURE_PET_FRIENDLY(반려동물), FEATURE_PHOTO_SPOT(사진맛집)
-          - 운영(OPERATION):
-            OPERATION_HALL_SERVICE(홀영업), OPERATION_DELIVERY_AVAILABLE(배달가능), OPERATION_TAKEOUT_ONLY(포장전문)
+              태그 코드 목록 (참고)
+              - 분위기(MOOD):
+                MOOD_VIEW(뷰맛집), MOOD_HIP(힙한), MOOD_QUIET(조용한),
+                MOOD_RETRO(레트로), MOOD_LUXURY(고급진), MOOD_LIVELY(활기찬)
+              - 특징(FEATURE):
+                FEATURE_GOOD_VALUE(가성비), FEATURE_SOLO_FRIENDLY(혼밥환영), FEATURE_GROUP_SEAT(단체석),
+                FEATURE_PET_FRIENDLY(반려동물), FEATURE_PHOTO_SPOT(사진맛집)
+              - 운영(OPERATION):
+                OPERATION_HALL_SERVICE(홀영업), OPERATION_DELIVERY_AVAILABLE(배달가능), OPERATION_TAKEOUT_ONLY(포장전문)
 
-          """)
+              """)
   @PatchMapping("/{storeId}")
   public ResponseEntity<ApiResponse<StoreResponse>> updateStore(
       @PathVariable Long storeId,
@@ -216,34 +217,34 @@ public class StoreController {
       summary = "가게 태그 수정",
       description =
           """
-          로그인 사용자가 **본인 가게의 태그(tags)만** 수정합니다.
+              로그인 사용자가 **본인 가게의 태그(tags)만** 수정합니다.
 
-          동작 방식
-          - 기존 태그 매핑(StoreTag)을 **모두 삭제한 뒤**, 요청으로 받은 태그로 **완전히 교체**합니다.
-          - 따라서 이 API는 "추가"가 아니라 "교체"입니다. (Replace)
+              동작 방식
+              - 기존 태그 매핑(StoreTag)을 **모두 삭제한 뒤**, 요청으로 받은 태그로 **완전히 교체**합니다.
+              - 따라서 이 API는 "추가"가 아니라 "교체"입니다. (Replace)
 
-          권한/소유자
-          - 로그인 필수 (JWT 필요)
-          - 본인 소유(store의 owner)가 아니면 **403 FORBIDDEN**
+              권한/소유자
+              - 로그인 필수 (JWT 필요)
+              - 본인 소유(store의 owner)가 아니면 **403 FORBIDDEN**
 
-          tags 규칙 (필수)
-          - 최소 1개, 최대 3개
-          - 중복 불가
-          - 공백/잘못된 문자열/enum에 없는 코드가 포함되면 **400 에러**
-          - DB에 존재하지 않는 태그 코드면 **404 에러**
+              tags 규칙 (필수)
+              - 최소 1개, 최대 3개
+              - 중복 불가
+              - 공백/잘못된 문자열/enum에 없는 코드가 포함되면 **400 에러**
+              - DB에 존재하지 않는 태그 코드면 **404 에러**
 
-          태그 코드 목록
-          - 분위기(MOOD):
-            MOOD_VIEW(뷰맛집), MOOD_HIP(힙한), MOOD_QUIET(조용한),
-            MOOD_RETRO(레트로), MOOD_LUXURY(고급진), MOOD_LIVELY(활기찬)
-          - 특징(FEATURE):
-            FEATURE_GOOD_VALUE(가성비), FEATURE_SOLO_FRIENDLY(혼밥환영), FEATURE_GROUP_SEAT(단체석),
-            FEATURE_PET_FRIENDLY(반려동물), FEATURE_PHOTO_SPOT(사진맛집)
-          - 운영(OPERATION):
-            OPERATION_HALL_SERVICE(홀영업), OPERATION_DELIVERY_AVAILABLE(배달가능), OPERATION_TAKEOUT_ONLY(포장전문)
+              태그 코드 목록
+              - 분위기(MOOD):
+                MOOD_VIEW(뷰맛집), MOOD_HIP(힙한), MOOD_QUIET(조용한),
+                MOOD_RETRO(레트로), MOOD_LUXURY(고급진), MOOD_LIVELY(활기찬)
+              - 특징(FEATURE):
+                FEATURE_GOOD_VALUE(가성비), FEATURE_SOLO_FRIENDLY(혼밥환영), FEATURE_GROUP_SEAT(단체석),
+                FEATURE_PET_FRIENDLY(반려동물), FEATURE_PHOTO_SPOT(사진맛집)
+              - 운영(OPERATION):
+                OPERATION_HALL_SERVICE(홀영업), OPERATION_DELIVERY_AVAILABLE(배달가능), OPERATION_TAKEOUT_ONLY(포장전문)
 
-          """)
-  @PatchMapping("/{storeId}/tags")
+              """)
+  @PutMapping("/{storeId}/tags")
   public ResponseEntity<ApiResponse<StoreResponse>> updateStoreTags(
       @PathVariable Long storeId,
       @AuthenticationPrincipal org.springframework.security.core.userdetails.User user,
