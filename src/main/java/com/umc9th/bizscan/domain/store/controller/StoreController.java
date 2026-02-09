@@ -159,6 +159,21 @@ public class StoreController {
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.OK, storeService.getStore(storeId)));
   }
 
+  @Operation(summary = "내 가게 조회", description = "로그인 사용자의 Access Token 기반으로 본인 소유 가게 정보를 조회합니다.")
+  @GetMapping("/me")
+  public ResponseEntity<ApiResponse<StoreResponse>> getMyStore(
+      @Parameter(hidden = true) @AuthenticationPrincipal
+          org.springframework.security.core.userdetails.User user) {
+
+    if (user == null) {
+      throw new GeneralException(SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI);
+    }
+
+    String email = user.getUsername();
+
+    return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.OK, storeService.getMyStore(email)));
+  }
+
   @Operation(
       summary = "가게 정보 부분 수정",
       description =

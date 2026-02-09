@@ -117,6 +117,28 @@ public class StoreServiceImpl implements StoreService {
   }
 
   @Override
+  @Transactional(readOnly = true)
+  public StoreResponse getMyStore(String email) {
+
+    Member member =
+        memberRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new GeneralException(StoreErrorCode.MEMBER_NOT_FOUND));
+
+    Store store =
+        storeRepository
+            .findByMember(member)
+            .orElseThrow(() -> new GeneralException(StoreErrorCode.STORE_NOT_FOUND));
+
+    List<Tag> tags =
+        storeTagRepository.findAllByStoreFetchTag(store).stream().map(StoreTag::getTag).toList();
+
+    Long analysisId = analysisRepository.findLatestAnalysisIdByStoreId(store.getId()).orElse(null);
+
+    return storeMapper.toCreateResponse(store, tags, analysisId);
+  }
+
+  @Override
   public StoreResponse updateStore(Long storeId, String email, StoreUpdateRequest request) {
 
     Store store = validateStoreOwner(storeId, email);

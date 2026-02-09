@@ -14,6 +14,8 @@ public interface StoreService {
 
   StoreResponse getStore(Long storeId);
 
+  StoreResponse getMyStore(String email);
+
   StoreResponse updateStore(Long storeId, String email, StoreUpdateRequest request);
 
   StoreResponse updateStoreTags(Long storeId, String email, List<String> tags);
