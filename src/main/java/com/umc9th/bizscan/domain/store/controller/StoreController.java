@@ -59,16 +59,15 @@ public class StoreController {
               - 위도/경도는 주소 기반으로 서버에서 자동 변환됩니다. (Kakao Geocoding)
               """)
   @ApiErrorCodeExamples(
-          store = {
-                  StoreErrorCode.ADDRESS_DUPLICATED,
-                  StoreErrorCode.ADDRESS_INVALID,
-                  StoreErrorCode.MEMBER_NOT_FOUND,
-                  StoreErrorCode.TAG_REQUIRED,
-                  StoreErrorCode.TAG_LIMIT_EXCEEDED,
-                  StoreErrorCode.TAG_NOT_FOUND
-          },
-          security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI}
-  )
+      store = {
+        StoreErrorCode.ADDRESS_DUPLICATED,
+        StoreErrorCode.ADDRESS_INVALID,
+        StoreErrorCode.MEMBER_NOT_FOUND,
+        StoreErrorCode.TAG_REQUIRED,
+        StoreErrorCode.TAG_LIMIT_EXCEEDED,
+        StoreErrorCode.TAG_NOT_FOUND
+      },
+      security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI})
   @PostMapping
   public ResponseEntity<ApiResponse<StoreResponse>> createStore(
       @Parameter(hidden = true) @AuthenticationPrincipal
@@ -175,9 +174,8 @@ public class StoreController {
 
   @Operation(summary = "내 가게 조회", description = "로그인 사용자의 Access Token 기반으로 본인 소유 가게 정보를 조회합니다.")
   @ApiErrorCodeExamples(
-          store = {StoreErrorCode.MEMBER_NOT_FOUND, StoreErrorCode.STORE_NOT_FOUND},
-          security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI}
-  )
+      store = {StoreErrorCode.MEMBER_NOT_FOUND, StoreErrorCode.STORE_NOT_FOUND},
+      security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI})
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<StoreResponse>> getMyStore(
       @Parameter(hidden = true) @AuthenticationPrincipal
@@ -231,15 +229,14 @@ public class StoreController {
 
               """)
   @ApiErrorCodeExamples(
-          store = {
-                  StoreErrorCode.STORE_NOT_FOUND,
-                  StoreErrorCode.MEMBER_NOT_FOUND,
-                  StoreErrorCode.FORBIDDEN,
-                  StoreErrorCode.ADDRESS_DUPLICATED,
-                  StoreErrorCode.ADDRESS_INVALID
-          },
-          security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI}
-  )
+      store = {
+        StoreErrorCode.STORE_NOT_FOUND,
+        StoreErrorCode.MEMBER_NOT_FOUND,
+        StoreErrorCode.FORBIDDEN,
+        StoreErrorCode.ADDRESS_DUPLICATED,
+        StoreErrorCode.ADDRESS_INVALID
+      },
+      security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI})
   @PatchMapping("/{storeId}")
   public ResponseEntity<ApiResponse<StoreResponse>> updateStore(
       @PathVariable Long storeId,
@@ -288,17 +285,16 @@ public class StoreController {
 
               """)
   @ApiErrorCodeExamples(
-          store = {
-                  StoreErrorCode.STORE_NOT_FOUND,
-                  StoreErrorCode.MEMBER_NOT_FOUND,
-                  StoreErrorCode.FORBIDDEN,
-                  StoreErrorCode.TAG_REQUIRED,
-                  StoreErrorCode.TAG_CODE_INVALID,
-                  StoreErrorCode.TAG_LIMIT_EXCEEDED,
-                  StoreErrorCode.TAG_NOT_FOUND
-          },
-          security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI}
-  )
+      store = {
+        StoreErrorCode.STORE_NOT_FOUND,
+        StoreErrorCode.MEMBER_NOT_FOUND,
+        StoreErrorCode.FORBIDDEN,
+        StoreErrorCode.TAG_REQUIRED,
+        StoreErrorCode.TAG_CODE_INVALID,
+        StoreErrorCode.TAG_LIMIT_EXCEEDED,
+        StoreErrorCode.TAG_NOT_FOUND
+      },
+      security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI})
   @PutMapping("/{storeId}/tags")
   public ResponseEntity<ApiResponse<StoreResponse>> updateStoreTags(
       @PathVariable Long storeId,

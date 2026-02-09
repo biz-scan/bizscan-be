@@ -10,10 +10,8 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-
 import java.lang.reflect.Method;
 import java.util.*;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.stereotype.Component;
@@ -35,41 +33,39 @@ public class ApiErrorCodeOperationCustomizer implements OperationCustomizer {
     }
 
     // 2. Operation에서 Responses 확보 (null 방어)
-      ApiResponses responses =
-              Optional.ofNullable(operation.getResponses()).orElseGet(ApiResponses::new);
-      operation.setResponses(responses);
+    ApiResponses responses =
+        Optional.ofNullable(operation.getResponses()).orElseGet(ApiResponses::new);
+    operation.setResponses(responses);
 
-      // 3. 에러 코드 추출 및 예시 추가
-      List<BaseErrorCode> errorCodes = extractErrorCodes(annotation);
+    // 3. 에러 코드 추출 및 예시 추가
+    List<BaseErrorCode> errorCodes = extractErrorCodes(annotation);
 
     // 4. 에러 코드 주입
-      errorCodes.forEach(errorCode -> addErrorCodeExample(responses, errorCode));
+    errorCodes.forEach(errorCode -> addErrorCodeExample(responses, errorCode));
 
     return operation;
   }
 
-    /**
-     * 리플렉션을 통해 어노테이션의 모든 필드에서 BaseErrorCode[]를 추출
-     */
-    private List<BaseErrorCode> extractErrorCodes(ApiErrorCodeExamples annotation) {
-        List<BaseErrorCode> errorCodes = new ArrayList<>();
+  /** 리플렉션을 통해 어노테이션의 모든 필드에서 BaseErrorCode[]를 추출 */
+  private List<BaseErrorCode> extractErrorCodes(ApiErrorCodeExamples annotation) {
+    List<BaseErrorCode> errorCodes = new ArrayList<>();
 
-        for (Method method : annotation.annotationType().getDeclaredMethods()) {
-            // 반환 타입이 BaseErrorCode 배열인지 체크 (안전성 강화)
-            if (BaseErrorCode[].class.isAssignableFrom(method.getReturnType())) {
-                try {
-                    BaseErrorCode[] result = (BaseErrorCode[]) method.invoke(annotation);
-                    if (result != null) {
-                        errorCodes.addAll(Arrays.asList(result));
-                    }
-                } catch (Exception e) {
-                    log.error("Swagger 예시 생성 중 리플렉션 오류 발생: {}", method.getName(), e);
-                    throw new GeneralException(ErrorCode.SWAGGER_ANNOTATION_ERROR);
-                }
-            }
+    for (Method method : annotation.annotationType().getDeclaredMethods()) {
+      // 반환 타입이 BaseErrorCode 배열인지 체크 (안전성 강화)
+      if (BaseErrorCode[].class.isAssignableFrom(method.getReturnType())) {
+        try {
+          BaseErrorCode[] result = (BaseErrorCode[]) method.invoke(annotation);
+          if (result != null) {
+            errorCodes.addAll(Arrays.asList(result));
+          }
+        } catch (Exception e) {
+          log.error("Swagger 예시 생성 중 리플렉션 오류 발생: {}", method.getName(), e);
+          throw new GeneralException(ErrorCode.SWAGGER_ANNOTATION_ERROR);
         }
-        return errorCodes;
+      }
     }
+    return errorCodes;
+  }
 
   private void addErrorCodeExample(ApiResponses responses, BaseErrorCode errorCode) {
     String statusCode = String.valueOf(errorCode.getStatus());
@@ -100,7 +96,7 @@ public class ApiErrorCodeOperationCustomizer implements OperationCustomizer {
     body.put("message", errorCode.getMessage());
     body.put("result", null);
 
-      String errorName = errorCode.toString();
+    String errorName = errorCode.toString();
 
     // Swagger Example 객체 생성
     Example example = new Example();

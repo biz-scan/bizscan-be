@@ -23,11 +23,10 @@ public class AnalysisController {
       summary = "AI 분석용 요약 데이터 추출",
       description = "주소, 업종, 가게명, 키워드를 입력하면 AI 프롬프트에 사용할 핵심 요약 데이터(경쟁, 리뷰 포함)를 JSON으로 반환합니다.")
   @ApiErrorCodeExamples(
-          dataAnalysis = {
-                  SwotAnalysisErrorCode.REGION_ADDRESS_NOT_FOUND,
-                  SwotAnalysisErrorCode.REGION_DATA_NOT_FOUND
-          }
-  )
+      dataAnalysis = {
+        SwotAnalysisErrorCode.REGION_ADDRESS_NOT_FOUND,
+        SwotAnalysisErrorCode.REGION_DATA_NOT_FOUND
+      })
   @GetMapping("/summary")
   public AnalysisSummaryDto getAnalysisSummary(
       @Parameter(description = "매장 주소 (예: 서울 성동구 성수동1가 656-442)", required = true)

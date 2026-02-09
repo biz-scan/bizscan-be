@@ -13,7 +13,7 @@ public enum ErrorCode implements BaseErrorCode {
   NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON404_1", "요청한 리소스를 찾을 수 없습니다."),
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500_1", "예기치 않은 서버 에러가 발생했습니다."),
   INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "COMMON400_2", "유효하지 않은 타입 값입니다."),
-    SWAGGER_ANNOTATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500_1", "Swagger 오류"),
+  SWAGGER_ANNOTATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON500_1", "Swagger 오류"),
 
   // JWT
   UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH401_1", "인증이 필요합니다."),

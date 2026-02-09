@@ -29,9 +29,9 @@ public class MemberController {
       summary = "회원가입",
       description = "신규 사용자를 회원으로 등록합니다. " + "이메일 중복 여부를 검증하고, 비밀번호는 암호화되어 저장됩니다.")
   @ApiErrorCodeExamples({
-          ErrorCode.MEMBER_ALREADY_REGISTERED,
-          ErrorCode.EMAIL_ALREADY_EXISTS,
-          ErrorCode.NICKNAME_ALREADY_EXISTS
+    ErrorCode.MEMBER_ALREADY_REGISTERED,
+    ErrorCode.EMAIL_ALREADY_EXISTS,
+    ErrorCode.NICKNAME_ALREADY_EXISTS
   })
   @PostMapping("/register")
   public ResponseEntity<ApiResponse<Long>> register(@RequestBody @Valid RegisterMemberDto dto) {
@@ -49,7 +49,6 @@ public class MemberController {
         ApiResponse.onSuccess(SuccessCode.MEMBER_GET_SUCCESS, MemberResponseDto.from(member)));
   }
 
-
   @GetMapping
   @Operation(summary = "회원 목록 조회", description = "전체 회원 목록을 조회합니다.")
   public ResponseEntity<ApiResponse<List<MemberResponseDto>>> getMembers() {
@@ -59,7 +58,6 @@ public class MemberController {
 
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.MEMBER_LIST_SUCCESS, result));
   }
-
 
   @PatchMapping("/{memberId}")
   @Operation(summary = "회원 정보 수정", description = "회원 닉네임 및 비밀번호를 수정합니다.")

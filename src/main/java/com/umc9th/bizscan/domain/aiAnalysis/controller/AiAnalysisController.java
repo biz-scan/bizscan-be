@@ -33,7 +33,12 @@ public class AiAnalysisController {
     - 분석 요청이 성공하면 requestId를 반환합니다.
     - 반환된 requestId는 이후 분석 상태 조회 및 결과 조회에 사용됩니다.
     """)
-  @ApiErrorCodeExamples({ErrorCode.STORE_NOT_FOUND, ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED, ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS, ErrorCode.ANALYSIS_SERVER_ERROR})
+  @ApiErrorCodeExamples({
+    ErrorCode.STORE_NOT_FOUND,
+    ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED,
+    ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS,
+    ErrorCode.ANALYSIS_SERVER_ERROR
+  })
   @PostMapping
   public ApiResponse<AnalysisRequestResponse> analyze(@RequestParam Long storeId) {
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.analyzeStore(storeId));
