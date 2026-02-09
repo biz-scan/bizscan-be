@@ -217,7 +217,7 @@ public class AiAnalysisService {
   /** pollingTime 계산 로직 */
   private int calculatePoolingTime(AnalysisStatus status) {
     return switch (status) {
-      case REQUEST -> 30000; // 초반
+      case REQUEST -> 15000; // 초반
       case SWOT_PROCESSING -> 10000; // 중반
       case ACTION_PLAN_PROCESSING -> 10000; // 중반
       case ACTION_DETAIL_PROCESSING -> 2000; // 후반
