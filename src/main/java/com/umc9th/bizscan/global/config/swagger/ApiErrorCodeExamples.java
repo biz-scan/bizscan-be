@@ -16,7 +16,7 @@ public @interface ApiErrorCodeExamples {
 
     // ErrorCode
   ErrorCode[] value() default {};
-  // CustomErrorCode: store={} 명시 필요 && ApiErrorCodeOperationCustomizer에 코드 추가 필요
+  // CustomErrorCode: store={} 명시 필요
     StoreErrorCode[] store() default {};
     SwotAnalysisErrorCode[] dataAnalysis() default {};
     SecurityErrorStatus[]  security() default {};

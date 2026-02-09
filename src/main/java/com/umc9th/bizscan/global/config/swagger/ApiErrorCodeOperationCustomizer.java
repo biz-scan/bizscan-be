@@ -22,7 +22,6 @@ import org.springframework.web.method.HandlerMethod;
 @Slf4j
 @Component
 public class ApiErrorCodeOperationCustomizer implements OperationCustomizer {
-    // Thanks to Jake
 
   private static final String JSON_MEDIA_TYPE = "application/json";
   private static final String RESPONSE_DTO_REF = "#/components/schemas/ApiResponse";
