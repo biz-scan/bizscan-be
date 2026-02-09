@@ -16,6 +16,9 @@ public class StoreResponse {
   @Schema(description = "가게 ID", example = "1")
   private Long storeId;
 
+  @Schema(description = "분석 ID", example = "2", nullable = true)
+  private Long analysisId;
+
   @Schema(description = "매장명", example = "문화제빵")
   private String name;
 
@@ -66,6 +69,7 @@ public class StoreResponse {
 
   public static StoreResponse of(
       Long storeId,
+      Long analysisId,
       String name,
       String address,
       BigDecimal lat,
@@ -80,6 +84,7 @@ public class StoreResponse {
 
     return StoreResponse.builder()
         .storeId(storeId)
+        .analysisId(analysisId)
         .name(name)
         .address(address)
         .lat(lat)
