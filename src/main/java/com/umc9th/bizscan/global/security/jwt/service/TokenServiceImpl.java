@@ -71,6 +71,10 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   public JwtToken issueTokens(String refreshToken) {
+    if (refreshToken == null) {
+      throw new GeneralException(SecurityErrorStatus.AUTH_INVALID_REFRESH_TOKEN);
+    }
+
     refreshToken = resolveToken(refreshToken);
 
     if (!validateToken(refreshToken) || !existsRefreshToken(refreshToken)) {
