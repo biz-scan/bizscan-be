@@ -217,10 +217,10 @@ public class AiAnalysisService {
   /** pollingTime 계산 로직 */
   private int calculatePoolingTime(AnalysisStatus status) {
     return switch (status) {
-      case REQUEST -> 15000; // 초반
-      case SWOT_PROCESSING -> 10000; // 중반
-      case ACTION_PLAN_PROCESSING -> 10000; // 중반
-      case ACTION_DETAIL_PROCESSING -> 2000; // 후반
+      case REQUEST -> 2000; // 데이터 정제
+      case SWOT_PROCESSING -> 5000; // SWOT 분석
+      case ACTION_PLAN_PROCESSING -> 8000; // ActionPlan 생성
+      case ACTION_DETAIL_PROCESSING -> 1500; // ActionDetail 생성
       case COMPLETED, FAILED -> 0; // 폴링 종료
     };
   }
