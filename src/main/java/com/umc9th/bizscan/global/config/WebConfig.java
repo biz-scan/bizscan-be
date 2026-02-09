@@ -12,7 +12,10 @@ public class WebConfig implements WebMvcConfigurer {
     registry
         .addMapping("/**")
         .allowedOrigins(
-            "http://localhost:3000", "http://localhost:5173", "https://bizscan.duckdns.org", "https://bizscan-web.vercel.app")
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://bizscan.duckdns.org",
+            "https://bizscan-web.vercel.app")
         .allowedMethods("*")
         .allowedHeaders("*")
         .exposedHeaders("Authorization")
