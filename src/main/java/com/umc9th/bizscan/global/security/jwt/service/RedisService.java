@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class RedisService {
+
   private final RedisTemplate redisTemplate;
+  private static final String BLACKLIST_PREFIX = "blacklist:";
 
   // FOR Refresh token(whiteList)
   // key-value 설정
@@ -23,7 +25,7 @@ public class RedisService {
   }
 
   public void deleteRefreshTokenByEmail(String email) {
-    String refreshToken = redisTemplate.opsForValue().get(email).toString();
+    String refreshToken = (String) redisTemplate.opsForValue().get(email);
     if (refreshToken != null) {
       redisTemplate.delete(refreshToken);
       redisTemplate.delete(email);
@@ -42,5 +44,34 @@ public class RedisService {
       token = token.substring(7);
     }
     redisTemplate.delete(token);
+  }
+
+  // AccessToken 블랙리스트 등록 (TTL: 남은 만료시간)
+  public void blacklistAccessToken(String accessToken, Duration ttl) {
+    if (accessToken == null) {
+      return;
+    }
+    if (accessToken.startsWith("Bearer ")) {
+      accessToken = accessToken.substring(7);
+    }
+
+    if (ttl == null || ttl.isZero() || ttl.isNegative()) {
+      return;
+    }
+
+    redisTemplate.opsForValue().set(BLACKLIST_PREFIX + accessToken, "logout", ttl);
+  }
+
+  // 블랙리스트 여부 확인
+  public boolean isBlacklisted(String accessToken) {
+    if (accessToken == null) {
+      return false;
+    }
+    if (accessToken.startsWith("Bearer ")) {
+      accessToken = accessToken.substring(7);
+    }
+
+    Boolean exists = redisTemplate.hasKey(BLACKLIST_PREFIX + accessToken);
+    return Boolean.TRUE.equals(exists);
   }
 }

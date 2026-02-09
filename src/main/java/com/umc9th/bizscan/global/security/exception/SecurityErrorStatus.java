@@ -21,7 +21,8 @@ public enum SecurityErrorStatus implements BaseErrorCode {
   AUTH_UNAUTHORIZED_LOGIN_DATA_RETRIEVAL_ERROR(HttpStatus.BAD_REQUEST, "4358", "로그인이 필요없는 API입니다."),
   AUTH_ASSIGNABLE_PARAMETER(HttpStatus.BAD_REQUEST, "4359", "인증타입이 잘못되어 할당이 불가능합니다."),
   AUTH_INVALID_ROLE(HttpStatus.FORBIDDEN, "4360", "유효하지 않은 역할(Role)입니다."),
-  AUTH_WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "4361", "패스워드가 잘못되었습니다.");
+  AUTH_WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "4361", "패스워드가 잘못되었습니다."),
+  AUTH_LOGGED_OUT_TOKEN(HttpStatus.UNAUTHORIZED, "4362", "로그아웃된 토큰입니다.");
 
   private final HttpStatus httpStatus;
   private final String code;

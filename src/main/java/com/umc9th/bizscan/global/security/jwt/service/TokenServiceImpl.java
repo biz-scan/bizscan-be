@@ -9,10 +9,18 @@ import com.umc9th.bizscan.global.security.exception.JwtAuthenticationExpiredExce
 import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import com.umc9th.bizscan.global.security.jwt.dto.JwtToken;
 import com.umc9th.bizscan.global.security.jwt.dto.MemberLoginRequestDto;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import java.security.Key;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -31,6 +39,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class TokenServiceImpl implements TokenService {
+
   private final Key key; // security yml 파일 생성 후 app.jwt.secret에 값 넣어주기(보안을 위해 따로 연락주세요)
   private final RedisService redisService;
   private final MemberQueryService memberQueryService;
@@ -62,16 +71,20 @@ public class TokenServiceImpl implements TokenService {
 
   @Override
   public JwtToken issueTokens(String refreshToken) {
+    if (refreshToken == null) {
+      throw new GeneralException(SecurityErrorStatus.AUTH_INVALID_REFRESH_TOKEN);
+    }
+
     refreshToken = resolveToken(refreshToken);
 
     if (!validateToken(refreshToken) || !existsRefreshToken(refreshToken)) {
       throw new GeneralException(SecurityErrorStatus.AUTH_INVALID_REFRESH_TOKEN);
     }
 
-    redisService.deleteValue(refreshToken);
-
     Claims claims = parseClaims(refreshToken);
     String email = claims.getSubject();
+    redisService.deleteRefreshTokenByEmail(email);
+
     Member member = memberQueryService.getMemberByEmail(email);
 
     Authentication authentication =
@@ -147,7 +160,7 @@ public class TokenServiceImpl implements TokenService {
     try {
       Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
       return true;
-    } catch (SecurityException | MalformedJwtException e) {
+    } catch (SignatureException | SecurityException | MalformedJwtException e) {
       log.info("Invalid JWT Token", e);
       throw JwtAuthenticationException.INVALID_TOKEN;
     } catch (ExpiredJwtException e) {
@@ -163,9 +176,25 @@ public class TokenServiceImpl implements TokenService {
   }
 
   @Override
-  public boolean logout(String email) {
+  public boolean logout(String email, String accessToken) {
     // email 기준으로 Redis에 저장된 refreshToken 찾아서 삭제
     redisService.deleteRefreshTokenByEmail(email);
+
+    // accessToken 블랙리스트 (남은 TTL만큼)
+    if (accessToken != null) {
+      accessToken = resolveToken(accessToken);
+      try {
+        Date exp = parseExpiration(accessToken);
+        long remainingMillis = exp.getTime() - System.currentTimeMillis();
+
+        if (remainingMillis > 0) {
+          redisService.blacklistAccessToken(accessToken, Duration.ofMillis(remainingMillis));
+        }
+      } catch (Exception e) {
+        // accessToken이 이상해도 로그아웃은 성공 처리
+        log.info("logout accessToken parse failed: {}", e.getMessage());
+      }
+    }
     return true;
   }
 

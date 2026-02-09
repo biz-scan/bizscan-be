@@ -3,8 +3,11 @@ package com.umc9th.bizscan.global.security.filter;
 import static com.umc9th.bizscan.global.security.consts.StaticVariable.HEALTH_CHECK_ENDPOINT;
 import static com.umc9th.bizscan.global.security.consts.StaticVariable.REISSUE_ENDPOINT;
 
+import com.umc9th.bizscan.global.security.exception.CustomErrorSend;
 import com.umc9th.bizscan.global.security.exception.JwtAuthenticationException;
 import com.umc9th.bizscan.global.security.exception.JwtAuthenticationExpiredException;
+import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
+import com.umc9th.bizscan.global.security.jwt.service.RedisService;
 import com.umc9th.bizscan.global.security.jwt.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,6 +28,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final TokenService tokenService;
+  private final RedisService redisService;
 
   @Override
   protected void doFilterInternal(
@@ -40,6 +44,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (token != null) {
       // 만료 케이스만 해당 필터에서 처리. 나머지는 JwtExceptionFilter 에서 처리
       try {
+        if (redisService.isBlacklisted(token)) {
+          CustomErrorSend.handleException(
+              response,
+              SecurityErrorStatus.AUTH_LOGGED_OUT_TOKEN,
+              SecurityErrorStatus.AUTH_LOGGED_OUT_TOKEN.name());
+          return;
+        }
         tokenService.validateToken(token);
         // 토큰이 유효할 경우 토큰에서 Authentication 객체를 가지고 와서 SecurityContext에 저장
         Authentication authentication = tokenService.getAuthentication(token);
@@ -51,8 +62,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             requestURI,
             authentication.getAuthorities());
       } catch (JwtAuthenticationExpiredException e) {
-        if (!requestURI.equals(REISSUE_ENDPOINT)) throw JwtAuthenticationException.TOKEN_IS_EXPIRED;
+        if (!requestURI.equals(REISSUE_ENDPOINT)) {
+          CustomErrorSend.handleException(
+              response,
+              SecurityErrorStatus.AUTH_TOKEN_HAS_EXPIRED,
+              SecurityErrorStatus.AUTH_TOKEN_HAS_EXPIRED.name());
+          return;
+        }
         log.debug("토큰 만료지만 재발급 시도이므로 통과합니다.");
+
+      } catch (JwtAuthenticationException e) {
+        SecurityErrorStatus status;
+        try {
+          status = SecurityErrorStatus.valueOf(e.getMessage());
+        } catch (Exception ex) {
+          status = SecurityErrorStatus.AUTH_INVALID_TOKEN;
+        }
+
+        CustomErrorSend.handleException(response, status, status.name());
+        return;
       }
     } else {
       if (!requestURI.equals(HEALTH_CHECK_ENDPOINT)) {

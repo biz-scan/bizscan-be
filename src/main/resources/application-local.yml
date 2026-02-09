@@ -1,0 +1,11 @@
+ai:
+  fastapi:
+    base-url: http://localhost:8000
+  callback:
+    base-url: http://localhost:8080
+
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379

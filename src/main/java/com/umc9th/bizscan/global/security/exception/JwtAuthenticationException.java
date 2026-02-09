@@ -3,6 +3,7 @@ package com.umc9th.bizscan.global.security.exception;
 import org.springframework.security.core.AuthenticationException;
 
 public class JwtAuthenticationException extends AuthenticationException {
+
   public static final AuthenticationException UNAUTHORIZED_LOGIN_DATA =
       new JwtAuthenticationException(
           SecurityErrorStatus.AUTH_UNAUTHORIZED_LOGIN_DATA_RETRIEVAL_ERROR);
@@ -21,6 +22,9 @@ public class JwtAuthenticationException extends AuthenticationException {
       new JwtAuthenticationException(SecurityErrorStatus.AUTH_IS_NULL);
   public static final AuthenticationException TOKEN_IS_EXPIRED =
       new JwtAuthenticationException(SecurityErrorStatus.AUTH_TOKEN_HAS_EXPIRED);
+
+  public static final AuthenticationException LOGGED_OUT =
+      new JwtAuthenticationException(SecurityErrorStatus.AUTH_LOGGED_OUT_TOKEN);
 
   public JwtAuthenticationException(SecurityErrorStatus errorStatus) {
     super(errorStatus.name());
