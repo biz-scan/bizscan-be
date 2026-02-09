@@ -52,9 +52,5 @@ public class AnalysisSummary {
   private Double myRating; // 내 별점
   private Double avgCompReviewCount; // 경쟁사 평균 리뷰 수
 
-  @Lob
-  @Column(columnDefinition = "TEXT")
-  private String myReviewContents; // 내 리뷰 내용 요약
-
   @CreatedDate private LocalDateTime createdAt;
 }

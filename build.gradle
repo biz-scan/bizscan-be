@@ -56,7 +56,7 @@ dependencies {
 
 
     // naver crawling - Selenium
-    implementation 'org.seleniumhq.selenium:selenium-java:4.16.1'
+    implementation 'org.jsoup:jsoup:1.17.2'
     // WebDriver Manager - chrom driver
     implementation 'io.github.bonigarcia:webdrivermanager:5.6.3'
 
@@ -73,6 +73,7 @@ tasks.named('test') {
 tasks.named('compileJava') {
     options.compilerArgs.add('-parameters')
 }
+
 
 spotless {
     java {

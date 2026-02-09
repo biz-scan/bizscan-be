@@ -22,11 +22,7 @@ public class StoreCrawlingData {
   private String storeName;
 
   private int reviewCount; // 리뷰 수
-  private double rating; // ✨ 별점 (추가됨)
-
-  @Lob
-  @Column(columnDefinition = "TEXT")
-  private String reviewContents; // ✨ 리뷰 내용 (추가됨)
+  private double rating;
 
   @CreatedDate
   @Column(name = "created_at", updatable = false)
@@ -48,13 +44,10 @@ public class StoreCrawlingData {
     this.storeName = storeName;
     this.reviewCount = reviewCount;
     this.rating = rating;
-    this.reviewContents = reviewContents;
   }
 
-  // 데이터 갱신 (크롤링 재수행 시 호출)
-  public void updateData(int reviewCount, double rating, String reviewContents) {
+  public void updateData(int reviewCount, double rating) {
     this.reviewCount = reviewCount;
     this.rating = rating;
-    this.reviewContents = reviewContents;
   }
 }

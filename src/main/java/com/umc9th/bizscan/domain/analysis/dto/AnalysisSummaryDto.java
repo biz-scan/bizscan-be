@@ -31,5 +31,4 @@ public class AnalysisSummaryDto {
   private int myReviewCount; // 내 가게 리뷰 수
   private double avgCompReviewCount; // 경쟁사 평균 리뷰 수
   private double myRating; // 내 별점
-  private String myReviewContents; // 리뷰 내용
 }
