@@ -20,6 +20,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -132,6 +133,15 @@ public class GeneralExceptionAdvice {
 
     ErrorCode code = ErrorCode.INVALID_TYPE_VALUE;
     return ResponseEntity.status(code.getStatus()).body(ApiResponse.onFailure(code, errors));
+  }
+
+  // 정적 리소스 또는 매핑되지 않은 URL을 500이 아닌 404(Not Found)로 응답하도록 처리
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ApiResponse<Void>> handleNoResourceFoundException(
+      NoResourceFoundException ex) {
+
+    return ResponseEntity.status(ErrorCode.NOT_FOUND.getStatus())
+        .body(ApiResponse.onFailure(ErrorCode.NOT_FOUND, null));
   }
 
   // 그 외의 정의되지 않은 모든 예외 처리
