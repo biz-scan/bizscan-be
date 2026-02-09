@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,7 +44,7 @@ public class AiAnalysisController {
             """)
   @ApiErrorCodeExamples({ErrorCode.STORE_NOT_FOUND, ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED, ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS, ErrorCode.ANALYSIS_SERVER_ERROR})
   @PostMapping
-  public ApiResponse<AnalysisRequestResponse> analyze(@RequestBody AnalysisReqDTO.AiAnalysisDTO request) {
+  public ApiResponse<AnalysisRequestResponse> analyze(@Valid @RequestBody AnalysisReqDTO.AiAnalysisDTO request) {
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.analyzeStore(request));
   }
 
