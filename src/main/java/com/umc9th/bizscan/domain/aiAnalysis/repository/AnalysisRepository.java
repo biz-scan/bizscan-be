@@ -23,12 +23,12 @@ public interface AnalysisRepository extends JpaRepository<Analysis, Long> {
 
   Optional<Analysis> findByStore(Store store);
 
-  @Query("""
+  @Query(
+      """
           select a.id
           from Analysis a
           where a.store.id = :storeId
           order by a.createdAt desc
       """)
   Optional<Long> findLatestAnalysisIdByStoreId(@Param("storeId") Long storeId);
-
 }

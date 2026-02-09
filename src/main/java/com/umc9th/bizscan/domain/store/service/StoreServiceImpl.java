@@ -152,9 +152,7 @@ public class StoreServiceImpl implements StoreService {
     List<Tag> tags =
         storeTagRepository.findAllByStoreFetchTag(store).stream().map(StoreTag::getTag).toList();
 
-    Long analysisId = analysisRepository
-        .findLatestAnalysisIdByStoreId(storeId)
-        .orElse(null);
+    Long analysisId = analysisRepository.findLatestAnalysisIdByStoreId(storeId).orElse(null);
 
     return storeMapper.toCreateResponse(store, tags, analysisId);
   }
@@ -170,9 +168,7 @@ public class StoreServiceImpl implements StoreService {
     storeTagRepository.deleteAllByStoreId(storeId);
     storeTagRepository.saveAll(tags.stream().map(tag -> StoreTag.of(store, tag)).toList());
 
-    Long analysisId = analysisRepository
-        .findLatestAnalysisIdByStoreId(storeId)
-        .orElse(null);
+    Long analysisId = analysisRepository.findLatestAnalysisIdByStoreId(storeId).orElse(null);
 
     return storeMapper.toCreateResponse(store, tags, analysisId);
   }
