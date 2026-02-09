@@ -52,7 +52,11 @@ public enum ErrorCode implements BaseErrorCode {
   ACTION_NOTE_ALREADY_EXISTS(HttpStatus.CONFLICT, "ACTION_NOTE409_1", "이미 등록된 실행노트가 존재합니다."),
   ACTION_NOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "ACTION_NOTE404_1", "실행 노트를 찾을 수 없습니다."),
   ACTION_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "ACTION_DETAIL404_1", "세부 실행 전략을 찾을 수 없습니다."),
-  PAGE_INVALID(HttpStatus.BAD_REQUEST, "PAGE400_1", "유효하지 않은 페이지 범위입니다.");
+  PAGE_INVALID(HttpStatus.BAD_REQUEST, "PAGE400_1", "유효하지 않은 페이지 범위입니다."),
+
+  // SWOT
+  REGION_ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "REGION404_1", "입력하신 주소를 찾을 수 없습니다."),
+  REGION_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "REGION404_2", "기본 상권 데이터를 찾을 수 없습니다.");
 
   private final HttpStatus status;
   private final String code;

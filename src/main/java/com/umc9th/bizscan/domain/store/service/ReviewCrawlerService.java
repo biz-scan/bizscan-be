@@ -29,7 +29,6 @@ public class ReviewCrawlerService {
 
     if (existingOpt.isPresent()) {
       StoreCrawlingData existing = existingOpt.get();
-      // 0개면 재시도
       if (existing.getReviewCount() == 0) {
         log.info("리뷰 0개 발견 -> 재크롤링 시도 ID: {}", placeId);
         StoreCrawlingDataDto dto = crawlDataPureJava(placeId);
@@ -93,7 +92,7 @@ public class ReviewCrawlerService {
   }
 
   // =========================================================
-  // 3. 데이터 수집 (Googlebot + 2중 탐색)
+  // 3. 데이터 수집
   // =========================================================
   public StoreCrawlingDataDto crawlDataPureJava(String placeId) {
     int reviewCount = 0;
@@ -143,14 +142,12 @@ public class ReviewCrawlerService {
         String reviewHtml = reviewDoc.html();
         String reviewText = reviewDoc.text();
 
-        // 텍스트에서 "방문자리뷰 1,234" 찾기 (가장 강력함)
         Matcher textM = Pattern.compile("(방문자|인증)\\s*리뷰\\s*([0-9,]+)").matcher(reviewText);
         if (textM.find()) {
           reviewCount = Integer.parseInt(textM.group(2).replace(",", ""));
         }
       }
 
-      // 별점 보정 (리뷰는 있는데 별점이 0이면)
       if (rating == 0.0 && reviewCount > 0) {
         rating = calculateEstimatedRating(reviewCount);
       }

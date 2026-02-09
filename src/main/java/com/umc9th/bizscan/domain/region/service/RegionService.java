@@ -24,7 +24,7 @@ public class RegionService {
 
     // 2. DB 미존재 시 카카오 API 호출
     if (region == null) {
-      log.info("⚠️ 신규 주소 감지. 카카오 API 조회 시도: {}", address);
+      log.info("신규 주소 감지. 카카오 API 조회 시도: {}", address);
 
       KakaoApiResponse response = kakaoClient.searchAddress(address);
 
@@ -59,9 +59,9 @@ public class RegionService {
       if (nearestWithData != null) {
         borrowedTrdarCd = nearestWithData.getTrdarCd();
         borrowedTrdarName = nearestWithData.getTrdarCdNm();
-        log.info("🔗 [매핑 성공] 근처 데이터 보유 상권: {} ({})", borrowedTrdarName, borrowedTrdarCd);
+        log.info("[매핑 성공] 근처 데이터 보유 상권: {} ({})", borrowedTrdarName, borrowedTrdarCd);
       } else {
-        log.warn("❌ [매핑 실패] 반경 내 데이터 보유 상권 없음.");
+        log.warn("[매핑 실패] 반경 내 데이터 보유 상권 없음.");
       }
 
       // 5. 엔티티 생성 및 저장
@@ -78,7 +78,7 @@ public class RegionService {
               .build();
 
       regionRepository.save(region);
-      log.info("✅ 지역 정보 DB 적재 완료: {}", region.getFullAddress());
+      log.info("지역 정보 DB 적재 완료: {}", region.getFullAddress());
     }
 
     return region;

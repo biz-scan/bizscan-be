@@ -41,11 +41,11 @@ public class AnalysisSummary {
   private Long avgMonIncome;
 
   // [Trend]
-  private String housingType; // DTO의 mainHousingType 대응
+  private String housingType;
 
   @Lob
   @Column(columnDefinition = "TEXT")
-  private String topHashtags; // DTO의 topHashtags 대응
+  private String topHashtags;
 
   // [W: 약점]
   private Integer myReviewCount; // 내 리뷰 수

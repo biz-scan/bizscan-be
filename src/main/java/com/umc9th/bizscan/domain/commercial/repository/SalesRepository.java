@@ -13,7 +13,6 @@ public interface SalesRepository extends JpaRepository<SalesEstimate, Long> {
 
   Optional<SalesEstimate> findTopByTrdarCdOrderByStdQuarterDesc(String trdarCd);
 
-  // 가장 최근 분기(std_quarter 내림차순) 데이터 1개를 확실하게 가져옴
   @Query(
       value =
           "SELECT * FROM tb_sales_estimate "

@@ -36,7 +36,6 @@ public class RegionTrendService {
   @Value("${naver.ad.customer-id}")
   private String customerId;
 
-  // SNS 해시태그 추천용 (DB 저장 X, 즉시 리턴)
   public List<HashtagDto> recommendHashtags(String keyword) {
 
     // 1. API 호출
@@ -71,7 +70,7 @@ public class RegionTrendService {
       return Collections.emptyList();
     }
 
-    // 2. 검색량 순으로 정렬 + # 붙여서 리턴
+    // 2. 검색량 순으로 정렬
     return response.getKeywordList().stream()
         .map(
             result -> {
@@ -82,15 +81,14 @@ public class RegionTrendService {
               String tag = "#" + result.getRelKeyword().replaceAll(" ", "");
               return new HashtagDto(tag, totalCount);
             })
-        .sorted((a, b) -> Long.compare(b.getSearchVolume(), a.getSearchVolume())) // 검색량 내림차순 정렬
-        .limit(20) // 상위 20개만 추천
+        .sorted((a, b) -> Long.compare(b.getSearchVolume(), a.getSearchVolume()))
+        .limit(20)
         .collect(Collectors.toList());
   }
 
-  // [유틸] "< 10" 같은 문자열을 숫자로 변환
   private long parseCount(String count) {
     if (count == null || count.contains("<")) {
-      return 0L; // 10 미만은 0으로 처리 (또는 5로 처리해도 됨)
+      return 0L;
     }
     try {
       return Long.parseLong(count);

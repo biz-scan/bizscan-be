@@ -18,7 +18,6 @@ public class HousingStat {
   private String zoneNm; // 권역명
   private String stdDate;
 
-  // 비율 (BigDecimal 필수)
   private Double singleFamRatio;
   private Double multiFamRatio;
   private Double multiplexHouseRatio;
