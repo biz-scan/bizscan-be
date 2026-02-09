@@ -14,13 +14,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http,
-      JwtAuthenticationFilter jwtAuthenticationFilter, JwtExceptionFilter jwtExceptionFilter)
+  public SecurityFilterChain filterChain(
+      HttpSecurity http,
+      JwtAuthenticationFilter jwtAuthenticationFilter,
+      JwtExceptionFilter jwtExceptionFilter)
       throws Exception {
     http.csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(
             auth -> auth.anyRequest().permitAll() // TODO : 추후 권한 설정
-        )
+            )
         .formLogin(form -> form.disable());
 
     http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

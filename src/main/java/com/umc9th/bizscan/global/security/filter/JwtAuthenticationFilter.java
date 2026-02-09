@@ -48,8 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           CustomErrorSend.handleException(
               response,
               SecurityErrorStatus.AUTH_LOGGED_OUT_TOKEN,
-              SecurityErrorStatus.AUTH_LOGGED_OUT_TOKEN.name()
-          );
+              SecurityErrorStatus.AUTH_LOGGED_OUT_TOKEN.name());
           return;
         }
         tokenService.validateToken(token);
@@ -67,8 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           CustomErrorSend.handleException(
               response,
               SecurityErrorStatus.AUTH_TOKEN_HAS_EXPIRED,
-              SecurityErrorStatus.AUTH_TOKEN_HAS_EXPIRED.name()
-          );
+              SecurityErrorStatus.AUTH_TOKEN_HAS_EXPIRED.name());
           return;
         }
         log.debug("토큰 만료지만 재발급 시도이므로 통과합니다.");
