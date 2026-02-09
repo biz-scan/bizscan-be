@@ -21,7 +21,7 @@ public class NaverKeywordResponse {
     private String relKeyword; // 연관 키워드
 
     @JsonProperty("monthlyPcQcCnt")
-    private String monthlyPcQcCnt; // 월간 PC 검색수 (String인 이유: "< 10" 같은 값 때문)
+    private String monthlyPcQcCnt; // 월간 PC 검색수
 
     @JsonProperty("monthlyMobileQcCnt")
     private String monthlyMobileQcCnt; // 월간 모바일 검색수

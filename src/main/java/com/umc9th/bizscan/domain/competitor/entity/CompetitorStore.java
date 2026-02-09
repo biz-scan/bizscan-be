@@ -21,11 +21,10 @@ public class CompetitorStore {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  // CSV의 '상가업소번호' (MA010120220800006441) - 고유 식별자 역할
+  // 상가업소번호
   @Column(name = "store_uid", length = 50, unique = true)
   private String storeUid;
 
-  // CSV에는 region_id가 없으므로 Nullable로 설정 (반경 검색 위주라 필수 아님)
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "region_id", nullable = true)
   private RegionMaster regionMaster;
@@ -36,7 +35,6 @@ public class CompetitorStore {
   @Column(name = "branch_nm", length = 100)
   private String branchNm; // 지점명
 
-  // CSV의 '행정동코드' 등 (필요 시 매핑)
   @Column(name = "adstrd_cd", length = 20)
   private String adstrdCd;
 
