@@ -1,5 +1,6 @@
 package com.umc9th.bizscan.domain.store.entity;
 
+import com.umc9th.bizscan.domain.aiAnalysis.entity.Analysis;
 import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.global.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -59,6 +60,9 @@ public class Store extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(name = "pain_point", nullable = false, length = 30)
   private PainPoint painPoint;
+
+  @OneToOne(mappedBy = "store", cascade = CascadeType.ALL)
+  private Analysis analysis;
 
   public void update(
       String name,

@@ -1,6 +1,7 @@
 package com.umc9th.bizscan.domain.aiAnalysis.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umc9th.bizscan.domain.aiAnalysis.dto.request.AnalysisReqDTO;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.FastApiAnalysisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.*;
@@ -48,7 +49,9 @@ public class AiAnalysisService {
 
   /** AI 분석 요청 (프론트에서 최초 1회 호출) requestId 반환 → 프론트에서 폴링 */
   @Transactional
-  public AnalysisRequestResponse analyzeStore(Long storeId) {
+  public AnalysisRequestResponse analyzeStore(AnalysisReqDTO.AiAnalysisDTO dto) {
+    Long storeId = dto.storeId();
+    Boolean retry = dto.retry();
 
     // 0. 매장 조회 (Spring에서만 DB 접근)
     Store store =
@@ -66,8 +69,8 @@ public class AiAnalysisService {
                   analysisRequestRepository.findByAnalysis(existingAnalysis).orElse(null);
 
               if (existingRequest != null) {
-                // 상태가 FAILED인 경우에만 삭제 후 재시도
-                if (existingRequest.getStatus() == AnalysisStatus.FAILED) {
+                // 상태가 FAILED인 경우 || retry=True 삭제 후 재시도
+                if (existingRequest.getStatus() == AnalysisStatus.FAILED || retry) {
                   // @OnDelete는 DB 레벨이므로 영속성 컨텍스트에 남아있는 existingRequest를 삭제해줘야 함
                   analysisRequestRepository.delete(existingRequest);
                   // Cascade.ALL, @OnDelete로 연쇄 삭제

@@ -17,6 +17,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
   String email(String email);
 
-  @Query("select m from Member m left join fetch m.store where m.email = :email")
-  Optional<Member> findByEmailWithStore(@Param("email") String email);
+  @Query(
+      "select m from Member m "
+          + "left join fetch m.store s "
+          + "left join fetch s.analysis a "
+          + "left join fetch a.analysisRequest "
+          + "where m.email = :email")
+  Optional<Member> findByEmailWithStoreAndAnalysis(@Param("email") String email);
 }
