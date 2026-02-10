@@ -11,10 +11,12 @@ import com.umc9th.bizscan.domain.store.entity.StoreCategory;
 import com.umc9th.bizscan.domain.store.entity.StoreCategoryDetail;
 import com.umc9th.bizscan.domain.store.entity.TagCode;
 import com.umc9th.bizscan.domain.store.entity.Target;
+import com.umc9th.bizscan.domain.store.exception.StoreErrorCode;
 import com.umc9th.bizscan.domain.store.service.StoreService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
+import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
 import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,6 +58,16 @@ public class StoreController {
               - enum은 영문 코드로 선택되며, Description에 한글 설명이 표시됩니다.
               - 위도/경도는 주소 기반으로 서버에서 자동 변환됩니다. (Kakao Geocoding)
               """)
+  @ApiErrorCodeExamples(
+      store = {
+        StoreErrorCode.ADDRESS_DUPLICATED,
+        StoreErrorCode.ADDRESS_INVALID,
+        StoreErrorCode.MEMBER_NOT_FOUND,
+        StoreErrorCode.TAG_REQUIRED,
+        StoreErrorCode.TAG_LIMIT_EXCEEDED,
+        StoreErrorCode.TAG_NOT_FOUND
+      },
+      security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI})
   @PostMapping
   public ResponseEntity<ApiResponse<StoreResponse>> createStore(
       @Parameter(hidden = true) @AuthenticationPrincipal
@@ -151,12 +163,31 @@ public class StoreController {
   }
 
   @Operation(summary = "가게 단건 조회", description = "가게 ID로 단일 가게 정보를 조회합니다.")
+  @ApiErrorCodeExamples(store = {StoreErrorCode.STORE_NOT_FOUND})
   @GetMapping("/{storeId}")
   public ResponseEntity<ApiResponse<StoreResponse>> getStore(
       @Parameter(description = "가게 ID", example = "1", required = true) @PathVariable
           Long storeId) {
 
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.OK, storeService.getStore(storeId)));
+  }
+
+  @Operation(summary = "내 가게 조회", description = "로그인 사용자의 Access Token 기반으로 본인 소유 가게 정보를 조회합니다.")
+  @ApiErrorCodeExamples(
+      store = {StoreErrorCode.MEMBER_NOT_FOUND, StoreErrorCode.STORE_NOT_FOUND},
+      security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI})
+  @GetMapping("/me")
+  public ResponseEntity<ApiResponse<StoreResponse>> getMyStore(
+      @Parameter(hidden = true) @AuthenticationPrincipal
+          org.springframework.security.core.userdetails.User user) {
+
+    if (user == null) {
+      throw new GeneralException(SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI);
+    }
+
+    String email = user.getUsername();
+
+    return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.OK, storeService.getMyStore(email)));
   }
 
   @Operation(
@@ -197,6 +228,15 @@ public class StoreController {
                 OPERATION_HALL_SERVICE(홀영업), OPERATION_DELIVERY_AVAILABLE(배달가능), OPERATION_TAKEOUT_ONLY(포장전문)
 
               """)
+  @ApiErrorCodeExamples(
+      store = {
+        StoreErrorCode.STORE_NOT_FOUND,
+        StoreErrorCode.MEMBER_NOT_FOUND,
+        StoreErrorCode.FORBIDDEN,
+        StoreErrorCode.ADDRESS_DUPLICATED,
+        StoreErrorCode.ADDRESS_INVALID
+      },
+      security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI})
   @PatchMapping("/{storeId}")
   public ResponseEntity<ApiResponse<StoreResponse>> updateStore(
       @PathVariable Long storeId,
@@ -244,6 +284,17 @@ public class StoreController {
                 OPERATION_HALL_SERVICE(홀영업), OPERATION_DELIVERY_AVAILABLE(배달가능), OPERATION_TAKEOUT_ONLY(포장전문)
 
               """)
+  @ApiErrorCodeExamples(
+      store = {
+        StoreErrorCode.STORE_NOT_FOUND,
+        StoreErrorCode.MEMBER_NOT_FOUND,
+        StoreErrorCode.FORBIDDEN,
+        StoreErrorCode.TAG_REQUIRED,
+        StoreErrorCode.TAG_CODE_INVALID,
+        StoreErrorCode.TAG_LIMIT_EXCEEDED,
+        StoreErrorCode.TAG_NOT_FOUND
+      },
+      security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI})
   @PutMapping("/{storeId}/tags")
   public ResponseEntity<ApiResponse<StoreResponse>> updateStoreTags(
       @PathVariable Long storeId,
@@ -262,6 +313,7 @@ public class StoreController {
   }
 
   @Operation(summary = "가게 삭제", description = "가게를 삭제합니다. (연결된 태그 매핑도 함께 삭제)")
+  @ApiErrorCodeExamples(store = {StoreErrorCode.STORE_NOT_FOUND})
   @DeleteMapping("/{storeId}")
   public ResponseEntity<ApiResponse<StoreDeleteResponse>> deleteStore(@PathVariable Long storeId) {
     StoreDeleteResponse result = storeService.deleteStore(storeId);

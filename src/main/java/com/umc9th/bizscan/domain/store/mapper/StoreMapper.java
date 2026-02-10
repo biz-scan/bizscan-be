@@ -29,6 +29,10 @@ public class StoreMapper {
   }
 
   public StoreResponse toCreateResponse(Store store, List<Tag> tags) {
+    return toCreateResponse(store, tags, null);
+  }
+
+  public StoreResponse toCreateResponse(Store store, List<Tag> tags, Long analysisId) {
     List<StoreResponse.TagInfo> tagInfos =
         tags.stream()
             .map(
@@ -42,6 +46,7 @@ public class StoreMapper {
 
     return StoreResponse.of(
         store.getId(),
+        analysisId,
         store.getName(),
         store.getAddress(),
         store.getLat(),

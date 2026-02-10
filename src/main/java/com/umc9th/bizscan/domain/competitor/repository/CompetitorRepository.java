@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 public interface CompetitorRepository extends JpaRepository<CompetitorStore, Long> {
   List<CompetitorStore> findByRegionMaster(RegionMaster regionMaster);
 
-  // 행정동 코드로 찾기
+  // 1. 행정동 코드로 찾기
   List<CompetitorStore> findByAdstrdCd(String adstrdCd);
 
   @Query(
@@ -25,8 +25,7 @@ public interface CompetitorRepository extends JpaRepository<CompetitorStore, Lon
       @Param("category") String category,
       @Param("radiusKm") double radiusKm);
 
-  // 2. 주변 경쟁 업체 리스트 조회 (W분석용)
-  // 카운트만 하는게 아니라, 실제 가게 정보를 가져옵니다. (최대 5개 제한)
+  // 2. 주변 경쟁 업체 리스트 조회
   @Query(
       value =
           "SELECT * FROM tb_competitor_store s "
