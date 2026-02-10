@@ -6,12 +6,14 @@ import com.umc9th.bizscan.domain.analysis.service.DataVerificationService;
 import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Data Analysis", description = "상권 분석 데이터 추출 및 AI 프롬프트용 요약 정보 제공 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/swot")
