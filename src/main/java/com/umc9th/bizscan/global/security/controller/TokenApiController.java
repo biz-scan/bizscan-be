@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@Tag(name = "Token API", description = "JWT 토큰 관련 API")
+@Tag(name = "Token", description = "JWT 토큰 관련 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/tokens")
