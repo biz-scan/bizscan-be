@@ -147,14 +147,15 @@ public class GeneralExceptionAdvice {
         .body(ApiResponse.onFailure(ErrorCode.NOT_FOUND, null));
   }
 
-    @ExceptionHandler({JwtAuthenticationException.class, JwtAuthenticationExpiredException.class})
-    public ResponseEntity<ApiResponse<Void>> handleJwtAuthenticationException(JwtAuthenticationException ex) {
-        // 예외 메시지에 담긴 "AUTH_WRONG_PASSWORD" 등을 통해 Enum을 찾음
-        SecurityErrorStatus errorStatus = SecurityErrorStatus.valueOf(ex.getMessage());
+  @ExceptionHandler({JwtAuthenticationException.class, JwtAuthenticationExpiredException.class})
+  public ResponseEntity<ApiResponse<Void>> handleJwtAuthenticationException(
+      JwtAuthenticationException ex) {
+    // 예외 메시지에 담긴 "AUTH_WRONG_PASSWORD" 등을 통해 Enum을 찾음
+    SecurityErrorStatus errorStatus = SecurityErrorStatus.valueOf(ex.getMessage());
 
-        return ResponseEntity.status(errorStatus.getStatus())
-                .body(ApiResponse.onFailure(errorStatus, null));
-    }
+    return ResponseEntity.status(errorStatus.getStatus())
+        .body(ApiResponse.onFailure(errorStatus, null));
+  }
 
   // 그 외의 정의되지 않은 모든 예외 처리
   @ExceptionHandler(Exception.class)

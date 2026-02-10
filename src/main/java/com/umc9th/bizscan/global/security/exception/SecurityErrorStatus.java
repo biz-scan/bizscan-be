@@ -23,7 +23,7 @@ public enum SecurityErrorStatus implements BaseErrorCode {
   AUTH_INVALID_ROLE(HttpStatus.FORBIDDEN, "4360", "유효하지 않은 역할(Role)입니다."),
   AUTH_WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "4361", "패스워드가 잘못되었습니다."),
   AUTH_LOGGED_OUT_TOKEN(HttpStatus.UNAUTHORIZED, "4362", "로그아웃된 토큰입니다."),
-    INTERNAL_SECURITY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH5000", "보안 시스템 내부 오류가 발생했습니다.");
+  INTERNAL_SECURITY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AUTH5000", "보안 시스템 내부 오류가 발생했습니다.");
 
   private final HttpStatus httpStatus;
   private final String code;
