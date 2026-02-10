@@ -6,6 +6,9 @@ import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.BaseErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
+import com.umc9th.bizscan.global.security.exception.JwtAuthenticationException;
+import com.umc9th.bizscan.global.security.exception.JwtAuthenticationExpiredException;
+import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -143,6 +146,15 @@ public class GeneralExceptionAdvice {
     return ResponseEntity.status(ErrorCode.NOT_FOUND.getStatus())
         .body(ApiResponse.onFailure(ErrorCode.NOT_FOUND, null));
   }
+
+    @ExceptionHandler({JwtAuthenticationException.class, JwtAuthenticationExpiredException.class})
+    public ResponseEntity<ApiResponse<Void>> handleJwtAuthenticationException(JwtAuthenticationException ex) {
+        // 예외 메시지에 담긴 "AUTH_WRONG_PASSWORD" 등을 통해 Enum을 찾음
+        SecurityErrorStatus errorStatus = SecurityErrorStatus.valueOf(ex.getMessage());
+
+        return ResponseEntity.status(errorStatus.getStatus())
+                .body(ApiResponse.onFailure(errorStatus, null));
+    }
 
   // 그 외의 정의되지 않은 모든 예외 처리
   @ExceptionHandler(Exception.class)
