@@ -20,6 +20,7 @@ import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
 import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Store", description = "매장 관리 API (등록, 수정, 상세 조회 및 태그 교체)")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/stores")

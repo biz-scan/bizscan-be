@@ -11,6 +11,7 @@ import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
 import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Member", description = "회원 관련 API (회원가입, 프로필 조회, 정보 수정 및 탈퇴)")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/member")
