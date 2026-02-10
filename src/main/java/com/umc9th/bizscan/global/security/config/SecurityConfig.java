@@ -29,7 +29,7 @@ public class SecurityConfig {
       HttpSecurity http,
       JwtAuthenticationFilter jwtAuthenticationFilter,
       JwtExceptionFilter jwtExceptionFilter,
-      JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, // 주입 필요
+      JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
       JwtAccessDeniedHandler jwtAccessDeniedHandler)
       throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
