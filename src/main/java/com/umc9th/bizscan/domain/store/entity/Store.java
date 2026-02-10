@@ -87,4 +87,8 @@ public class Store extends BaseEntity {
     this.target = target;
     this.painPoint = painPoint;
   }
+
+  public void deleteAnalysis() {
+    this.analysis = null;
+  }
 }
