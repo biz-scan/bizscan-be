@@ -81,6 +81,7 @@ jobs:
           NAVER_AD_CUSTOMER_ID: ${{ secrets.NAVER_AD_CUSTOMER_ID }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
+          GRAFANA_ROOT_URL: ${{ secrets.GRAFANA_ROOT_URL }}
         run: |
           set -e
 
@@ -99,7 +100,8 @@ jobs:
           echo "NAVER_AD_API_KEY=${NAVER_AD_API_KEY}" >> docker/.env
           echo "NAVER_AD_SECRET_KEY=${NAVER_AD_SECRET_KEY}" >> docker/.env
           echo "NAVER_AD_CUSTOMER_ID=${NAVER_AD_CUSTOMER_ID}" >> docker/.env
-
+          echo "GRAFANA_ROOT_URL=${GRAFANA_ROOT_URL}" >> docker/.env          
+          
           docker compose -f docker/docker-compose.yml --env-file docker/.env down
           docker compose -f docker/docker-compose.yml --env-file docker/.env pull
           docker compose -f docker/docker-compose.yml --env-file docker/.env up -d --build
