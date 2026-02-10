@@ -76,6 +76,8 @@ public class AiAnalysisService {
                   // Cascade.ALL, @OnDelete로 연쇄 삭제
                   analysisRepository.delete(existingAnalysis);
 
+                  store.deleteAnalysis();
+
                   /** [.delete(existingRequest) 필요성에 관해] */
                   /**
                    * @OnDelete(action = OnDeleteAction.CASCADE)는 DB 레벨에서 연관된 테이블들을 삭제한다.
