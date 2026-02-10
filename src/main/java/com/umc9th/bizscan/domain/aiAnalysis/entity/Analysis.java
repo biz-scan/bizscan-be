@@ -34,8 +34,8 @@ public class Analysis extends BaseEntity {
   @OneToMany(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ActionPlan> actionPlans = new ArrayList<>();
 
-    @OneToOne(mappedBy = "analysis", cascade = CascadeType.ALL)
-    private AnalysisRequest analysisRequest;
+  @OneToOne(mappedBy = "analysis", cascade = CascadeType.ALL)
+  private AnalysisRequest analysisRequest;
 
   public void updateCatchphrase(String catchphrase) {
     this.catchphrase = catchphrase;

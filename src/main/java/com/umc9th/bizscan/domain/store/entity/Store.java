@@ -61,8 +61,8 @@ public class Store extends BaseEntity {
   @Column(name = "pain_point", nullable = false, length = 30)
   private PainPoint painPoint;
 
-    @OneToOne(mappedBy = "store", cascade = CascadeType.ALL)
-    private Analysis analysis;
+  @OneToOne(mappedBy = "store", cascade = CascadeType.ALL)
+  private Analysis analysis;
 
   public void update(
       String name,
