@@ -28,6 +28,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -233,6 +234,12 @@ public class AiAnalysisService {
     };
   }
 
+  private String buildCallbackUrl(String path) {
+    return UriComponentsBuilder.fromHttpUrl(env.getProperty("ai.callback.base-url"))
+        .path(env.getProperty(path))
+        .toUriString();
+  }
+
   private FastApiAnalysisRequest toFastApiRequest(
       Store store, List<StoreTag> storeTags, String requestId) {
     // 1. Tag 엔티티 리스트를 FastAPI용 TagInfoRequest 리스트로 변환
@@ -248,14 +255,11 @@ public class AiAnalysisService {
 
     return FastApiAnalysisRequest.builder()
         // callback 식별용
-        .swotCallbackUrl(
-            env.getProperty("ai.callback.base-url") + env.getProperty("ai.callback.swot"))
-        .actionPlanCallbackUrl(
-            env.getProperty("ai.callback.base-url") + env.getProperty("ai.callback.action-plan"))
-        .actionDetailCallbackUrl(
-            env.getProperty("ai.callback.base-url") + env.getProperty("ai.callback.action-detail"))
-        .failCallbackUrl(
-            env.getProperty("ai.callback.base-url") + env.getProperty("ai.callback.fail"))
+        .requestId(requestId)
+        .swotCallbackUrl(callbackBaseUrl + "/api/analysis/callback/swots")
+        .actionPlanCallbackUrl(callbackBaseUrl + "/api/analysis/callback/action-plans")
+        .actionDetailCallbackUrl(callbackBaseUrl + "/api/analysis/callback/action-details")
+        .failCallbackUrl(callbackBaseUrl + "/api/analysis/callback/fail")
 
         // store 기본 정보
         .storeId(store.getId())
