@@ -4,6 +4,7 @@ import com.umc9th.bizscan.global.security.exception.JwtAccessDeniedHandler;
 import com.umc9th.bizscan.global.security.exception.JwtAuthenticationEntryPoint;
 import com.umc9th.bizscan.global.security.filter.JwtAuthenticationFilter;
 import com.umc9th.bizscan.global.security.filter.JwtExceptionFilter;
+import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,6 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
@@ -36,6 +40,7 @@ public class SecurityConfig {
       JwtAccessDeniedHandler jwtAccessDeniedHandler)
       throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
@@ -52,6 +57,30 @@ public class SecurityConfig {
     http.addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class);
 
     return http.build();
+  }
+
+  // Security 레벨에서의 CORS 세부 설정
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+
+    configuration.setAllowedOrigins(
+        Arrays.asList(
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://bizscan.duckdns.org",
+            "https://bizscan-web.vercel.app"));
+    configuration.setAllowedMethods(
+        Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+    configuration.setAllowedHeaders(
+        Arrays.asList("Authorization", "Content-Type", "x-requested-with"));
+    configuration.setAllowCredentials(true);
+    configuration.setExposedHeaders(Arrays.asList("Authorization"));
+    configuration.setMaxAge(3600L); // 브라우저가 CORS 응답을 캐싱할 시간 (초)
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
   }
 
   @Bean
