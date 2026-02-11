@@ -63,6 +63,6 @@ public class AnalysisRequest extends BaseEntity {
   }
 
   public void fail() {
-    updateStatus(AnalysisStatus.FAIL);
+    updateStatus(AnalysisStatus.FAILED);
   }
 }

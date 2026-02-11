@@ -11,7 +11,7 @@ public enum AnalysisStatus {
   ACTION_PLAN_PROCESSING("실행 전략을 생성 중입니다."), // ActionPlan 생성 중
   ACTION_DETAIL_PROCESSING("마무리 작업을 진행 중입니다."), // ActionDetail 생성 중
   COMPLETED("완료되었습니다."),
-  FAIL("분석에 실패했습니다.");
+  FAILED("분석에 실패했습니다.");
 
   private final String progressMessage;
 }
