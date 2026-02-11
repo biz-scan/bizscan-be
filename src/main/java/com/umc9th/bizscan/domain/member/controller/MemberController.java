@@ -9,6 +9,7 @@ import com.umc9th.bizscan.domain.member.service.MemberQueryService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
+import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,13 +18,21 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Member", description = "회원 관련 API (회원가입, 프로필 조회, 정보 수정 및 탈퇴)")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/member")
 public class MemberController {
+
   private final MemberCommandService memberCommandService;
   private final MemberQueryService memberQueryService;
 
@@ -89,8 +98,11 @@ public class MemberController {
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<MemberResponseDto>> getMyInfo(Authentication authentication) {
     // JWT subject == email
-    String email = authentication.getName();
+    if (authentication == null || authentication.getName() == null) {
+      throw new GeneralException(ErrorCode.UNAUTHORIZED);
+    }
 
+    String email = authentication.getName();
     Member member = memberQueryService.getMemberByEmail(email);
 
     return ResponseEntity.ok(

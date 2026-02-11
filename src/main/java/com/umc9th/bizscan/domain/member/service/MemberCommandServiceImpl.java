@@ -5,8 +5,12 @@ import com.umc9th.bizscan.domain.member.dto.request.MemberUpdateRequestDto;
 import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.domain.member.exception.MemberException;
 import com.umc9th.bizscan.domain.member.repository.MemberRepository;
+import com.umc9th.bizscan.domain.store.entity.Store;
+import com.umc9th.bizscan.domain.store.repository.StoreRepository;
+import com.umc9th.bizscan.domain.store.repository.StoreTagRepository;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,8 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
+  private final StoreRepository storeRepository;
+  private final StoreTagRepository storeTagRepository;
 
   public Long registerMember(RegisterMemberDto registerMemberDto) {
 
@@ -62,6 +68,11 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
     // 1. 닉네임 수정 (입력값이 있을 경우에만)
     if (dto.getNickname() != null && !dto.getNickname().isBlank()) {
+
+      if (memberRepository.existsByNickname(dto.getNickname())) {
+        throw new GeneralException(ErrorCode.NICKNAME_ALREADY_EXISTS);
+      }
+
       member.updateNickname(dto.getNickname());
     }
 
@@ -84,12 +95,20 @@ public class MemberCommandServiceImpl implements MemberCommandService {
   }
 
   @Override
+  @Transactional
   public void deleteMember(Long memberId) {
 
     Member member =
         memberRepository
             .findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
+
+    List<Store> stores = storeRepository.findAllByMember(member);
+
+    for (Store store : stores) {
+      storeTagRepository.deleteAllByStoreId(store.getId());
+      storeRepository.delete(store);
+    }
 
     memberRepository.delete(member);
   }
