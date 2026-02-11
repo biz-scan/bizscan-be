@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -155,6 +157,30 @@ public class GeneralExceptionAdvice {
 
     return ResponseEntity.status(errorStatus.getStatus())
         .body(ApiResponse.onFailure(errorStatus, null));
+  }
+
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(
+      DataIntegrityViolationException ex) {
+
+    String msg = "";
+    if (ex.getMostSpecificCause() != null && ex.getMostSpecificCause().getMessage() != null) {
+      msg = ex.getMostSpecificCause().getMessage();
+    }
+
+    // member table unique key name 기반 분기
+    if (msg.contains("UKmbmcqelty0fbrvxp1q58dn57t")) { // email unique
+      return ResponseEntity.status(ErrorCode.EMAIL_ALREADY_EXISTS.getStatus())
+          .body(ApiResponse.onFailure(ErrorCode.EMAIL_ALREADY_EXISTS, null));
+    }
+
+    if (msg.contains("UKhh9kg6jti4n1eoiertn2k6qsc")) { // nickname unique
+      return ResponseEntity.status(ErrorCode.NICKNAME_ALREADY_EXISTS.getStatus())
+          .body(ApiResponse.onFailure(ErrorCode.NICKNAME_ALREADY_EXISTS, null));
+    }
+
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(ApiResponse.onFailure(ErrorCode.MEMBER_ALREADY_REGISTERED, null));
   }
 
   // 그 외의 정의되지 않은 모든 예외 처리
