@@ -194,7 +194,7 @@ public class CallbackService {
             .findByRequestId(request.requestId())
             .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND));
 
-    analysisRequest.fail(request.status());
+    analysisRequest.fail();
     log.warn(
         "[failAnalysis] AI 분석 실패 처리 완료 - RequestId: {}, Status: {}",
         request.requestId(),

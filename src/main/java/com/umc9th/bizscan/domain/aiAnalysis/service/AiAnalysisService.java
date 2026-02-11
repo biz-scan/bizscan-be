@@ -70,7 +70,7 @@ public class AiAnalysisService {
 
               if (existingRequest != null) {
                 // 상태가 FAILED인 경우 || retry=True 삭제 후 재시도
-                if (existingRequest.getStatus() == AnalysisStatus.FAILED || retry) {
+                if (existingRequest.getStatus() == AnalysisStatus.FAIL || retry) {
                   // @OnDelete는 DB 레벨이므로 영속성 컨텍스트에 남아있는 existingRequest를 삭제해줘야 함
                   analysisRequestRepository.delete(existingRequest);
                   // Cascade.ALL, @OnDelete로 연쇄 삭제
@@ -130,7 +130,7 @@ public class AiAnalysisService {
           fastApiRequest,
           Void.class);
     } catch (Exception e) {
-      request.fail("AI 분석 요청 실패");
+      request.updateStatus(AnalysisStatus.FAIL);
       throw new GeneralException(ErrorCode.ANALYSIS_SERVER_ERROR);
     }
 
@@ -226,7 +226,7 @@ public class AiAnalysisService {
       case SWOT_PROCESSING -> 5000; // SWOT 분석
       case ACTION_PLAN_PROCESSING -> 8000; // ActionPlan 생성
       case ACTION_DETAIL_PROCESSING -> 1500; // ActionDetail 생성
-      case COMPLETED, FAILED -> 0; // 폴링 종료
+      case COMPLETED, FAIL -> 0; // 폴링 종료
     };
   }
 
