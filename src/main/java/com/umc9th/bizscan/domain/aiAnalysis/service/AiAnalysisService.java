@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -43,6 +44,8 @@ public class AiAnalysisService {
 
   private final FastApiProperties fastApiProperties;
   private final RestTemplate restTemplate = new RestTemplate();
+
+  private final Environment env;
 
   @Value("${ai.callback.base-url}")
   private String callbackBaseUrl;
@@ -115,7 +118,7 @@ public class AiAnalysisService {
             .requestId(requestId)
             .analysis(analysis) // 추가: store -> analysis 변경
             .status(AnalysisStatus.REQUEST)
-            .progressMessage("AI 분석 요청 중입니다.")
+            .progressMessage(AnalysisStatus.REQUEST.getProgressMessage())
             .build();
 
     analysisRequestRepository.save(request);
@@ -245,11 +248,14 @@ public class AiAnalysisService {
 
     return FastApiAnalysisRequest.builder()
         // callback 식별용
-        .requestId(requestId)
-        .swotCallbackUrl(callbackBaseUrl + "/api/analysis/callback/swots")
-        .actionPlanCallbackUrl(callbackBaseUrl + "/api/analysis/callback/action-plans")
-        .actionDetailCallbackUrl(callbackBaseUrl + "/api/analysis/callback/action-details")
-        .failCallbackUrl(callbackBaseUrl + "/api/analysis/callback/fail")
+        .swotCallbackUrl(
+            env.getProperty("ai.callback.base-url") + env.getProperty("ai.callback.swot"))
+        .actionPlanCallbackUrl(
+            env.getProperty("ai.callback.base-url") + env.getProperty("ai.callback.action-plan"))
+        .actionDetailCallbackUrl(
+            env.getProperty("ai.callback.base-url") + env.getProperty("ai.callback.action-detail"))
+        .failCallbackUrl(
+            env.getProperty("ai.callback.base-url") + env.getProperty("ai.callback.fail"))
 
         // store 기본 정보
         .storeId(store.getId())
