@@ -53,14 +53,18 @@ public class StoreServiceImpl implements StoreService {
   @Override
   public StoreResponse createStore(String email, StoreCreateRequest request) {
 
-    if (storeRepository.existsByAddress(request.getAddress())) {
-      throw new GeneralException(StoreErrorCode.ADDRESS_DUPLICATED);
-    }
-
     Member member =
         memberRepository
             .findByEmail(email)
             .orElseThrow(() -> new GeneralException(StoreErrorCode.MEMBER_NOT_FOUND));
+
+    if (storeRepository.existsByMember(member)) {
+      throw new GeneralException(StoreErrorCode.STORE_ALREADY_EXISTS);
+    }
+
+    if (storeRepository.existsByAddress(request.getAddress())) {
+      throw new GeneralException(StoreErrorCode.ADDRESS_DUPLICATED);
+    }
 
     GeoPoint geoPoint = geocode(request.getAddress());
 

@@ -22,7 +22,9 @@ public enum StoreErrorCode implements BaseErrorCode {
   ADDRESS_INVALID("STORE400_1", "유효하지 않은 주소입니다. 주소를 다시 확인해주세요.", HttpStatus.BAD_REQUEST),
   ADDRESS_DUPLICATED("STORE400_2", "이미 등록된 주소입니다.", HttpStatus.BAD_REQUEST),
   INVALID_REQUEST_FORMAT("STORE400_3", "요청 형식이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
-  INVALID_ENUM_VALUE("STORE400_4", "요청 값(enum)이 올바르지 않습니다.", HttpStatus.BAD_REQUEST);
+  INVALID_ENUM_VALUE("STORE400_4", "요청 값(enum)이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+
+  STORE_ALREADY_EXISTS("STORE409_1", "이미 가게를 보유한 사용자는 추가로 가게를 등록할 수 없습니다.", HttpStatus.CONFLICT);
 
   private final String code;
   private final String message;

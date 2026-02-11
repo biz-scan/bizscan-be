@@ -3,7 +3,18 @@ package com.umc9th.bizscan.domain.store.entity;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.Analysis;
 import com.umc9th.bizscan.domain.member.entity.Member;
 import com.umc9th.bizscan.global.entity.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +34,7 @@ public class Store extends BaseEntity {
   private Long id;
 
   @OneToOne(fetch = FetchType.LAZY) // ManyToOne에서 OneToOne으로 변경
-  @JoinColumn(name = "member_id", nullable = false)
+  @JoinColumn(name = "member_id", nullable = false, unique = true)
   private Member member;
 
   @Column(nullable = false, length = 100)
