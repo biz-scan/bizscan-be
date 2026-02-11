@@ -17,8 +17,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
   private final String[] allowUris = {
-    "/api/v1/tokens/login",
-    "/api/v1/member/register",
+    "/api/tokens/login",
+    "/api/member/register",
+    "/health",
+    "/api/analysis/callback",
+    "/api/swot/summary",
     "/swagger-ui/**",
     "/swagger-resources/**",
     "/v3/api-docs/**",
@@ -36,11 +39,7 @@ public class SecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
-            auth ->
-                auth
-                    // .requestMatchers(allowUris).permitAll().anyRequest().authenticated()
-                    .anyRequest()
-                    .permitAll())
+            auth -> auth.requestMatchers(allowUris).permitAll().anyRequest().authenticated())
         .formLogin(AbstractHttpConfigurer::disable)
         .exceptionHandling(
             handler ->
