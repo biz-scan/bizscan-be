@@ -24,7 +24,7 @@ public class SecurityConfig {
     "/api/tokens/login",
     "/api/member/register",
     "/health",
-    "/api/analysis/callback",
+    "/api/analysis/callback/**",
     "/api/swot/summary",
     "/swagger-ui/**",
     "/swagger-resources/**",
