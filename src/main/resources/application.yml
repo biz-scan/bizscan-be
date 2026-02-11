@@ -45,6 +45,7 @@ ai:
     swot: /api/analysis/callback/swots
     action-plan: /api/analysis/callback/action-plans
     action-detail: /api/analysis/callback/action-details
+    fail: /api/analysis/callback/fail
 
 app:
   jwt:

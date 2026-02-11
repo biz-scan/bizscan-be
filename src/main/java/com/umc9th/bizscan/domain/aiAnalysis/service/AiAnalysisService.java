@@ -24,9 +24,11 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +45,8 @@ public class AiAnalysisService {
 
   private final FastApiProperties fastApiProperties;
   private final RestTemplate restTemplate = new RestTemplate();
+
+  private final Environment env;
 
   @Value("${ai.callback.base-url}")
   private String callbackBaseUrl;
@@ -115,7 +119,7 @@ public class AiAnalysisService {
             .requestId(requestId)
             .analysis(analysis) // 추가: store -> analysis 변경
             .status(AnalysisStatus.REQUEST)
-            .progressMessage("AI 분석 요청 중입니다.")
+            .progressMessage(AnalysisStatus.REQUEST.getProgressMessage())
             .build();
 
     analysisRequestRepository.save(request);
@@ -130,7 +134,7 @@ public class AiAnalysisService {
           fastApiRequest,
           Void.class);
     } catch (Exception e) {
-      request.fail("AI 분석 요청 실패");
+      request.updateStatus(AnalysisStatus.FAILED);
       throw new GeneralException(ErrorCode.ANALYSIS_SERVER_ERROR);
     }
 
@@ -228,6 +232,12 @@ public class AiAnalysisService {
       case ACTION_DETAIL_PROCESSING -> 1500; // ActionDetail 생성
       case COMPLETED, FAILED -> 0; // 폴링 종료
     };
+  }
+
+  private String buildCallbackUrl(String path) {
+    return UriComponentsBuilder.fromHttpUrl(env.getProperty("ai.callback.base-url"))
+        .path(env.getProperty(path))
+        .toUriString();
   }
 
   private FastApiAnalysisRequest toFastApiRequest(

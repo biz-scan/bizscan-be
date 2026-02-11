@@ -43,22 +43,26 @@ public class AnalysisRequest extends BaseEntity {
 
   // ===== 상태 전이 메서드 =====
 
-  public void updateProgress(String message) {
-    this.progressMessage = message;
-  }
-
-  public void complete(String catchphrase) {
-    this.status = AnalysisStatus.COMPLETED;
-    this.completedAt = LocalDateTime.now();
-    this.progressMessage = null;
-  }
-
-  public void fail(String message) {
-    this.status = AnalysisStatus.FAILED;
-    this.progressMessage = message;
-  }
+  //  public void updateProgress(String message) {
+  //    this.progressMessage = message;
+  //  }
+  //
+  //  public void complete(String catchphrase) {
+  //    this.status = AnalysisStatus.COMPLETED;
+  //    this.completedAt = LocalDateTime.now();
+  //    this.progressMessage = null;
+  //  }
 
   public void updateStatus(AnalysisStatus status) {
     this.status = status;
+    this.progressMessage = status.getProgressMessage();
+
+    if (status == AnalysisStatus.COMPLETED) {
+      this.completedAt = LocalDateTime.now();
+    }
+  }
+
+  public void fail() {
+    updateStatus(AnalysisStatus.FAILED);
   }
 }
