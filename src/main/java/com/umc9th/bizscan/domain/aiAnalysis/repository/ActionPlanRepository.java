@@ -28,14 +28,22 @@ public interface ActionPlanRepository extends JpaRepository<ActionPlan, Long> {
       @Param("storeId") Long storeId, @Param("isCompleted") Boolean isCompleted);
 
   // Tags만 FetchJoin
-  @Query("SELECT ap FROM ActionPlan ap LEFT JOIN FETCH ap.tags WHERE ap.id = :id")
-  Optional<ActionPlan> findByIdWithTags(@Param("id") Long id);
+  //  @Query("SELECT ap FROM ActionPlan ap LEFT JOIN FETCH ap.tags WHERE ap.id = :id")
+  //  Optional<ActionPlan> findByIdWithTags(@Param("id") Long id);
 
   // Details만 FetchJoin
+  //  @Query(
+  //      "SELECT ap FROM ActionPlan ap "
+  //          + "JOIN FETCH ap.details ad "
+  //          + "WHERE ap.id = :id "
+  //          + "ORDER BY ad.step ASC")
+  //  Optional<ActionPlan> findByIdWithDetails(@Param("id") Long id);
+
   @Query(
       "SELECT ap FROM ActionPlan ap "
-          + "JOIN FETCH ap.details ad "
-          + "WHERE ap.id = :id "
-          + "ORDER BY ad.step ASC")
-  Optional<ActionPlan> findByIdWithDetails(@Param("id") Long id);
+          + "JOIN FETCH ap.analysis a "
+          + "JOIN FETCH a.store s "
+          + "JOIN FETCH s.member m "
+          + "WHERE ap.id = :id")
+  Optional<ActionPlan> findByIdWithMember(@Param("id") Long id);
 }

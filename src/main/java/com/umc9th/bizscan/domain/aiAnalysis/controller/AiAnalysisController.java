@@ -7,19 +7,25 @@ import com.umc9th.bizscan.domain.aiAnalysis.service.AiAnalysisService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
+import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
+import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "AI Analysis", description = "AI 기반 SWOT 분석 및 실행 전략 추천 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/analysis")
+@Slf4j
 public class AiAnalysisController {
 
   private final AiAnalysisService aiAnalysisService;
@@ -29,7 +35,7 @@ public class AiAnalysisController {
       summary = "매장 AI 분석 요청",
       description =
           """
-            특정 매장(storeId)에 대해 AI 분석을 요청합니다.
+            특정 매장(storeId)에 대해 AI 분석을 요청합니다. 본인의 매장만 분석 가능합니다.
 
             - 분석 요청 시 비동기 방식으로 AI 서버(FastAPI)에 분석을 전달합니다.
             - 분석 요청이 성공하면 requestId를 반환합니다.
@@ -39,16 +45,27 @@ public class AiAnalysisController {
             1. 이미 분석이 완료된 경우 `ANALYSIS_ALREADY_IN_COMPLETED` 에러가 발생합니다. 재시도를 원할 경우 `retry: true`로 요청하세요.
             2. 이미 분석이 진행 중인 경우 `ANALYSIS_ALREADY_IN_PROGRESS` 에러가 발생합니다.
             """)
-  @ApiErrorCodeExamples({
-    ErrorCode.STORE_NOT_FOUND,
-    ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED,
-    ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS,
-    ErrorCode.ANALYSIS_SERVER_ERROR
-  })
+  @ApiErrorCodeExamples(
+      value = {
+        ErrorCode.STORE_NOT_FOUND,
+        ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED,
+        ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS,
+        ErrorCode.ANALYSIS_SERVER_ERROR,
+        ErrorCode.ANALYSIS_FORBIDDEN
+      },
+      security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI})
   @PostMapping
   public ApiResponse<AnalysisRequestResponse> analyze(
+      @Parameter(hidden = true) @AuthenticationPrincipal User user,
       @Valid @RequestBody AnalysisReqDTO.AiAnalysisDTO request) {
-    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.analyzeStore(request));
+
+    if (user == null) {
+      throw new GeneralException(SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI);
+    }
+
+    String email = user.getUsername();
+
+    return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.analyzeStore(request, email));
   }
 
   // 분석 상태 조회 (폴링용)

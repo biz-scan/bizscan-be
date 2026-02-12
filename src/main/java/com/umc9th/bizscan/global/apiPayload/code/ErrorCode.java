@@ -17,7 +17,7 @@ public enum ErrorCode implements BaseErrorCode {
 
   // JWT
   UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "AUTH401_1", "인증이 필요합니다."),
-  FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH403_1", "요청이 거부되었습니다."),
+  FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH403_1", "해당 리소스에 접근할 권한이 없습니다."),
   EXPIRED_JWT(HttpStatus.UNAUTHORIZED, "AUTH401_2", "만료된 JWT 토큰입니다."),
   UNSUPPORTED_JWT(HttpStatus.UNAUTHORIZED, "AUTH401_3", "지원되지 않는 JWT 토큰입니다."),
   SIGNATURE_INVALID_JWT(HttpStatus.UNAUTHORIZED, "AUTH401_4", "유효하지 않은 JWT 시그니처입니다."),
@@ -45,6 +45,7 @@ public enum ErrorCode implements BaseErrorCode {
   ANALYSIS_ALREADY_IN_COMPLETED(HttpStatus.BAD_REQUEST, "ANALYSIS400_1", "이미 완료된 분석 결과가 존재합니다."),
   ANALYSIS_SERVER_ERROR(
       HttpStatus.INTERNAL_SERVER_ERROR, "ANALYSIS500_1", "AI 분석 서버와의 통신 중 오류가 발생했습니다."),
+  ANALYSIS_FORBIDDEN(HttpStatus.FORBIDDEN, "ANALYSIS403_1", "가게 소유자만 분석 요청이 가능합니다."),
 
   // Store
   STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE404_1", "해당 매장을 찾을 수 없습니다."),

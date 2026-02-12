@@ -6,7 +6,7 @@ import com.umc9th.bizscan.domain.member.dto.request.MemberUpdateRequestDto;
 public interface MemberCommandService {
   Long registerMember(RegisterMemberDto registerMemberDto);
 
-  void updateMember(Long memberId, MemberUpdateRequestDto dto);
+  void updateMember(Long memberId, MemberUpdateRequestDto dto, String currentUserEmail);
 
   void deleteMember(Long memberId);
 }

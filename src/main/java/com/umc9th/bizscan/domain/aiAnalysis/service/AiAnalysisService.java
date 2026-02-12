@@ -54,7 +54,7 @@ public class AiAnalysisService {
 
   /** AI 분석 요청 (프론트에서 최초 1회 호출) requestId 반환 → 프론트에서 폴링 */
   @Transactional
-  public AnalysisRequestResponse analyzeStore(AnalysisReqDTO.AiAnalysisDTO dto) {
+  public AnalysisRequestResponse analyzeStore(AnalysisReqDTO.AiAnalysisDTO dto, String email) {
     Long storeId = dto.storeId();
     Boolean retry = dto.retry();
 
@@ -63,6 +63,11 @@ public class AiAnalysisService {
         storeRepository
             .findById(storeId)
             .orElseThrow(() -> new GeneralException(ErrorCode.STORE_NOT_FOUND));
+    // 매장의 소유자 이메일과 현재 요청자의 이메일을 비교 (Store 엔티티에 Member 연관관계가 있다고 가정)
+    if (!store.getMember().getEmail().equals(email)) {
+      // 본인 매장이 아닌 경우 권한 에러 발생
+      throw new GeneralException(ErrorCode.ANALYSIS_FORBIDDEN);
+    }
 
     // 재시도 로직: 기존 분석 이력 체크 및 실패 시 삭제
     analysisRepository
@@ -74,8 +79,9 @@ public class AiAnalysisService {
                   analysisRequestRepository.findByAnalysis(existingAnalysis).orElse(null);
 
               if (existingRequest != null) {
-                // 상태가 FAILED인 경우 || retry=True 삭제 후 재시도
-                if (existingRequest.getStatus() == AnalysisStatus.FAILED || retry) {
+                // 상태가 FAILED인 경우 || (완료 AND retry=True) 삭제 후 재시도
+                if (existingRequest.getStatus() == AnalysisStatus.FAILED
+                    || (existingRequest.getStatus() == AnalysisStatus.COMPLETED && retry)) {
                   // @OnDelete를 활용한 Bulk삭제
                   // JPA의 delete()는 @OnDelete와 상관없이 엔티티를 하나씩 조회 후 삭제하므로 N+1 발생
                   // @Query로 DB에 Delete 쿼리를 직접 날려 DB 레벨에서 단일 쿼리로 연쇄 삭제를 수행함
