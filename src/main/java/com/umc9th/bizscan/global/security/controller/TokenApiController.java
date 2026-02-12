@@ -38,7 +38,7 @@ public class TokenApiController {
   private final TokenService tokenService;
   private final MemberQueryService memberQueryService;
 
-  @Operation(summary = "이메일로 JWT 토큰 발급")
+  @Operation(summary = "로그인 (이메일로 JWT 토큰 발급)")
   @ApiErrorCodeExamples(
       value = {ErrorCode.MEMBER_NOT_FOUND},
       security = {SecurityErrorStatus.AUTH_WRONG_PASSWORD})
