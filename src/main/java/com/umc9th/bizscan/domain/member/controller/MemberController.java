@@ -9,13 +9,18 @@ import com.umc9th.bizscan.domain.member.service.MemberQueryService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
+import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
+import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Member", description = "회원 관련 API (회원가입, 프로필 조회, 정보 수정 및 탈퇴)")
@@ -62,15 +67,27 @@ public class MemberController {
   //  }
 
   @PatchMapping("/{memberId}")
-  @Operation(summary = "회원 정보 수정", description = "회원 닉네임 및 비밀번호를 수정합니다.")
-  @ApiErrorCodeExamples({
+  @Operation(summary = "회원 정보 수정", description = "회원 닉네임 및 비밀번호를 수정합니다. 본인의 정보만 수정 가능합니다. 본인이 아닐 경우 AUTH403_1 에러가 발생합니다.")
+  @ApiErrorCodeExamples(value = {
     ErrorCode.MEMBER_NOT_FOUND,
     ErrorCode.INVALID_PASSWORD,
-    ErrorCode.SAME_AS_OLD_PASSWORD
-  })
+    ErrorCode.SAME_AS_OLD_PASSWORD,
+          ErrorCode.FORBIDDEN
+  }, security = {SecurityErrorStatus
+          .AUTH_MUST_AUTHORIZED_URI}
+  )
   public ResponseEntity<ApiResponse<Void>> updateMember(
+          @Parameter(hidden = true) @AuthenticationPrincipal
+          User user,
       @PathVariable Long memberId, @RequestBody @Valid MemberUpdateRequestDto dto) {
-    memberCommandService.updateMember(memberId, dto);
+      if (user == null) {
+          throw new GeneralException(
+                  SecurityErrorStatus
+                          .AUTH_MUST_AUTHORIZED_URI);
+      }
+
+      String email = user.getUsername();
+    memberCommandService.updateMember(memberId, dto, email);
 
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.MEMBER_UPDATE_SUCCESS, null));
   }

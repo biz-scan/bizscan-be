@@ -6,12 +6,16 @@ import com.umc9th.bizscan.domain.actionnote.service.ActionNoteService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
+import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
+import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Action Note", description = "실행 노트 관련 API")
@@ -21,12 +25,21 @@ import org.springframework.web.bind.annotation.*;
 public class ActionNoteController {
   private final ActionNoteService actionNoteService;
 
-  @Operation(summary = "실행 노트 등록 API", description = "특정 실행 전략(ActionPlan)을 실행 노트에 등록합니다. ")
-  @ApiErrorCodeExamples({ErrorCode.ACTION_PLAN_NOT_FOUND, ErrorCode.ACTION_NOTE_ALREADY_EXISTS})
+  @Operation(summary = "실행 노트 등록 API", description = "특정 실행 전략(ActionPlan)을 실행 노트에 등록합니다. 본인의 실행 전략만 등록 가능합니다. 본인이 아닐 경우 AUTH403_1 에러가 발생합니다.")
+  @ApiErrorCodeExamples({ErrorCode.ACTION_PLAN_NOT_FOUND, ErrorCode.ACTION_NOTE_ALREADY_EXISTS, ErrorCode.FORBIDDEN})
   @PostMapping()
   public ApiResponse<ActionNoteResDTO.AddDTO> addActionNote(
+          @Parameter(hidden = true) @AuthenticationPrincipal
+          User user,
       @RequestBody ActionNoteReqDTO.AddDTO addDTO) {
-    return ApiResponse.onSuccess(SuccessCode.OK, actionNoteService.addActionNote(addDTO));
+      if (user == null) {
+          throw new GeneralException(
+                  SecurityErrorStatus
+                          .AUTH_MUST_AUTHORIZED_URI);
+      }
+      String email = user.getUsername();
+
+    return ApiResponse.onSuccess(SuccessCode.OK, actionNoteService.addActionNote(addDTO, email));
   }
 
   @Operation(
@@ -69,13 +82,21 @@ public class ActionNoteController {
   @Operation(
       summary = "상세 실행 전략 완료 상태 수정 API",
       description =
-          "특정 상세 실행 전략의 완료 여부를 수정합니다. 수정 시 해당 전략의 전체 진행도와 실행 전략(ActionPlan)의 완료 여부가 자동 갱신됩니다.")
-  @ApiErrorCodeExamples({ErrorCode.ACTION_DETAIL_NOT_FOUND})
+          "특정 상세 실행 전략의 완료 여부를 수정합니다. 수정 시 해당 전략의 전체 진행도와 실행 전략(ActionPlan)의 완료 여부가 자동 갱신됩니다. 본인의 상세 실행 전략만 수정 가능합니다. 본인이 아닐 경우 AUTH403_1 에러가 발생합니다.")
+  @ApiErrorCodeExamples({ErrorCode.ACTION_DETAIL_NOT_FOUND, ErrorCode.FORBIDDEN})
   @PatchMapping("")
   public ApiResponse<ActionNoteResDTO.UpdateActionDetailDTO> updateActionDetail(
+          @Parameter(hidden = true) @AuthenticationPrincipal
+          User user,
       @Parameter(description = "상세 실행 전략 ID", example = "10") @RequestParam Long actionDetailId,
       @Parameter(description = "완료 여부", example = "true") @RequestParam Boolean isCompleted) {
+      if (user == null) {
+          throw new GeneralException(
+                  SecurityErrorStatus
+                          .AUTH_MUST_AUTHORIZED_URI);
+      }
+      String email = user.getUsername();
     return ApiResponse.onSuccess(
-        SuccessCode.OK, actionNoteService.updateActionDetail(actionDetailId, isCompleted));
+        SuccessCode.OK, actionNoteService.updateActionDetail(actionDetailId, isCompleted, email));
   }
 }

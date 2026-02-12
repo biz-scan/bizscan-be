@@ -53,12 +53,17 @@ public class MemberCommandServiceImpl implements MemberCommandService {
   }
 
   @Override
-  public void updateMember(Long memberId, MemberUpdateRequestDto dto) {
+  public void updateMember(Long memberId, MemberUpdateRequestDto dto, String currentUserEmail) {
     // 회원 조회
     Member member =
         memberRepository
             .findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
+
+      // 현재 로그인한 사용자의 이메일과 수정하려는 회원의 이메일이 일치하는지 확인
+      if (!member.getEmail().equals(currentUserEmail)) {
+          throw new GeneralException(ErrorCode.FORBIDDEN);
+      }
 
     // 1. 닉네임 수정 (입력값이 있을 경우에만)
     if (dto.getNickname() != null && !dto.getNickname().isBlank()) {
