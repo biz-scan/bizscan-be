@@ -75,7 +75,8 @@ public class TokenApiController {
       })
   @PostMapping("/reissue")
   public ResponseEntity<ApiResponse<AccessTokenResponse>> reissue(
-          @Parameter(hidden = true) @CookieValue(value = "refreshToken", required = false) String refreshToken,
+      @Parameter(hidden = true) @CookieValue(value = "refreshToken", required = false)
+          String refreshToken,
       HttpServletResponse response) {
     JwtToken token = tokenService.issueTokens(refreshToken);
 
@@ -94,8 +95,9 @@ public class TokenApiController {
       })
   @PostMapping("/logout")
   public ApiResponse<Void> logout(
-           @AuthenticationPrincipal User user,
-           @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorization,
+      @AuthenticationPrincipal User user,
+      @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false)
+          String authorization,
       HttpServletResponse response) {
 
     tokenService.logout(user.getUsername(), authorization);

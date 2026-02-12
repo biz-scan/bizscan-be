@@ -25,19 +25,23 @@ import org.springframework.web.bind.annotation.*;
 public class ActionNoteController {
   private final ActionNoteService actionNoteService;
 
-  @Operation(summary = "실행 노트 등록 API", description = "특정 실행 전략(ActionPlan)을 실행 노트에 등록합니다. 본인의 실행 전략만 등록 가능합니다. 본인이 아닐 경우 AUTH403_1 에러가 발생합니다.")
-  @ApiErrorCodeExamples({ErrorCode.ACTION_PLAN_NOT_FOUND, ErrorCode.ACTION_NOTE_ALREADY_EXISTS, ErrorCode.FORBIDDEN})
+  @Operation(
+      summary = "실행 노트 등록 API",
+      description =
+          "특정 실행 전략(ActionPlan)을 실행 노트에 등록합니다. 본인의 실행 전략만 등록 가능합니다. 본인이 아닐 경우 AUTH403_1 에러가 발생합니다.")
+  @ApiErrorCodeExamples({
+    ErrorCode.ACTION_PLAN_NOT_FOUND,
+    ErrorCode.ACTION_NOTE_ALREADY_EXISTS,
+    ErrorCode.FORBIDDEN
+  })
   @PostMapping()
   public ApiResponse<ActionNoteResDTO.AddDTO> addActionNote(
-          @Parameter(hidden = true) @AuthenticationPrincipal
-          User user,
+      @Parameter(hidden = true) @AuthenticationPrincipal User user,
       @RequestBody ActionNoteReqDTO.AddDTO addDTO) {
-      if (user == null) {
-          throw new GeneralException(
-                  SecurityErrorStatus
-                          .AUTH_MUST_AUTHORIZED_URI);
-      }
-      String email = user.getUsername();
+    if (user == null) {
+      throw new GeneralException(SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI);
+    }
+    String email = user.getUsername();
 
     return ApiResponse.onSuccess(SuccessCode.OK, actionNoteService.addActionNote(addDTO, email));
   }
@@ -86,16 +90,13 @@ public class ActionNoteController {
   @ApiErrorCodeExamples({ErrorCode.ACTION_DETAIL_NOT_FOUND, ErrorCode.FORBIDDEN})
   @PatchMapping("")
   public ApiResponse<ActionNoteResDTO.UpdateActionDetailDTO> updateActionDetail(
-          @Parameter(hidden = true) @AuthenticationPrincipal
-          User user,
+      @Parameter(hidden = true) @AuthenticationPrincipal User user,
       @Parameter(description = "상세 실행 전략 ID", example = "10") @RequestParam Long actionDetailId,
       @Parameter(description = "완료 여부", example = "true") @RequestParam Boolean isCompleted) {
-      if (user == null) {
-          throw new GeneralException(
-                  SecurityErrorStatus
-                          .AUTH_MUST_AUTHORIZED_URI);
-      }
-      String email = user.getUsername();
+    if (user == null) {
+      throw new GeneralException(SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI);
+    }
+    String email = user.getUsername();
     return ApiResponse.onSuccess(
         SuccessCode.OK, actionNoteService.updateActionDetail(actionDetailId, isCompleted, email));
   }

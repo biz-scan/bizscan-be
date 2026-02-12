@@ -24,15 +24,19 @@ public interface ActionDetailRepository extends JpaRepository<ActionDetail, Long
           "WHERE ad.id = :id")
   Optional<ActionDetail> findByIdWithPlanAndNoteAndDetails(@Param("id") Long id);
 
-    @Query("SELECT ad FROM ActionDetail ad " +
-            "JOIN FETCH ad.actionPlan ap " +
-            "JOIN FETCH ap.details " +             // 진행도 계산용
-            "LEFT JOIN FETCH ap.actionNote " +      // 상태 동기화용
-            "JOIN FETCH ap.analysis a " +           // 본인 확인용
-            "JOIN FETCH a.store s " +               // 본인 확인용
-            "JOIN FETCH s.member m " +              // 본인 확인용
-            "WHERE ad.id = :id")
-    Optional<ActionDetail> findByIdWithMemberAndAllRelated(@Param("id") Long id);
-
-
+  @Query(
+      "SELECT ad FROM ActionDetail ad "
+          + "JOIN FETCH ad.actionPlan ap "
+          + "JOIN FETCH ap.details "
+          + // 진행도 계산용
+          "LEFT JOIN FETCH ap.actionNote "
+          + // 상태 동기화용
+          "JOIN FETCH ap.analysis a "
+          + // 본인 확인용
+          "JOIN FETCH a.store s "
+          + // 본인 확인용
+          "JOIN FETCH s.member m "
+          + // 본인 확인용
+          "WHERE ad.id = :id")
+  Optional<ActionDetail> findByIdWithMemberAndAllRelated(@Param("id") Long id);
 }

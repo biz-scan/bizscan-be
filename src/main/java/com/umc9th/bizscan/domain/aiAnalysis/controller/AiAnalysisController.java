@@ -45,30 +45,25 @@ public class AiAnalysisController {
             1. 이미 분석이 완료된 경우 `ANALYSIS_ALREADY_IN_COMPLETED` 에러가 발생합니다. 재시도를 원할 경우 `retry: true`로 요청하세요.
             2. 이미 분석이 진행 중인 경우 `ANALYSIS_ALREADY_IN_PROGRESS` 에러가 발생합니다.
             """)
-  @ApiErrorCodeExamples(value = {
-    ErrorCode.STORE_NOT_FOUND,
-    ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED,
-    ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS,
-    ErrorCode.ANALYSIS_SERVER_ERROR,
-          ErrorCode.ANALYSIS_FORBIDDEN
-
-  },
-          security = {SecurityErrorStatus
-                  .AUTH_MUST_AUTHORIZED_URI}
-  )
+  @ApiErrorCodeExamples(
+      value = {
+        ErrorCode.STORE_NOT_FOUND,
+        ErrorCode.ANALYSIS_ALREADY_IN_COMPLETED,
+        ErrorCode.ANALYSIS_ALREADY_IN_PROGRESS,
+        ErrorCode.ANALYSIS_SERVER_ERROR,
+        ErrorCode.ANALYSIS_FORBIDDEN
+      },
+      security = {SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI})
   @PostMapping
   public ApiResponse<AnalysisRequestResponse> analyze(
-          @Parameter(hidden = true) @AuthenticationPrincipal
-          User user,
+      @Parameter(hidden = true) @AuthenticationPrincipal User user,
       @Valid @RequestBody AnalysisReqDTO.AiAnalysisDTO request) {
 
-      if (user == null) {
-          throw new GeneralException(
-                  SecurityErrorStatus
-                          .AUTH_MUST_AUTHORIZED_URI);
-      }
+    if (user == null) {
+      throw new GeneralException(SecurityErrorStatus.AUTH_MUST_AUTHORIZED_URI);
+    }
 
-      String email = user.getUsername();
+    String email = user.getUsername();
 
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.analyzeStore(request, email));
   }

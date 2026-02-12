@@ -45,7 +45,7 @@ public enum ErrorCode implements BaseErrorCode {
   ANALYSIS_ALREADY_IN_COMPLETED(HttpStatus.BAD_REQUEST, "ANALYSIS400_1", "이미 완료된 분석 결과가 존재합니다."),
   ANALYSIS_SERVER_ERROR(
       HttpStatus.INTERNAL_SERVER_ERROR, "ANALYSIS500_1", "AI 분석 서버와의 통신 중 오류가 발생했습니다."),
-    ANALYSIS_FORBIDDEN(HttpStatus.FORBIDDEN, "ANALYSIS403_1", "가게 소유자만 분석 요청이 가능합니다."),
+  ANALYSIS_FORBIDDEN(HttpStatus.FORBIDDEN, "ANALYSIS403_1", "가게 소유자만 분석 요청이 가능합니다."),
 
   // Store
   STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE404_1", "해당 매장을 찾을 수 없습니다."),

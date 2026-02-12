@@ -28,14 +28,16 @@ public class ActionNoteService {
 
   @Transactional
   public ActionNoteResDTO.AddDTO addActionNote(ActionNoteReqDTO.AddDTO dto, String email) {
-      // 존재 여부 확인 (Fetch Join으로 한 번에 가져옴)
-      ActionPlan actionPlan = actionPlanRepository.findByIdWithMember(dto.actionPlanId())
-              .orElseThrow(() -> new GeneralException(ErrorCode.ACTION_PLAN_NOT_FOUND));
+    // 존재 여부 확인 (Fetch Join으로 한 번에 가져옴)
+    ActionPlan actionPlan =
+        actionPlanRepository
+            .findByIdWithMember(dto.actionPlanId())
+            .orElseThrow(() -> new GeneralException(ErrorCode.ACTION_PLAN_NOT_FOUND));
 
-      // 본인 확인 (권한 검증)
-      if (!actionPlan.getAnalysis().getStore().getMember().getEmail().equals(email)) {
-          throw new GeneralException(ErrorCode.FORBIDDEN); // 혹은 ACCESS_DENIED
-      }
+    // 본인 확인 (권한 검증)
+    if (!actionPlan.getAnalysis().getStore().getMember().getEmail().equals(email)) {
+      throw new GeneralException(ErrorCode.FORBIDDEN); // 혹은 ACCESS_DENIED
+    }
 
     // 중복 체크
     if (actionNoteRepository.existsByActionPlanId(dto.actionPlanId())) {
@@ -129,15 +131,17 @@ public class ActionNoteService {
   public ActionNoteResDTO.UpdateActionDetailDTO updateActionDetail(
       Long actionDetailId, Boolean isCompleted, String email) {
     // ActionDetail 조회
-      ActionDetail actionDetail = actionDetailRepository
-              .findByIdWithMemberAndAllRelated(actionDetailId)
-              .orElseThrow(() -> new GeneralException(ErrorCode.ACTION_DETAIL_NOT_FOUND));
+    ActionDetail actionDetail =
+        actionDetailRepository
+            .findByIdWithMemberAndAllRelated(actionDetailId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.ACTION_DETAIL_NOT_FOUND));
 
-      // 본인 확인 (권한 검증)
-      String ownerEmail = actionDetail.getActionPlan().getAnalysis().getStore().getMember().getEmail();
-      if (!ownerEmail.equals(email)) {
-          throw new GeneralException(ErrorCode.FORBIDDEN);
-      }
+    // 본인 확인 (권한 검증)
+    String ownerEmail =
+        actionDetail.getActionPlan().getAnalysis().getStore().getMember().getEmail();
+    if (!ownerEmail.equals(email)) {
+      throw new GeneralException(ErrorCode.FORBIDDEN);
+    }
 
     // 상태 업데이트
     actionDetail.updateIsCompleted(isCompleted);
