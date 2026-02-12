@@ -24,6 +24,7 @@ public class SecurityConfig {
   private final String[] allowUris = {
     "/api/tokens/login",
     "/api/members/register",
+    "/api/tokens/reissue",
     "/health",
     "/api/analysis/callback/**",
     "/api/swot/summary",
