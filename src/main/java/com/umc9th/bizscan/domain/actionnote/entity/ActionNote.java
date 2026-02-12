@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -21,6 +23,7 @@ public class ActionNote extends BaseEntity {
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "action_plan_id", nullable = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private ActionPlan actionPlan;
 
   @Column(nullable = false)
