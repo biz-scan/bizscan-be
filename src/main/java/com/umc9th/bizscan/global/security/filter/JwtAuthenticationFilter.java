@@ -91,6 +91,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    String path = request.getRequestURI();
+    return path.startsWith("/actuator");
+  }
+
   private String resolveToken(HttpServletRequest request) {
     String bearerToken = request.getHeader("Authorization");
 

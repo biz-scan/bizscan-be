@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 @Component
 public class JwtExceptionFilter extends OncePerRequestFilter {
+
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -34,5 +35,10 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
       CustomErrorSend.handleException(
           response, SecurityErrorStatus.INTERNAL_SECURITY_ERROR, e.getMessage());
     }
+  }
+
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    return request.getRequestURI().startsWith("/actuator");
   }
 }
