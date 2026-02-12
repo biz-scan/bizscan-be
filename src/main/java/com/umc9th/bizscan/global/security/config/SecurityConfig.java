@@ -20,6 +20,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
+
   private final String[] allowUris = {
     "/api/tokens/login",
     "/api/members/register",
@@ -29,6 +30,7 @@ public class SecurityConfig {
     "/swagger-ui/**",
     "/swagger-resources/**",
     "/v3/api-docs/**",
+    "/actuator/**",
   };
 
   @Bean
