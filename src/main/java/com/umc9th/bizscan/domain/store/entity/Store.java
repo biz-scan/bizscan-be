@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @NoArgsConstructor
@@ -22,8 +24,9 @@ public class Store extends BaseEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @OneToOne(fetch = FetchType.LAZY) // ManyToOne에서 OneToOne으로 변경
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private Member member;
 
   @Column(nullable = false, length = 100)

@@ -91,6 +91,6 @@ public class MemberCommandServiceImpl implements MemberCommandService {
             .findById(memberId)
             .orElseThrow(() -> new GeneralException(ErrorCode.MEMBER_NOT_FOUND));
 
-    memberRepository.delete(member);
+    memberRepository.deleteByIdBulk(member.getId());
   }
 }

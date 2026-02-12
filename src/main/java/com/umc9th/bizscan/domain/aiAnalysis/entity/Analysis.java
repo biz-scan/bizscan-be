@@ -8,6 +8,8 @@ import java.util.List;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -21,6 +23,7 @@ public class Analysis extends BaseEntity {
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "store_id")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private Store store;
 
   @Column(length = 255)

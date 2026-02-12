@@ -35,7 +35,11 @@ public class Member extends BaseEntity implements UserDetails {
   @Column(name = "password", nullable = false)
   private String password;
 
-  @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
+  @OneToOne(
+      mappedBy = "member",
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
   private Store store;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
