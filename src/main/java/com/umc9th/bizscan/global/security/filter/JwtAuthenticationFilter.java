@@ -41,7 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     log.info("requestURI: {}", requestURI);
     String token = null;
     token = resolveToken(request);
-    log.info("Token: {}", token);
 
     if (token != null) {
       // 만료 케이스만 해당 필터에서 처리. 나머지는 JwtExceptionFilter 에서 처리
@@ -98,10 +97,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getRequestURI();
-    if (path.startsWith("/actuator")) return true;
-    return path.equals(REISSUE_ENDPOINT)
-        || path.equals("/api/tokens/login")
-        || path.equals("/health");
+    return path.startsWith("/actuator");
   }
 
   private String resolveToken(HttpServletRequest request) {
