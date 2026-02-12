@@ -11,6 +11,7 @@ import com.umc9th.bizscan.global.security.jwt.dto.JwtToken;
 import com.umc9th.bizscan.global.security.jwt.dto.MemberLoginRequestDto;
 import com.umc9th.bizscan.global.security.jwt.service.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -74,7 +75,7 @@ public class TokenApiController {
       })
   @PostMapping("/reissue")
   public ResponseEntity<ApiResponse<AccessTokenResponse>> reissue(
-      @CookieValue(value = "refreshToken", required = false) String refreshToken,
+          @Parameter(hidden = true) @CookieValue(value = "refreshToken", required = false) String refreshToken,
       HttpServletResponse response) {
     JwtToken token = tokenService.issueTokens(refreshToken);
 
@@ -93,8 +94,8 @@ public class TokenApiController {
       })
   @PostMapping("/logout")
   public ApiResponse<Void> logout(
-      @AuthenticationPrincipal User user,
-      @RequestHeader(value = "Authorization", required = false) String authorization,
+           @AuthenticationPrincipal User user,
+           @Parameter(hidden = true) @RequestHeader(value = "Authorization", required = false) String authorization,
       HttpServletResponse response) {
 
     tokenService.logout(user.getUsername(), authorization);
