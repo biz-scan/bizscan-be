@@ -22,7 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
   private final String[] allowUris = {
     "/api/tokens/login",
-    "/api/member/register",
+    "/api/members/register",
     "/health",
     "/api/analysis/callback/**",
     "/api/swot/summary",
