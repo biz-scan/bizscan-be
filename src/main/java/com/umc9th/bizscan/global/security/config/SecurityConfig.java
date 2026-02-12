@@ -25,6 +25,8 @@ public class SecurityConfig {
     "/api/tokens/login",
     "/api/members/register",
     "/api/tokens/reissue",
+    "/api/tokens/duplication/login-id",
+    "/api/tokens/duplication/nickname",
     "/health",
     "/api/analysis/callback/**",
     "/api/swot/summary",
