@@ -13,7 +13,6 @@ import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Member", description = "회원 관련 API (회원가입, 프로필 조회, 정보 수정 및 탈퇴)")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/member")
+@RequestMapping("/api/members")
 public class MemberController {
   private final MemberCommandService memberCommandService;
   private final MemberQueryService memberQueryService;
@@ -42,24 +41,25 @@ public class MemberController {
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.MEMBER_REGISTER_SUCCESS, memberId));
   }
 
-  @Operation(summary = "회원 단건 조회", description = "회원 ID를 통해 특정 회원의 정보를 조회합니다.")
-  @ApiErrorCodeExamples({ErrorCode.MEMBER_NOT_FOUND})
-  @GetMapping("/{memberId}")
-  public ResponseEntity<ApiResponse<MemberResponseDto>> getMember(@PathVariable Long memberId) {
-    Member member = memberQueryService.getMemberById(memberId);
-    return ResponseEntity.ok(
-        ApiResponse.onSuccess(SuccessCode.MEMBER_GET_SUCCESS, MemberResponseDto.from(member)));
-  }
+  // 현재 서비스에서는 사용하지 않는 API라 판단하여 주석처리
+  //  @Operation(summary = "회원 단건 조회", description = "회원 ID를 통해 특정 회원의 정보를 조회합니다.")
+  //  @ApiErrorCodeExamples({ErrorCode.MEMBER_NOT_FOUND})
+  //  @GetMapping("/{memberId}")
+  //  public ResponseEntity<ApiResponse<MemberResponseDto>> getMember(@PathVariable Long memberId) {
+  //    Member member = memberQueryService.getMemberById(memberId);
+  //    return ResponseEntity.ok(
+  //        ApiResponse.onSuccess(SuccessCode.MEMBER_GET_SUCCESS, MemberResponseDto.from(member)));
+  //  }
 
-  @GetMapping
-  @Operation(summary = "회원 목록 조회", description = "전체 회원 목록을 조회합니다.")
-  public ResponseEntity<ApiResponse<List<MemberResponseDto>>> getMembers() {
-
-    List<MemberResponseDto> result =
-        memberQueryService.getAllMembers().stream().map(MemberResponseDto::from).toList();
-
-    return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.MEMBER_LIST_SUCCESS, result));
-  }
+  //  @GetMapping
+  //  @Operation(summary = "회원 목록 조회", description = "전체 회원 목록을 조회합니다.")
+  //  public ResponseEntity<ApiResponse<List<MemberResponseDto>>> getMembers() {
+  //
+  //    List<MemberResponseDto> result =
+  //        memberQueryService.getAllMembers().stream().map(MemberResponseDto::from).toList();
+  //
+  //    return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.MEMBER_LIST_SUCCESS, result));
+  //  }
 
   @PatchMapping("/{memberId}")
   @Operation(summary = "회원 정보 수정", description = "회원 닉네임 및 비밀번호를 수정합니다.")
