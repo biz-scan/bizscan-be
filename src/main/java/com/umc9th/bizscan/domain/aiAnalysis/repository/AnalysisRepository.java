@@ -33,7 +33,7 @@ public interface AnalysisRepository extends JpaRepository<Analysis, Long> {
       """)
   Optional<Long> findLatestAnalysisIdByStoreId(@Param("storeId") Long storeId);
 
-    @Modifying(clearAutomatically = true) // 쿼리 실행 후 영속성 컨텍스트를 자동으로 비워줌
-    @Query("delete from Analysis a where a.id = :analysisId")
-    void deleteByIdBulk(@Param("analysisId") Long analysisId);
+  @Modifying(clearAutomatically = true) // 쿼리 실행 후 영속성 컨텍스트를 자동으로 비워줌
+  @Query("delete from Analysis a where a.id = :analysisId")
+  void deleteByIdBulk(@Param("analysisId") Long analysisId);
 }
