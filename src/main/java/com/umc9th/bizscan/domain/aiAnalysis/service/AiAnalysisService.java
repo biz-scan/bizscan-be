@@ -19,6 +19,7 @@ import com.umc9th.bizscan.domain.store.repository.StoreTagRepository;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import com.umc9th.bizscan.global.config.FastApiProperties;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -131,11 +132,28 @@ public class AiAnalysisService {
   }
 
   /** 분석 상태 조회 (폴링 API) */
+  @Transactional
   public AnalysisStatusResponse getAnalysisStatus(String requestId) {
     AnalysisRequest request =
         analysisRequestRepository
             .findByRequestId(requestId)
             .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_REQUEST_NOT_FOUND));
+
+    // 1. 진행 중 상태인지 확인
+    boolean isInProgress =
+        request.getStatus() != AnalysisStatus.COMPLETED
+            && request.getStatus() != AnalysisStatus.FAILED;
+
+    if (isInProgress) {
+      // 2. 생성 시간 + 3분 초과 여부 확인
+      LocalDateTime createdAt = request.getCreatedAt();
+      LocalDateTime now = LocalDateTime.now();
+
+      // 3. 3분 초과 시 FAILED로 강제 변경
+      if (createdAt.plusMinutes(3).isBefore(now)) {
+        request.updateStatus(AnalysisStatus.FAILED);
+      }
+    }
 
     int poolingTime = calculatePoolingTime(request.getStatus());
     return new AnalysisStatusResponse(
