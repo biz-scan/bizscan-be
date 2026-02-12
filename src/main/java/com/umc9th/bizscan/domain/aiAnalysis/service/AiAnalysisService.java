@@ -145,12 +145,12 @@ public class AiAnalysisService {
             && request.getStatus() != AnalysisStatus.FAILED;
 
     if (isInProgress) {
-      // 2. 생성 시간 + 3분 초과 여부 확인
+      // 2. 생성 시간 + 5분 초과 여부 확인
       LocalDateTime createdAt = request.getCreatedAt();
       LocalDateTime now = LocalDateTime.now();
 
-      // 3. 3분 초과 시 FAILED로 강제 변경
-      if (createdAt.plusMinutes(3).isBefore(now)) {
+      // 3. 5분 초과 시 FAILED로 강제 변경
+      if (createdAt.plusMinutes(5).isBefore(now)) {
         request.updateStatus(AnalysisStatus.FAILED);
       }
     }
