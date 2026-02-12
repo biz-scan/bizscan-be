@@ -1,5 +1,7 @@
 package com.umc9th.bizscan.global.security.filter;
 
+import static com.umc9th.bizscan.global.security.consts.StaticVariable.REISSUE_ENDPOINT;
+
 import com.umc9th.bizscan.global.security.exception.CustomErrorSend;
 import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import jakarta.servlet.FilterChain;
@@ -40,6 +42,10 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
-    return request.getRequestURI().startsWith("/actuator");
+    String path = request.getRequestURI();
+    if (path.startsWith("/actuator")) return true;
+    return path.equals(REISSUE_ENDPOINT)
+        || path.equals("/api/tokens/login")
+        || path.equals("/health");
   }
 }

@@ -98,8 +98,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getRequestURI();
-      if (path.startsWith("/actuator")) return true;
-      return path.equals(REISSUE_ENDPOINT) || path.equals("/api/tokens/login") || path.equals("/health");
+    if (path.startsWith("/actuator")) return true;
+    return path.equals(REISSUE_ENDPOINT)
+        || path.equals("/api/tokens/login")
+        || path.equals("/health");
   }
 
   private String resolveToken(HttpServletRequest request) {
