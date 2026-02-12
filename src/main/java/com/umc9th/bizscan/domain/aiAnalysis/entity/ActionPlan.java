@@ -39,6 +39,7 @@ public class ActionPlan extends BaseEntity {
   private RelatedSwotType relatedSwot;
 
   @BatchSize(size = 100)
+  @OrderBy("step ASC")
   @OneToMany(mappedBy = "actionPlan", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ActionDetail> details = new ArrayList<>();
 

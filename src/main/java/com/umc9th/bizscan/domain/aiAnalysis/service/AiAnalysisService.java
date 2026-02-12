@@ -145,12 +145,12 @@ public class AiAnalysisService {
             && request.getStatus() != AnalysisStatus.FAILED;
 
     if (isInProgress) {
-      // 2. 생성 시간 + 3분 초과 여부 확인
+      // 2. 생성 시간 + 5분 초과 여부 확인
       LocalDateTime createdAt = request.getCreatedAt();
       LocalDateTime now = LocalDateTime.now();
 
-      // 3. 3분 초과 시 FAILED로 강제 변경
-      if (createdAt.plusMinutes(3).isBefore(now)) {
+      // 3. 5분 초과 시 FAILED로 강제 변경
+      if (createdAt.plusMinutes(5).isBefore(now)) {
         request.updateStatus(AnalysisStatus.FAILED);
       }
     }
@@ -211,15 +211,11 @@ public class AiAnalysisService {
   }
 
   public AnalysisResDTO.ActionPlanDetailDTO getActionPlanDetail(Long actionPlanId) {
-    // N+1 및 MultipleBagFetchException 방지용 FetchJoin 쿼리 2번 (또는 BatchSize 사용해야함)
-    // ActionPlan + Tag (영속성 컨텍스트에 저장)
+    // BatchSize 적용
     ActionPlan actionPlan =
         actionPlanRepository
-            .findByIdWithTags(actionPlanId)
+            .findById(actionPlanId)
             .orElseThrow(() -> new GeneralException(ErrorCode.ACTION_PLAN_NOT_FOUND));
-
-    // + ActionDetail (Hibernate가 1차 캐시에 있는 기존 actionPlan 객체에 details 리스트를 채움)
-    actionPlanRepository.findByIdWithDetails(actionPlanId);
 
     List<AnalysisResDTO.ActionDetailDTO> details =
         actionPlan.getDetails().stream().map(AnalysisResDTO.ActionDetailDTO::of).toList();
