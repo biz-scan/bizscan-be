@@ -74,8 +74,8 @@ public class AiAnalysisService {
                   analysisRequestRepository.findByAnalysis(existingAnalysis).orElse(null);
 
               if (existingRequest != null) {
-                // 상태가 FAILED인 경우 || retry=True 삭제 후 재시도
-                if (existingRequest.getStatus() == AnalysisStatus.FAILED || retry) {
+                // 상태가 FAILED인 경우 || (완료 AND retry=True) 삭제 후 재시도
+                if (existingRequest.getStatus() == AnalysisStatus.FAILED || (existingRequest.getStatus() == AnalysisStatus.COMPLETED && retry)) {
                   // @OnDelete를 활용한 Bulk삭제
                   // JPA의 delete()는 @OnDelete와 상관없이 엔티티를 하나씩 조회 후 삭제하므로 N+1 발생
                   // @Query로 DB에 Delete 쿼리를 직접 날려 DB 레벨에서 단일 쿼리로 연쇄 삭제를 수행함

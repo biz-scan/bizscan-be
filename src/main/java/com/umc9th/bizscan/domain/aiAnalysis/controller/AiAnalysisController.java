@@ -7,19 +7,24 @@ import com.umc9th.bizscan.domain.aiAnalysis.service.AiAnalysisService;
 import com.umc9th.bizscan.global.apiPayload.ApiResponse;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.code.SuccessCode;
+import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import com.umc9th.bizscan.global.config.swagger.ApiErrorCodeExamples;
+import com.umc9th.bizscan.global.security.exception.SecurityErrorStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "AI Analysis", description = "AI 기반 SWOT 분석 및 실행 전략 추천 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/analysis")
+@Slf4j
 public class AiAnalysisController {
 
   private final AiAnalysisService aiAnalysisService;
@@ -47,7 +52,18 @@ public class AiAnalysisController {
   })
   @PostMapping
   public ApiResponse<AnalysisRequestResponse> analyze(
+          @Parameter(hidden = true) @AuthenticationPrincipal
+          org.springframework.security.core.userdetails.User user,
       @Valid @RequestBody AnalysisReqDTO.AiAnalysisDTO request) {
+
+      if (user == null) {
+          throw new GeneralException(
+                  SecurityErrorStatus
+                          .AUTH_MUST_AUTHORIZED_URI);
+      }
+
+      String email = user.getUsername();
+      log.info(email);
     return ApiResponse.onSuccess(SuccessCode.OK, aiAnalysisService.analyzeStore(request));
   }
 
