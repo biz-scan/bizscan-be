@@ -59,7 +59,7 @@ public class AiAnalysisController {
     requestId를 기준으로 AI 분석 진행 상태를 조회합니다.
 
     - 프론트엔드에서 주기적으로 호출하는 폴링용 API입니다.
-    - 분석 상태는 WAITING / PROCESSING / COMPLETED / FAILED 등으로 구분됩니다.
+    - 분석 상태는   REQUEST /   SWOT_PROCESSING / ACTION_PLAN_PROCESSING /  ACTION_DETAIL_PROCESSING / COMPLETED / FAILED로 구분됩니다.
     """)
   @GetMapping("/{requestId}/status")
   public ApiResponse<AnalysisStatusResponse> getStatus(@PathVariable String requestId) {
