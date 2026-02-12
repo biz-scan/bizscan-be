@@ -78,10 +78,12 @@ public class TokenApiController {
       @Parameter(hidden = true) @CookieValue(value = "refreshToken", required = false)
           String refreshToken,
       HttpServletResponse response) {
+    log.info("Refresh Token: {}", refreshToken);
     JwtToken token = tokenService.issueTokens(refreshToken);
 
     // Access Token → Header
     response.setHeader("Authorization", "Bearer " + token.getAccessToken());
+    log.info("Refresh Token reissue success");
 
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.TOKEN_ISSUE_SUCCESS, null));
   }

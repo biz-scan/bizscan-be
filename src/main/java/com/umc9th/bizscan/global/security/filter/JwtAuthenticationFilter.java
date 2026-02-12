@@ -40,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String requestURI = httpServletRequest.getRequestURI();
     String token = null;
     token = resolveToken(request);
+    log.info("Token: {}", token);
 
     if (token != null) {
       // 만료 케이스만 해당 필터에서 처리. 나머지는 JwtExceptionFilter 에서 처리
@@ -62,6 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             requestURI,
             authentication.getAuthorities());
       } catch (JwtAuthenticationExpiredException e) {
+        log.info("Token has expired");
         if (!requestURI.equals(REISSUE_ENDPOINT)) {
           CustomErrorSend.handleException(
               response,
@@ -76,6 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
           status = SecurityErrorStatus.valueOf(e.getMessage());
         } catch (Exception ex) {
+          log.info("token error: {}", e.getMessage());
           status = SecurityErrorStatus.AUTH_INVALID_TOKEN;
         }
 

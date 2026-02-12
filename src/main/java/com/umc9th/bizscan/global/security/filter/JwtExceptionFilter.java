@@ -26,12 +26,13 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } catch (AuthenticationException authException) {
       // JwtAuthenticationException, JwtAuthenticationExpiredException의 인증 관련 예외 처리
+      log.info(authException.getMessage(), authException);
       String errorCodeName = authException.getMessage();
       SecurityErrorStatus errorStatus = SecurityErrorStatus.valueOf(errorCodeName);
       CustomErrorSend.handleException(response, errorStatus, errorCodeName);
     } catch (Exception e) {
       // 그 외의 필터 단 예외 처리 (예: DB 연결 오류, 예상치 못한 런타임 에러 등)
-      log.error("Filter Error: {}", e.getMessage());
+      log.info("Filter Error: {}", e.getMessage());
       CustomErrorSend.handleException(
           response, SecurityErrorStatus.INTERNAL_SECURITY_ERROR, e.getMessage());
     }
