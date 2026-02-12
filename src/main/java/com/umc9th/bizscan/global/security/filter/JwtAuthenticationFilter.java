@@ -38,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     HttpServletRequest httpServletRequest = ((HttpServletRequest) request);
 
     String requestURI = httpServletRequest.getRequestURI();
+    log.info("requestURI: {}", requestURI);
     String token = null;
     token = resolveToken(request);
     log.info("Token: {}", token);
@@ -97,7 +98,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getRequestURI();
-    return path.startsWith("/actuator");
+      if (path.startsWith("/actuator")) return true;
+      return path.equals(REISSUE_ENDPOINT) || path.equals("/api/tokens/login") || path.equals("/health");
   }
 
   private String resolveToken(HttpServletRequest request) {
