@@ -32,7 +32,6 @@ public class RecommendationResponseDto {
   // 6. 실행 전략 한 줄 (예: "인스타그램 릴스 챌린지")
   private String actionPlanSummary;
 
-  //7. 상세페이지 이동용
+  // 7. 상세페이지 이동용
   private Long storeId;
-
 }

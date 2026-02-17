@@ -43,21 +43,21 @@ public class AiVectorService {
 
     // 1. 내 가게 정보 조회
     Store currentStore =
-            storeRepository
-                    .findById(currentStoreId)
-                    .orElseThrow(() -> new GeneralException(ErrorCode.STORE_NOT_FOUND));
+        storeRepository
+            .findById(currentStoreId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.STORE_NOT_FOUND));
 
     // 2. Python 검색 쿼리 생성
     List<StoreTag> myTags = storeTagRepository.findAllByStoreFetchTag(currentStore);
     String tagString =
-            myTags.stream().map(st -> "#" + st.getTag().getName()).collect(Collectors.joining(" "));
+        myTags.stream().map(st -> "#" + st.getTag().getName()).collect(Collectors.joining(" "));
     String queryText =
-            String.format(
-                    "%s %s %s", currentStore.getCategory(), currentStore.getPainPoint(), tagString);
+        String.format(
+            "%s %s %s", currentStore.getCategory(), currentStore.getPainPoint(), tagString);
 
     // 3. Python 호출 (Vector DB 검색)
     List<VectorRecommendationDto> candidates =
-            aiVectorClient.getSimilarStores(currentStoreId, queryText);
+        aiVectorClient.getSimilarStores(currentStoreId, queryText);
 
     List<RecommendationResponseDto> finalResults = new ArrayList<>();
 
@@ -95,11 +95,11 @@ public class AiVectorService {
       // 태그가 3개 미만이면 거리 태그 추가
       if (hashTags.size() < 3) {
         double dist =
-                calculateDistance(
-                        currentStore.getLat(),
-                        currentStore.getLon(),
-                        targetStore.getLat(),
-                        targetStore.getLon());
+            calculateDistance(
+                currentStore.getLat(),
+                currentStore.getLon(),
+                targetStore.getLat(),
+                targetStore.getLon());
         if (dist <= 3.0) hashTags.add("#가까운 거리");
       }
 
@@ -111,33 +111,34 @@ public class AiVectorService {
 
       // 제목 생성
       String title =
-              makeStoreTitle(targetStore.getAddress(), targetStore.getCategoryDetail().getKorean());
+          makeStoreTitle(targetStore.getAddress(), targetStore.getCategoryDetail().getKorean());
 
       finalResults.add(
-              RecommendationResponseDto.builder()
-                      .rank(0) // 추후 설정
-                      .storeId(targetStore.getId()) // 상세 페이지 이동용
-                      .storeTitle(title) // 2. 제목
-                      .similarityPercent(percentScore) // 3. 유사도 %
-                      .hashTags(hashTags) // 4. 해시태그 리스트
-                      .catchphrase(candidate.getCatchphrase()) // 5. 캐치프레이즈
-                      .build());
+          RecommendationResponseDto.builder()
+              .rank(0) // 추후 설정
+              .storeId(targetStore.getId()) // 상세 페이지 이동용
+              .storeTitle(title) // 2. 제목
+              .similarityPercent(percentScore) // 3. 유사도 %
+              .hashTags(hashTags) // 4. 해시태그 리스트
+              .catchphrase(candidate.getCatchphrase()) // 5. 캐치프레이즈
+              .build());
     }
 
     // 5. 정렬 및 상위 3개 선정
     List<RecommendationResponseDto> sortedResults =
-            finalResults.stream()
-                    .sorted(
-                            Comparator.comparingInt(RecommendationResponseDto::getSimilarityPercent).reversed())
-                    .limit(3)
-                    .collect(Collectors.toList());
+        finalResults.stream()
+            .sorted(
+                Comparator.comparingInt(RecommendationResponseDto::getSimilarityPercent).reversed())
+            .limit(3)
+            .collect(Collectors.toList());
 
     // 6. 상세 정보
     int rank = 1;
     for (RecommendationResponseDto dto : sortedResults) {
       dto.setRank(rank++); // 1. 순위
 
-      Optional<Analysis> analysisOpt = analysisRepository.findByStoreIdWithActionPlan(dto.getStoreId());
+      Optional<Analysis> analysisOpt =
+          analysisRepository.findByStoreIdWithActionPlan(dto.getStoreId());
 
       if (analysisOpt.isPresent()) {
         Analysis analysis = analysisOpt.get();
@@ -171,7 +172,7 @@ public class AiVectorService {
 
   // 거리 계산 함수
   private double calculateDistance(
-          BigDecimal lat1, BigDecimal lon1, BigDecimal lat2, BigDecimal lon2) {
+      BigDecimal lat1, BigDecimal lon1, BigDecimal lat2, BigDecimal lon2) {
     if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return 9999.0;
 
     double R = 6371; // 지구 반지름 (km)
@@ -179,11 +180,11 @@ public class AiVectorService {
     double dLon = Math.toRadians(lon2.doubleValue() - lon1.doubleValue());
 
     double a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                    + Math.cos(Math.toRadians(lat1.doubleValue()))
-                    * Math.cos(Math.toRadians(lat2.doubleValue()))
-                    * Math.sin(dLon / 2)
-                    * Math.sin(dLon / 2);
+        Math.sin(dLat / 2) * Math.sin(dLat / 2)
+            + Math.cos(Math.toRadians(lat1.doubleValue()))
+                * Math.cos(Math.toRadians(lat2.doubleValue()))
+                * Math.sin(dLon / 2)
+                * Math.sin(dLon / 2);
 
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
