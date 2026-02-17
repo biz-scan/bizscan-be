@@ -34,7 +34,7 @@ public class AiVectorService {
   private final StoreTagRepository storeTagRepository;
   private final AnalysisRepository analysisRepository;
 
-  private static final double WEIGHT_VECTOR = 50.0;
+  private static final double WEIGHT_VECTOR = 100.0;
   private static final double WEIGHT_CATEGORY = 20.0;
   private static final double WEIGHT_PAIN_POINT = 20.0;
   private static final double WEIGHT_TARGET = 10.0;
@@ -72,6 +72,8 @@ public class AiVectorService {
 
       // --- 점수 및 해시태그 계산 ---
       double totalScore = candidate.getScore() * WEIGHT_VECTOR;
+      log.info("기본 점수: " + candidate.getScore());
+      log.info("곱된 점수: " + totalScore);
       List<String> hashTags = new ArrayList<>();
 
       // #SWOT 분석 유사
@@ -130,7 +132,7 @@ public class AiVectorService {
         finalResults.stream()
             .sorted(
                 Comparator.comparingInt(RecommendationResponseDto::getSimilarityPercent).reversed())
-            .limit(4)
+            .limit(3)
             .collect(Collectors.toList());
 
     // 6. 상세 정보
