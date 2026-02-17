@@ -5,6 +5,7 @@ import com.umc9th.bizscan.domain.aiAnalysis.entity.Analysis;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRepository;
 import com.umc9th.bizscan.domain.aiVector.client.AiVectorClient;
 import com.umc9th.bizscan.domain.aiVector.dto.RecommendationResponseDto;
+import com.umc9th.bizscan.domain.aiVector.dto.StoreSwotIngestRequestDto;
 import com.umc9th.bizscan.domain.aiVector.dto.VectorRecommendationDto;
 import com.umc9th.bizscan.domain.store.entity.Store;
 import com.umc9th.bizscan.domain.store.entity.StoreTag;
@@ -129,7 +130,7 @@ public class AiVectorService {
         finalResults.stream()
             .sorted(
                 Comparator.comparingInt(RecommendationResponseDto::getSimilarityPercent).reversed())
-            .limit(3)
+            .limit(4)
             .collect(Collectors.toList());
 
     // 6. 상세 정보
@@ -187,5 +188,78 @@ public class AiVectorService {
                 * Math.sin(dLon / 2);
 
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  @Transactional(readOnly = true)
+  public int migrateAllStoresToVectorDb() {
+    List<Store> allStores = storeRepository.findAll();
+    int successCount = 0;
+    int totalCount = allStores.size();
+
+    log.info(">>> 데이터 마이그레이션 시작. 총 대상 가게 수: {}", totalCount);
+
+    for (Store store : allStores) {
+      try {
+        // 1. 해당 가게의 최신 분석 결과 조회 (SWOT Fetch Join)
+        Optional<Analysis> analysisOpt =
+            analysisRepository.findTopByStoreIdOrderByCreatedAtDesc(store.getId());
+
+        if (analysisOpt.isPresent()) {
+          Analysis analysis = analysisOpt.get();
+
+          // 2. FastAPI 전송용 DTO 생성
+          StoreSwotIngestRequestDto requestDto = createIngestDto(store, analysis);
+
+          // 3. FastAPI 호출 (Ingest)
+          aiVectorClient.ingestSwotData(requestDto);
+
+          successCount++;
+          if (successCount % 10 == 0) {
+            log.info(">>> 진행 중: {}/{} 완료", successCount, totalCount);
+          }
+        } else {
+          log.debug(">>> Skipping Store ID: {} (분석 데이터 없음)", store.getId());
+        }
+      } catch (Exception e) {
+        log.error(">>> 마이그레이션 실패 - Store ID: {}", store.getId(), e);
+      }
+    }
+
+    log.info(">>> 마이그레이션 완료. 성공: {}/{}", successCount, totalCount);
+    return successCount;
+  }
+
+  // DTO 변환 헬퍼 메서드
+  private StoreSwotIngestRequestDto createIngestDto(Store store, Analysis analysis) {
+
+    List<StoreSwotIngestRequestDto.SwotItemDto> items = new ArrayList<>();
+
+    if (analysis.getSwots() != null) {
+      items =
+          analysis.getSwots().stream()
+              .map(
+                  swot ->
+                      StoreSwotIngestRequestDto.SwotItemDto.builder()
+                          .type(swot.getType() != null ? swot.getType().toString() : "")
+                          .keyword(swot.getKeyword())
+                          .description(swot.getDescription())
+                          .diagnosis(swot.getDiagnosis())
+                          .rawText(
+                              String.format(
+                                  "[%s] %s: %s",
+                                  swot.getType(), swot.getKeyword(), swot.getDescription()))
+                          .build())
+              .collect(Collectors.toList());
+    }
+
+    return StoreSwotIngestRequestDto.builder()
+        .storeId(store.getId())
+        .catchphrase(analysis.getCatchphrase() != null ? analysis.getCatchphrase() : "캐치프레이즈 없음")
+        .items(items)
+        .build();
+  }
+
+  public String checkStoreData(Long storeId) {
+    return aiVectorClient.checkStoreDataInVectorDb(storeId);
   }
 }
