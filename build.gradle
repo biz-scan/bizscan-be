@@ -63,6 +63,11 @@ dependencies {
     // monitoring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter' // @ExtendWith(MockitoExtension.class) 쓰려면 필수
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
 tasks.named('test') {
@@ -79,4 +84,8 @@ spotless {
         // 자바 코드 자동 포맷 (Google Java Style)
         googleJavaFormat()
     }
+}
+
+test {
+    useJUnitPlatform() // JUnit 5 사용 설정
 }
