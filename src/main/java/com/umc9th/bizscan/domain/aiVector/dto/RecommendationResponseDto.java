@@ -14,8 +14,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RecommendationResponseDto {
 
-  private Long storeId;
-
   // 1. 순위 (예: 1)
   private Integer rank;
 
@@ -34,6 +32,7 @@ public class RecommendationResponseDto {
   // 6. 실행 전략 한 줄 (예: "인스타그램 릴스 챌린지")
   private String actionPlanSummary;
 
-  // 7. 리포트 ID (클릭 시 상세페이지 이동용)
-  private Long reportId;
+  //7. 상세페이지 이동용
+  private Long storeId;
+
 }
