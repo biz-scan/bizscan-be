@@ -29,16 +29,16 @@ public class AiVectorController {
     return ResponseEntity.ok(ApiResponse.onSuccess(SuccessCode.OK, result));
   }
 
-  @Operation(
-      summary = "전체 데이터 적재 (마이그레이션)",
-      description = "MySQL의 모든 Store 데이터를 Vector DB로 업로드합니다. (배포 후 1회 실행용)")
-  @PostMapping("/migrate-all")
-  public ResponseEntity<ApiResponse<String>> migrateAllData() {
-    int count = aiVectorService.migrateAllStoresToVectorDb();
-
-    return ResponseEntity.ok(
-        ApiResponse.onSuccess(SuccessCode.OK, count + "개의 가게 데이터가 성공적으로 적재되었습니다."));
-  }
+  //  @Operation(
+  //      summary = "전체 데이터 적재 (마이그레이션)",
+  //      description = "MySQL의 모든 Store 데이터를 Vector DB로 업로드합니다. (배포 후 1회 실행용)")
+  //  @PostMapping("/migrate-all")
+  //  public ResponseEntity<ApiResponse<String>> migrateAllData() {
+  //    int count = aiVectorService.migrateAllStoresToVectorDb();
+  //
+  //    return ResponseEntity.ok(
+  //        ApiResponse.onSuccess(SuccessCode.OK, count + "개의 가게 데이터가 성공적으로 적재되었습니다."));
+  //  }
 
   @Operation(
       summary = "Vector DB 데이터 조회 확인",
