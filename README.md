@@ -83,7 +83,6 @@
 <img width="1920" height="1080" alt="14 화면설명" src="https://github.com/user-attachments/assets/98f6afbf-cfd7-403e-b86d-0a4206d1f320" />
 <img width="1920" height="1080" alt="15 화면설명" src="https://github.com/user-attachments/assets/84e7a9d4-3114-4bbb-a5a2-ba159c4e1281" />
 <img width="1920" height="1080" alt="16 화면설명" src="https://github.com/user-attachments/assets/d601c0ce-0f46-4bbd-bf58-193a945021e7" />
-<img width="1920" height="1080" alt="17 마지막" src="https://github.com/user-attachments/assets/7372d127-eb01-44d8-be8c-b3a53ffa3622" />
 
 <br>
 
