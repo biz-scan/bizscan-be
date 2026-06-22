@@ -2,6 +2,7 @@ package com.umc9th.bizscan.domain.aiVector.service;
 
 import com.umc9th.bizscan.domain.aiAnalysis.entity.ActionPlan;
 import com.umc9th.bizscan.domain.aiAnalysis.entity.Analysis;
+import com.umc9th.bizscan.domain.aiAnalysis.entity.Swot;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.AnalysisRepository;
 import com.umc9th.bizscan.domain.aiVector.client.AiVectorClient;
 import com.umc9th.bizscan.domain.aiVector.dto.RecommendationResponseDto;
@@ -54,7 +55,14 @@ public class AiVectorService {
         myTags.stream().map(st -> "#" + st.getTag().getName()).collect(Collectors.joining(" "));
     String queryText =
         String.format(
-            "%s %s %s", currentStore.getCategory(), currentStore.getPainPoint(), tagString);
+            "%s %s %s %s %s %s %s",
+            currentStore.getName(),
+            currentStore.getCategory(),
+            currentStore.getCategoryDetail(),
+            currentStore.getTarget(),
+            currentStore.getPainPoint(),
+            currentStore.getSignature(),
+            tagString);
 
     // 3. Python 호출 (Vector DB 검색)
     List<VectorRecommendationDto> candidates =
@@ -193,6 +201,21 @@ public class AiVectorService {
   }
 
   @Transactional(readOnly = true)
+  public void ingestStoreAnalysis(Long storeId) {
+    Store store =
+        storeRepository
+            .findById(storeId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.STORE_NOT_FOUND));
+
+    Analysis analysis =
+        analysisRepository
+            .findTopByStoreIdOrderByCreatedAtDesc(storeId)
+            .orElseThrow(() -> new GeneralException(ErrorCode.ANALYSIS_NOT_FOUND));
+
+    aiVectorClient.ingestSwotData(createIngestDto(store, analysis));
+  }
+
+  @Transactional(readOnly = true)
   public int migrateAllStoresToVectorDb() {
     List<Store> allStores = storeRepository.findAll();
     int successCount = 0;
@@ -246,10 +269,7 @@ public class AiVectorService {
                           .keyword(swot.getKeyword())
                           .description(swot.getDescription())
                           .diagnosis(swot.getDiagnosis())
-                          .rawText(
-                              String.format(
-                                  "[%s] %s: %s",
-                                  swot.getType(), swot.getKeyword(), swot.getDescription()))
+                          .rawText(buildRagText(store, analysis, swot))
                           .build())
               .collect(Collectors.toList());
     }
@@ -259,6 +279,33 @@ public class AiVectorService {
         .catchphrase(analysis.getCatchphrase() != null ? analysis.getCatchphrase() : "캐치프레이즈 없음")
         .items(items)
         .build();
+  }
+
+  private String buildRagText(Store store, Analysis analysis, Swot swot) {
+    String actionPlanText =
+        analysis.getActionPlans() == null
+            ? ""
+            : analysis.getActionPlans().stream()
+                .limit(3)
+                .map(plan -> String.format("%s - %s", plan.getTitle(), plan.getReason()))
+                .collect(Collectors.joining(" | "));
+
+    return String.format(
+        "Store[id=%d, category=%s, categoryDetail=%s, target=%s, painPoint=%s, signature=%s]. "
+            + "Catchphrase: %s. SWOT[%s] keyword=%s, description=%s, diagnosis=%s. "
+            + "Related action plans: %s",
+        store.getId(),
+        store.getCategory(),
+        store.getCategoryDetail(),
+        store.getTarget(),
+        store.getPainPoint(),
+        store.getSignature(),
+        analysis.getCatchphrase(),
+        swot.getType(),
+        swot.getKeyword(),
+        swot.getDescription(),
+        swot.getDiagnosis(),
+        actionPlanText);
   }
 
   public String checkStoreData(Long storeId) {

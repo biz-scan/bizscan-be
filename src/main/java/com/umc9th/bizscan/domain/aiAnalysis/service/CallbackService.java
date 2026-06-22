@@ -10,6 +10,7 @@ import com.umc9th.bizscan.domain.aiAnalysis.enums.AnalysisStatus;
 import com.umc9th.bizscan.domain.aiAnalysis.enums.RelatedSwotType;
 import com.umc9th.bizscan.domain.aiAnalysis.enums.TagType;
 import com.umc9th.bizscan.domain.aiAnalysis.repository.*;
+import com.umc9th.bizscan.domain.aiVector.service.AiVectorService;
 import com.umc9th.bizscan.global.apiPayload.code.ErrorCode;
 import com.umc9th.bizscan.global.apiPayload.exception.GeneralException;
 import java.util.List;
@@ -27,6 +28,7 @@ public class CallbackService {
   private final ActionPlanRepository actionPlanRepository;
   private final ActionPlanTagRepository actionPlanTagRepository;
   private final ActionDetailRepository actionDetailRepository;
+  private final AiVectorService aiVectorService;
 
   /** 1차, 2차 콜백: SWOT 결과 저장 */
   @Transactional
@@ -170,6 +172,15 @@ public class CallbackService {
     }
 
     analysisRequest.updateStatus(AnalysisStatus.COMPLETED);
+    try {
+      aiVectorService.ingestStoreAnalysis(analysis.getStore().getId());
+    } catch (Exception e) {
+      log.warn(
+          "[saveActionDetails] Vector ingest failed - RequestId: {}, AnalysisId: {}, reason: {}",
+          request.requestId(),
+          analysis.getId(),
+          e.getMessage());
+    }
     log.info(
         "[saveActionDetails] 4차 콜백 완료 및 분석 종료 - RequestId: {}, Final Status: {}",
         request.requestId(),

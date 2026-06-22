@@ -1,5 +1,6 @@
 package com.umc9th.bizscan.domain.aiAnalysis.dto.request;
 
+import com.umc9th.bizscan.domain.analysis.dto.AnalysisSummaryDto;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class FastApiAnalysisRequest {
   private String painPoint;
   private String signature;
   private List<TagInfoRequest> tags;
+  private AnalysisSummaryDto marketContext;
 
   // callback
   private String requestId;

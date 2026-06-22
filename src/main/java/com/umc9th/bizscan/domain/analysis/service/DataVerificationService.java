@@ -250,6 +250,21 @@ public class DataVerificationService {
       }
     }
 
+    String evidenceText =
+        buildEvidenceText(
+            mainAge,
+            mainGender,
+            peakTime,
+            avgDailyPop,
+            compCount,
+            compLevel,
+            avgIncome,
+            mainHousing,
+            hashtags,
+            myReviewCount,
+            myRating,
+            avgCompReviewCount);
+
     return AnalysisSummaryDto.builder()
         .mainAgeGroup(mainAge)
         .mainGender(mainGender)
@@ -263,6 +278,39 @@ public class DataVerificationService {
         .myReviewCount(myReviewCount)
         .myRating(myRating)
         .avgCompReviewCount(avgCompReviewCount)
+        .evidenceText(evidenceText)
         .build();
+  }
+
+  private String buildEvidenceText(
+      String mainAge,
+      String mainGender,
+      String peakTime,
+      long avgDailyPop,
+      int compCount,
+      String compLevel,
+      long avgIncome,
+      String mainHousing,
+      String hashtags,
+      int myReviewCount,
+      double myRating,
+      double avgCompReviewCount) {
+    return String.format(
+        "Market evidence: main age=%s, main gender=%s, peak time=%s, avg daily population=%d, "
+            + "nearby competitors=%d, competition level=%s, avg monthly income=%d, "
+            + "main housing type=%s, top hashtags=%s, store review count=%d, store rating=%.1f, "
+            + "avg competitor review count=%.1f.",
+        mainAge,
+        mainGender,
+        peakTime,
+        avgDailyPop,
+        compCount,
+        compLevel,
+        avgIncome,
+        mainHousing,
+        hashtags,
+        myReviewCount,
+        myRating,
+        avgCompReviewCount);
   }
 }
