@@ -1,6 +1,8 @@
 package com.umc9th.bizscan.domain.aiAnalysis.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umc9th.bizscan.domain.analysis.dto.AnalysisSummaryDto;
+import com.umc9th.bizscan.domain.analysis.service.DataVerificationService;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.AnalysisReqDTO;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.request.FastApiAnalysisRequest;
 import com.umc9th.bizscan.domain.aiAnalysis.dto.response.*;
@@ -45,6 +47,7 @@ public class AiAnalysisService {
   private final AnalysisRequestRepository analysisRequestRepository;
   private final AnalysisRepository analysisRepository;
   private final ObjectMapper objectMapper;
+  private final DataVerificationService dataVerificationService;
 
   private final FastApiProperties fastApiProperties;
   private final RestTemplate restTemplate = new RestTemplate();
@@ -263,6 +266,8 @@ public class AiAnalysisService {
                         .build())
             .toList();
 
+    AnalysisSummaryDto marketContext = buildMarketContext(store);
+
     return FastApiAnalysisRequest.builder()
         // callback 식별용
         .requestId(requestId)
@@ -286,6 +291,23 @@ public class AiAnalysisService {
         // 기타
         .signature(store.getSignature())
         .tags(tagInfos)
+        .marketContext(marketContext)
         .build();
+  }
+
+  private AnalysisSummaryDto buildMarketContext(Store store) {
+    try {
+      return dataVerificationService.extractAnalysisSummary(
+          store.getAddress(),
+          store.getCategory() != null ? store.getCategory().name() : null,
+          store.getName(),
+          store.getSignature());
+    } catch (Exception e) {
+      log.warn(
+          "[buildMarketContext] Market context creation failed. storeId={}, reason={}",
+          store.getId(),
+          e.getMessage());
+      return null;
+    }
   }
 }

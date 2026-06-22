@@ -31,4 +31,5 @@ public class AnalysisSummaryDto {
 
   // 트렌드 (SNS)
   private String topHashtags; // 인기 해시태그 모음
+  private String evidenceText;
 }

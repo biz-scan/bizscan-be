@@ -34,7 +34,7 @@ public class AiVectorClient {
               .path("/api/vector/recommend")
               .queryParam("storeId", storeId)
               .queryParam("queryText", query)
-              .queryParam("topK", 4)
+              .queryParam("topK", 20)
               .encode()
               .toUriString();
 
